@@ -23,11 +23,11 @@ import java.util.Map;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
@@ -38,8 +38,8 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
-import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
-import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
+import fr.inria.eventcloud.messages.request.StatefulQuadruplePatternRequest;
+import fr.inria.eventcloud.messages.response.StatefulQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -79,7 +79,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
             try {
                 Thread.sleep(RandomUtils.nextIntClosed(50, 100));
 
-                super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+                super.getPutGetProxy().add(QuadrupleGenerator.random());
 
                 // GetLoadInformationResponse loadInformation =
                 // (GetLoadInformationResponse)

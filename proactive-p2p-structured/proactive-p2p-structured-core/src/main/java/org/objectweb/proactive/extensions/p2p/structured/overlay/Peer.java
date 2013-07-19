@@ -17,14 +17,11 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
@@ -131,31 +128,11 @@ public interface Peer extends Comparable<Peer>, Serializable {
     void receive(RunnableOperation operation);
 
     /**
-     * Routes the specified {@code msg}.
+     * Routes the specified {@code msg} by using double dispatch.
      * 
      * @param msg
-     *            the message to route.
      */
     void route(RequestResponseMessage<?> msg);
-
-    /**
-     * Sends a request over the overlay by using message passing but without any
-     * response in return.
-     * 
-     * @param request
-     *            the request to handle.
-     */
-    void sendv(Request<?> request);
-
-    /**
-     * Sends a request over the overlay by using message passing.
-     * 
-     * @param request
-     *            the request to handle.
-     * 
-     * @return the response in agreement with the request type sent.
-     */
-    Response<?> send(Request<?> request);
 
     /**
      * Returns debug information as String.
@@ -163,8 +140,6 @@ public interface Peer extends Comparable<Peer>, Serializable {
      * @return debug information as String.
      */
     String dump();
-
-    void inject(List<org.objectweb.proactive.core.body.request.Request> requests);
 
     /**
      * {@inheritDoc}

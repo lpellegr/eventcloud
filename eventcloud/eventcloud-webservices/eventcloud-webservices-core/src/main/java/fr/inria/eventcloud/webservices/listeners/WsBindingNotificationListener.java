@@ -72,7 +72,7 @@ public class WsBindingNotificationListener extends BindingNotificationListener {
                     id.toString(), new BindingWrapper(binding));
 
             log.info(
-                    "Subscriber {} notified about:\n {}",
+                    "Subscriber {} notified about:\n{}",
                     this.subscriberWsEndpointUrl, binding);
         } catch (WebServiceException e) {
             log.error("Failed to send notification to "

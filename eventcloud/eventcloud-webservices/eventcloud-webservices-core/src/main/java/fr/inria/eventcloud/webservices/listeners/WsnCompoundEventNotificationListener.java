@@ -114,7 +114,7 @@ public class WsnCompoundEventNotificationListener extends
                                     this.getTranslator().translate(solution)));
 
             log.info(
-                    "Subscriber {} notified about:\n {}",
+                    "Subscriber {} notified about:\n{}",
                     this.subscriberWsEndpointUrl, solution);
         } catch (TranslationException e) {
             log.error("Error during translation", e);

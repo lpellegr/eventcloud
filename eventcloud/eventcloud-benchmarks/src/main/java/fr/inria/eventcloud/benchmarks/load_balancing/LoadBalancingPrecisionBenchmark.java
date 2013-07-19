@@ -36,7 +36,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.FileConverter;
 
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
-import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.AddQuadrupleRequest;
 import fr.inria.eventcloud.overlay.can.StaticLoadBalancingTestBuilder;
 
 /**

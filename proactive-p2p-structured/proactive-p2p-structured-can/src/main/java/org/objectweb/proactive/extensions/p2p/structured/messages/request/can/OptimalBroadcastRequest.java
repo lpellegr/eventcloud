@@ -18,10 +18,10 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
@@ -56,19 +56,19 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
-     * {@link ResponseProvider}. This means that this request is not supposed to
+     * {@link ResponseProvider}. It means that this request is not supposed to
      * sent back a response.
      * 
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
     public OptimalBroadcastRequest(AnycastConstraintsValidator<E> validator) {
-        super(validator, null);
+        super(validator);
     }
 
     /**
-     * Constructs a new message with the specified {@code validator} and
-     * {@code responseProvider}.
+     * Constructs a new message with the specified {@code validator},
+     * {@code responseProvider} and {@code responseProvider}.
      * 
      * @param validator
      *            the constraints validator to use for checking the constraints.

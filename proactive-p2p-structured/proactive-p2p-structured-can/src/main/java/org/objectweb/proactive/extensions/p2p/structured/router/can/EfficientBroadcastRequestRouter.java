@@ -29,6 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.EfficientBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
@@ -118,12 +119,10 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
-                request.getAnycastRoutingList()
+                ((PeerInternal) request.getAnycastRoutingList()
                         .removeLast()
-                        .getPeerStub()
-                        .route(
-                                request.getResponseProvider().get(
-                                        request, overlay));
+                        .getPeerStub()).forward(request.getResponseProvider()
+                        .get(request, overlay));
             }
         } else {
             // the current overlay validates the constraints
@@ -181,12 +180,11 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
-                overlay.getResponseEntries().put(
-                        request.getId(), new ResponseEntry(1));
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
-                response.incrementHopCount(1);
                 response.route(overlay);
             }
         } else {
@@ -203,9 +201,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
-                    response.incrementHopCount(1);
-                    overlay.getResponseEntries().put(
-                            response.getId(), new ResponseEntry(1));
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, new ResponseEntry(1));
                     response.route(overlay);
                 }
             }
@@ -224,7 +221,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                         new ResponseEntry(neighborsToSendTo.size());
 
                 if (request.getResponseProvider() != null) {
-                    overlay.getResponseEntries().put(request.getId(), entry);
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, entry);
 
                     // constructs the routing list used by responses for routing
                     // back
@@ -247,7 +245,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                                         + " -> " + p);
                             }
                             request.setDirections(neighborEntry.getDirections());
-                            p.route(request);
+                            ((PeerInternal) p).forward(request);
                         }
                     }
                 }

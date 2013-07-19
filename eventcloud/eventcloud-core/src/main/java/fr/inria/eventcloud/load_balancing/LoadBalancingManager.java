@@ -335,7 +335,6 @@ public class LoadBalancingManager {
                             + (System.currentTimeMillis() - startTime) + " ms");
                 }
             } catch (Throwable t) {
-                System.err.println("ERROR");
                 t.printStackTrace();
             }
         }

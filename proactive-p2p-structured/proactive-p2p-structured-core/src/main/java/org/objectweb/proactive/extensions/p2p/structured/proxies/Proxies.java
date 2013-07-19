@@ -16,25 +16,122 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.etsi.uri.gcm.util.GCM;
+import org.objectweb.fractal.api.Interface;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
+import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Static utility methods pertaining to {@link Proxy} instances.
  * 
  * @author lpellegr
  */
-public class Proxies {
+public class Proxies extends AbstractFactory {
 
-    public static <T extends Tracker> Proxy newProxy(T... trackers) {
-        return newProxy(Lists.newArrayList(trackers));
+    private Proxies() {
+
     }
 
-    public static <T extends Tracker> Proxy newProxy(List<T> trackers) {
-        return new ProxyImpl(trackers);
+    public static Proxy newProxy(Tracker... trackers) {
+        return newProxy(ImmutableList.copyOf(trackers));
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on the local JVM.
+     * 
+     * @param trackers
+     *            the trackers to use for getting entry points in the P2P
+     *            network.
+     * 
+     * @return the reference on the {@link Proxy} interface of the new proxy
+     *         component created.
+     */
+    public static Proxy newProxy(List<Tracker> trackers) {
+        return createProxy(new HashMap<String, Object>(), trackers);
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on the specified
+     * {@code node}.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param trackers
+     *            the trackers to use for getting entry points in the P2P
+     *            network.
+     * 
+     * @return the reference on the {@link Proxy} interface of the new proxy
+     *         component created.
+     */
+    public static Proxy newProxy(Node node, List<Tracker> trackers) {
+        return createProxy(ComponentUtils.createContext(node), trackers);
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on the specified
+     * {@code GCM virtual node}.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param trackers
+     *            the trackers to use for getting entry points in the P2P
+     *            network.
+     * 
+     * @return the reference on the {@link Proxy} interface of the new proxy
+     *         component created.
+     */
+    public static Proxy newProxy(GCMVirtualNode vn, List<Tracker> trackers) {
+        return createProxy(ComponentUtils.createContext(vn), trackers);
+    }
+
+    /**
+     * Creates a new put/get proxy component deployed on a node provided by the
+     * specified {@code node provider}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param trackers
+     *            the trackers to use for getting entry points in the P2P
+     *            network.
+     * 
+     * @return the reference on the {@link Proxy} interface of the new proxy
+     *         component created.
+     */
+    public static Proxy newProxy(NodeProvider nodeProvider,
+                                 List<Tracker> trackers) {
+        return createProxy(getContextFromNodeProvider(
+                nodeProvider, ProxyImpl.PROXY_VN), trackers);
+    }
+
+    protected static Proxy createProxy(Map<String, Object> context,
+                                       List<Tracker> trackers) {
+        if (trackers.size() == 0) {
+            throw new IllegalArgumentException("No tracker specified");
+        }
+
+        try {
+            Proxy proxy =
+                    ComponentUtils.createComponentAndGetInterface(
+                            ProxyImpl.PROXY_ADL, context,
+                            ProxyImpl.PROXY_SERVICES_ITF, Proxy.class, true);
+
+            ((ProxyAttributeController) GCM.getAttributeController(((Interface) proxy).getFcItfOwner())).setAttributes(trackers);
+
+            return proxy;
+        } catch (NoSuchInterfaceException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 }

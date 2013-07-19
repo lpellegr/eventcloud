@@ -78,7 +78,7 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      * @param overlay
      *            the overlay on which this method is called.
      */
-    public void synchronizationPointUnlocked(StructuredOverlay overlay) {
+    public void beforeSendingBackResponse(StructuredOverlay overlay) {
         // to be overriden if necessary
     }
 

@@ -64,7 +64,7 @@ import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
-import fr.inria.eventcloud.proxies.AbstractProxy;
+import fr.inria.eventcloud.proxies.EventCloudProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
 import fr.inria.eventcloud.webservices.api.EventCloudsManagementWsnApi;
@@ -759,7 +759,7 @@ public class EventCloudsManagementServiceImpl implements
 
         membraneController.nfAddFcSubComponent(proxyMonitoringManager);
         membraneController.nfBindFc(
-                AbstractProxy.MONITORING_SERVICES_CONTROLLER_ITF,
+                EventCloudProxy.MONITORING_SERVICES_CONTROLLER_ITF,
                 ProxyMonitoringManagerImpl.COMPONENT_NAME + "."
                         + ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
 

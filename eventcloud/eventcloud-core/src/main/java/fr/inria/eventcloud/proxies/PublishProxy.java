@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.proxies;
 
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
+
 import fr.inria.eventcloud.api.PublishApi;
 
 /**

@@ -16,65 +16,33 @@
  **/
 package fr.inria.eventcloud.overlay;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
-import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.objectweb.proactive.multiactivity.priority.PriorityConstraint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
-import fr.inria.eventcloud.api.QuadruplePattern;
-import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
-import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
-import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
-import fr.inria.eventcloud.api.responses.SparqlResponse;
-import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
-import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.factories.SemanticFactory;
-import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.can.ContainsQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.can.CountQuadruplePatternRequest;
-import fr.inria.eventcloud.messages.request.can.DeleteQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.can.DeleteQuadruplesRequest;
-import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.PublishCompoundEventRequest;
-import fr.inria.eventcloud.messages.request.can.PublishQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.can.QuadruplePatternRequest;
-import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
-import fr.inria.eventcloud.messages.response.can.BooleanForwardResponse;
-import fr.inria.eventcloud.messages.response.can.CountQuadruplePatternResponse;
-import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.PublishCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.PublishQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.pubsub.Subscription;
-import fr.inria.eventcloud.utils.Callback;
-import fr.inria.eventcloud.utils.RDFReader;
 
 /**
  * SemanticPeerImpl is a concrete implementation of {@link SemanticPeer}. It is
@@ -94,9 +62,6 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
     private static final long serialVersionUID = 150L;
-
-    private static final Logger log =
-            LoggerFactory.getLogger(SemanticPeerImpl.class);
 
     /**
      * ADL name of the semantic peer component.
@@ -181,7 +146,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
         // the quadruple is routed without taking into account the publication
         // datetime (neither the other meta information)
-        super.sendv(new PublishQuadrupleRequest(quad));
+        super.route(new PublishQuadrupleRequest(quad));
     }
 
     /**
@@ -203,7 +168,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
             for (int i = 0; i < compoundEvent.size(); i++) {
                 // sends the whole compound event
-                super.sendv(new PublishCompoundEventRequest(compoundEvent, i));
+                super.route(new PublishCompoundEventRequest(compoundEvent, i));
             }
 
             // the meta quadruple is necessary when we use the fallback scheme
@@ -234,257 +199,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public void subscribe(Subscription subscription) {
         subscription.setIndexationTime();
 
-        super.sendv(new IndexSubscriptionRequest(subscription));
-    }
-
-    /*
-     * PutGetApi implementation
-     * 
-     * The boolean value which is returned in the PutGetApi by some methods 
-     * is used to ensure that ProActive calls are synchronous.
-     */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean add(Quadruple quad) {
-        PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
-
-        return true;
-    }
-
-    @MemberOf("routing")
-    private BooleanWrapper addAsync(Quadruple quad) {
-        super.send(new AddQuadrupleRequest(quad));
-
-        return new BooleanWrapper(true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean add(Collection<Quadruple> quads) {
-        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
-
-        for (final Quadruple quad : quads) {
-            results.add(this.addAsync(quad));
-        }
-
-        PAFuture.waitForAll(results);
-
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean add(URL url, SerializationFormat format) {
-        try {
-            final Builder<BooleanWrapper> results = ImmutableList.builder();
-            InputStream in = url.openConnection().getInputStream();
-
-            RDFReader.read(in, format, new Callback<Quadruple>() {
-                @Override
-                public void execute(Quadruple quad) {
-                    results.add(SemanticPeerImpl.this.addAsync(quad));
-                }
-            });
-
-            in.close();
-            PAFuture.waitForAll(results.build());
-
-            return true;
-        } catch (IOException ioe) {
-            log.error("An error occurred when reading from the given URL "
-                    + url, ioe);
-            return false;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean contains(Quadruple quad) {
-        return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
-                quad)))).getResult();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean delete(Quadruple quad) {
-        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
-
-        return true;
-    }
-
-    @MemberOf("routing")
-    public BooleanWrapper deleteAsync(Quadruple quad) {
-        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
-
-        return new BooleanWrapper(true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public boolean delete(Collection<Quadruple> quads) {
-        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
-
-        for (final Quadruple quad : quads) {
-            results.add(this.deleteAsync(quad));
-        }
-
-        PAFuture.waitForAll(results);
-
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public List<Quadruple> delete(QuadruplePattern quadPattern) {
-        QuadruplePatternResponse response =
-                (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
-                        quadPattern.getGraph(), quadPattern.getSubject(),
-                        quadPattern.getPredicate(), quadPattern.getObject())));
-        return response.getResult();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public long count(QuadruplePattern quadPattern) {
-        return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
-                quadPattern.getGraph(), quadPattern.getSubject(),
-                quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public long count(String sparqlQuery) throws MalformedSparqlQueryException {
-        SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
-
-        if (response instanceof SparqlAskResponse) {
-            return ((SparqlAskResponse) response).getResult()
-                    ? 1 : 0;
-        } else if (response instanceof SparqlConstructResponse) {
-            StmtIterator it =
-                    ((SparqlConstructResponse) response).getResult()
-                            .listStatements();
-            long result = 0;
-            while (it.hasNext()) {
-                it.next();
-                result++;
-            }
-            return result;
-        } else if (response instanceof SparqlSelectResponse) {
-            ResultSetWrapper it = ((SparqlSelectResponse) response).getResult();
-            long result = 0;
-            while (it.hasNext()) {
-                it.nextBinding();
-                result++;
-            }
-            return result;
-        }
-
-        return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public List<Quadruple> find(QuadruplePattern quadPattern) {
-        return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
-                quadPattern.getGraph(), quadPattern.getSubject(),
-                quadPattern.getPredicate(), quadPattern.getObject()))))).getResult();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
-            throws MalformedSparqlQueryException {
-        sparqlQuery = sparqlQuery.trim();
-
-        if (sparqlQuery.startsWith("ASK")) {
-            return this.executeSparqlAsk(sparqlQuery);
-        } else if (sparqlQuery.startsWith("CONSTRUCT")) {
-            return this.executeSparqlConstruct(sparqlQuery);
-        } else if (sparqlQuery.startsWith("DESCRIBE")) {
-            return this.executeSparqlDescribe(sparqlQuery);
-        } else if (sparqlQuery.startsWith("SELECT")) {
-            return this.executeSparqlSelect(sparqlQuery);
-        } else {
-            throw new IllegalArgumentException("Unknow query form for query: "
-                    + sparqlQuery);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
-            throws MalformedSparqlQueryException {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlAsk(
-                sparqlAskQuery, super.overlay);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstruct)
-            throws MalformedSparqlQueryException {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlConstruct(
-                sparqlConstruct, super.overlay);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
-            throws MalformedSparqlQueryException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelect)
-            throws MalformedSparqlQueryException {
-        return ((SemanticRequestResponseManager) super.overlay.getRequestResponseManager()).executeSparqlSelect(
-                sparqlSelect, super.overlay);
+        super.route(new IndexSubscriptionRequest(subscription));
     }
 
     /**

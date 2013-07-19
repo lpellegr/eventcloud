@@ -92,9 +92,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<java.security.policy>${project.build.testOutputDirectory}/proactive.security.policy</java.security.policy>
-						<log4j.configuration>file:${project.build.testOutputDirectory}/log4j.xml</log4j.configuration>
-						<logback.configurationFile>file:${project.build.testOutputDirectory}/logback-test.xml</logback.configurationFile>
+						<java.security.policy>${basedir}/src/test/resources/proactive.security.policy</java.security.policy>
+						<log4j.configuration>file://${basedir}/src/test/resources/log4j.xml</log4j.configuration>
+						<logback.configurationFile>file:${basedir}/src/test/resources/logback-test.xml</logback.configurationFile>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>

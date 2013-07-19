@@ -27,6 +27,7 @@ import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.ProActiveInet;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 import org.objectweb.proactive.extensions.webservices.component.Utils;
 import org.objectweb.proactive.extensions.webservices.component.controller.PAWebServicesController;
@@ -37,7 +38,6 @@ import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.proxies.Proxy;
 import fr.inria.eventcloud.webservices.EventCloudsManagementServiceImpl;
 import fr.inria.eventcloud.webservices.api.EventCloudsManagementWsnApi;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
@@ -538,9 +538,9 @@ public class WsDeployer {
             wsc.unExposeComponentAsWebService(
                     proxyName, new String[] {interfaceName});
         } catch (NoSuchInterfaceException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         } catch (WebServicesException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
     }
 

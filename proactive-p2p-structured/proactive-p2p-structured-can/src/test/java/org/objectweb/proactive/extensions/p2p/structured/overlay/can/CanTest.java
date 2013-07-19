@@ -243,7 +243,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                 public void run() {
                     try {
                         if (RandomUtils.nextInt(2) == 0) {
-                            CanTest.this.getRandomPeer().send(
+                            CanTest.this.getProxy().send(
                                     createFloodingRequest());
                         } else {
                             preAllocatedPeers.poll().join(
@@ -285,7 +285,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                 public void run() {
                     try {
                         if (RandomUtils.nextInt(2) == 0) {
-                            CanTest.this.getRandomPeer().send(
+                            CanTest.this.getProxy().send(
                                     createFloodingRequest());
                         } else {
                             CanTest.this.getRandomTracker()
@@ -360,7 +360,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                                         .leave();
                                 break;
                             case ROUTING:
-                                CanTest.this.getRandomPeer().send(
+                                CanTest.this.getProxy().send(
                                         createFloodingRequest());
                                 break;
                         }

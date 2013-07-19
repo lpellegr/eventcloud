@@ -16,15 +16,12 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.LookupRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.LookupResponse;
@@ -35,9 +32,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOv
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 
@@ -49,8 +45,6 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastReque
 public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private Peer target;
-
-    private Proxy proxy;
 
     private Coordinate<StringElement> targetLowerBound;
 
@@ -76,25 +70,24 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         this.targetLowerBound =
                 CanOperations.<StringElement> getIdAndZoneResponseOperation(
                         this.target).getPeerZone().getLowerBound();
-
-        this.proxy = Proxies.newProxy(super.getRandomTracker());
     }
 
     @Test
     public void testUnicastLookupRequestWithResponse() {
-
         @SuppressWarnings({"unchecked"})
         LookupResponse<StringElement> response =
-                (LookupResponse<StringElement>) PAFuture.getFutureValue(this.proxy.send(
-                        new LookupRequest<StringElement>(this.targetLowerBound),
-                        super.getPeer(0)));
+                (LookupResponse<StringElement>) PAFuture.getFutureValue(super.getProxy()
+                        .send(
+                                new LookupRequest<StringElement>(
+                                        this.targetLowerBound),
+                                super.getPeer(0)));
 
         checkResponse(response, this.target);
     }
 
     @Test
     public void testUnicastForwardRequestWithoutResponse() {
-        this.proxy.sendv(
+        super.getProxy().sendv(
                 new SetStateRequest(this.targetLowerBound), super.getPeer(0));
 
         // sleep because the previous call is supposed to be asynchronous
@@ -105,9 +98,10 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         GetStateResponse response =
-                (GetStateResponse) PAFuture.getFutureValue(this.proxy.send(
-                        new GetStateRequest(this.targetLowerBound),
-                        super.getPeer(0)));
+                (GetStateResponse) PAFuture.getFutureValue(super.getProxy()
+                        .send(
+                                new GetStateRequest(this.targetLowerBound),
+                                super.getPeer(0)));
 
         Assert.assertTrue(response.getValue());
     }
@@ -115,12 +109,6 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     @Override
     public void tearDown() {
         super.tearDown();
-
-        try {
-            this.proxy.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private static class CustomCanOverlay extends StringCanOverlay {

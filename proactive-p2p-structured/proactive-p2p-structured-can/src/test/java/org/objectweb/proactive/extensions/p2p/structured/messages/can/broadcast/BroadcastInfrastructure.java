@@ -125,11 +125,6 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
      */
     public void terminate() {
         super.tearDown();
-        try {
-            this.proxy.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

@@ -35,7 +35,6 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang.mutable.MutableObject;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
@@ -76,9 +75,9 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.messages.request.can.IndexEphemeralSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.IndexSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
+import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.UnsubscribeRequest;
 import fr.inria.eventcloud.operations.can.RetrieveSubSolutionOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.SemanticPeer;
@@ -585,7 +584,7 @@ public final class PublishSubscribeUtils {
                                         source, ImmutableList.of(quadruple));
 
                         subscriber.receiveSbce2(quadruplesNotification);
-                        semanticCanOverlay.getStub().sendv(
+                        semanticCanOverlay.getStub().route(
                                 new IndexEphemeralSubscriptionRequest(
                                         quadruple.createMetaGraphNode(),
                                         subscription.getOriginalId(),
@@ -662,12 +661,13 @@ public final class PublishSubscribeUtils {
             // using soft references.
             if (subscriberConnectionFailure.getNbAttempts() == EventCloudProperties.PROXY_MAX_LOOKUP_ATTEMPTS.getValue()) {
                 for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-                    PAFuture.waitFor(semanticCanOverlay.getStub()
-                            .send(
+                    semanticCanOverlay.getStub()
+                            .route(
                                     new UnsubscribeRequest(
                                             subscription.getOriginalId(),
                                             subSubscription.getAtomicQuery(),
-                                            subscription.getType() == NotificationListenerType.BINDING)));
+                                            subscription.getType() == NotificationListenerType.BINDING,
+                                            true));
 
                     semanticCanOverlay.getSubscriberConnectionFailures()
                             .remove(subscription.getOriginalId());
@@ -788,7 +788,7 @@ public final class PublishSubscribeUtils {
                     + rewrittenSubscription.getSparqlQuery());
         }
 
-        overlay.getStub().sendv(
+        overlay.getStub().route(
                 new IndexSubscriptionRequest(rewrittenSubscription));
     }
 

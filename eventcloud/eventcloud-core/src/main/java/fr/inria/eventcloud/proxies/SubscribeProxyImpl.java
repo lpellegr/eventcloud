@@ -43,14 +43,11 @@ import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.util.concurrent.IsolationLevel;
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
-import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -75,10 +72,10 @@ import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
-import fr.inria.eventcloud.messages.request.can.ReconstructCompoundEventRequest;
-import fr.inria.eventcloud.messages.request.can.RemoveEphemeralSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.can.UnsubscribeRequest;
-import fr.inria.eventcloud.messages.response.can.QuadruplePatternResponse;
+import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.RemoveEphemeralSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.UnsubscribeRequest;
+import fr.inria.eventcloud.messages.response.QuadruplePatternResponse;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
@@ -100,8 +97,7 @@ import fr.inria.eventcloud.pubsub.solutions.QuadruplesSolution;
  * 
  * @see ProxyFactory
  */
-@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
-public class SubscribeProxyImpl extends AbstractProxy implements
+public class SubscribeProxyImpl extends EventCloudProxy implements
         ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 150L;
@@ -138,8 +134,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     // contains the quadruples solutions that are being received
     private ConcurrentMap<NotificationId, QuadruplesSolution> quadruplesSolutions;
 
-    private String componentURI;
-
     /**
      * Empty constructor required by ProActive.
      */
@@ -151,24 +145,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      * {@inheritDoc}
      */
     @Override
-    public void initComponentActivity(Body body) {
-        super.initComponentActivity(body);
-
-        // FIXME: to avoid some deadlock with components the method
-        // setImmediateServices has to be handled in immediate services. This
-        // configuration should be done in the ProActive source code.
-        body.setImmediateService("setImmediateServices", false);
-        body.setImmediateService("setAttributes", false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void runComponentActivity(Body body) {
-        new ComponentMultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                true, false);
+        super.multiActiveService = new ComponentMultiActiveService(body);
+        super.multiActiveService.multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                false, false);
     }
 
     /**
@@ -199,10 +180,9 @@ public class SubscribeProxyImpl extends AbstractProxy implements
     public void setAttributes(EventCloudCache proxy, String componentUri,
                               AlterableElaProperty[] properties) {
         if (super.eventCloudCache == null) {
-            super.eventCloudCache = proxy;
-            super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
+            super.setAttributes(proxy.getTrackers());
 
-            this.componentURI = componentUri;
+            super.eventCloudCache = proxy;
 
             // even if we could have
             // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
@@ -225,19 +205,32 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                             // is
                             // EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT
                             // we get the following formula
-                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                     * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                             0.75f,
-                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
             this.quadruplesSolutions =
                     new ConcurrentHashMap<NotificationId, QuadruplesSolution>(
-                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                     * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                             0.75f,
-                            EventCloudProperties.MAO_HARD_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
-            this.eventsDeliveredCache =
-                    new InfinispanEventsDeliveredCache(this.getComponentId());
+            String cacheEngine =
+                    EventCloudProperties.SUBSCRIBER_CACHE_ENGINE.getValue();
+
+            if (cacheEngine.equals("ehcache")) {
+                this.eventsDeliveredCache =
+                        new EhcacheEventsDeliveredCache(this.getComponentId());
+
+            } else if (cacheEngine.equals("infinispan")) {
+                this.eventsDeliveredCache =
+                        new InfinispanEventsDeliveredCache(
+                                this.getComponentId());
+            } else {
+                throw new IllegalStateException("Unknown cache engine: "
+                        + cacheEngine);
+            }
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
@@ -305,7 +298,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                                    NotificationListener<?> listener) {
         Subscription internalSubscription =
                 createInternalSubscription(
-                        subscription, this.componentURI, sparqlQuery,
+                        subscription, super.url, sparqlQuery,
                         listener.getType());
 
         if (this.subscriptions.putIfAbsent(
@@ -358,12 +351,11 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
         // updates the network to stop sending notifications
         for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-            super.selectPeer()
-                    .send(
-                            new UnsubscribeRequest(
-                                    subscription.getOriginalId(),
-                                    subSubscription.getAtomicQuery(),
-                                    subscription.getType() == NotificationListenerType.BINDING));
+            super.send(new UnsubscribeRequest(
+                    subscription.getOriginalId(),
+                    subSubscription.getAtomicQuery(),
+                    subscription.getType() == NotificationListenerType.BINDING,
+                    false));
         }
 
         this.eventsDeliveredCache.removeEntriesFor(sid);
@@ -545,8 +537,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     private void sendRemoveEphemeralSubscription(Node graph,
                                                  SubscriptionId subscriptionId) {
-        super.selectPeer().sendv(
-                new RemoveEphemeralSubscriptionRequest(graph, subscriptionId));
+        super.sendv(new RemoveEphemeralSubscriptionRequest(
+                graph, subscriptionId));
     }
 
     /**
@@ -715,11 +707,8 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             }
 
             List<Quadruple> quads =
-                    ((QuadruplePatternResponse) PAFuture.getFutureValue(super.selectPeer()
-                            .send(
-                                    new ReconstructCompoundEventRequest(
-                                            reconstructPattern,
-                                            quadHashesReceived)))).getResult();
+                    ((QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new ReconstructCompoundEventRequest(
+                            reconstructPattern, quadHashesReceived)))).getResult();
 
             for (Quadruple q : quads) {
                 if (PublishSubscribeUtils.isMetaQuadruple(q)) {
@@ -788,7 +777,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             }
 
             if (destination == null) {
-                destination = this.componentURI;
+                destination = super.url;
             }
 
             long eventPublicationTimestamp =
@@ -822,7 +811,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
             log.debug(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
-                            notification.getId(), this.componentURI,
+                            notification.getId(), super.url,
                             notification.getSubscriptionId()});
         }
     }
@@ -843,13 +832,20 @@ public class SubscribeProxyImpl extends AbstractProxy implements
      */
     @MemberOf("parallel")
     public String getComponentUri() {
-        return this.componentURI;
+        return super.url;
     }
 
     private String getComponentId() {
-        return this.componentURI.substring(
-                this.componentURI.lastIndexOf('/') + 1,
-                this.componentURI.length());
+        return super.url.substring(
+                super.url.lastIndexOf('/') + 1, super.url.length());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String prefixName() {
+        return "subscribe-proxy";
     }
 
     private static abstract class EventsDeliveredCache {
@@ -881,7 +877,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
     }
 
-    @SuppressWarnings("unused")
     private static class EhcacheEventsDeliveredCache extends
             EventsDeliveredCache {
 
@@ -995,7 +990,7 @@ public class SubscribeProxyImpl extends AbstractProxy implements
 
             GlobalConfigurationBuilder config =
                     new GlobalConfigurationBuilder();
-            config.globalJmxStatistics().allowDuplicateDomains(true).disable();
+            config.globalJmxStatistics().disable().allowDuplicateDomains(true);
             config.serialization().addAdvancedExternalizer(
                     NotificationId.SERIALIZER).addAdvancedExternalizer(
                     SubscriptionId.SERIALIZER);
@@ -1017,8 +1012,6 @@ public class SubscribeProxyImpl extends AbstractProxy implements
                     .maxEntries(
                             EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
                     .strategy(EvictionStrategy.LRU)
-                    .jmxStatistics()
-                    .disable()
                     .locking()
                     .isolationLevel(IsolationLevel.NONE);
 

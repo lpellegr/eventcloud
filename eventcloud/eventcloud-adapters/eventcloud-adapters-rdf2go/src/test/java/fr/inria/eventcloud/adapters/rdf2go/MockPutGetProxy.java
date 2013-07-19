@@ -106,27 +106,20 @@ public class MockPutGetProxy implements PutGetApi {
      * {@inheritDoc}
      */
     @Override
-    public boolean add(URL url, SerializationFormat format) {
-        try {
-            InputStream in = url.openConnection().getInputStream();
-            final Builder<Quadruple> quadruples = ImmutableList.builder();
+    public void add(URL url, SerializationFormat format) throws IOException {
+        InputStream in = url.openConnection().getInputStream();
+        final Builder<Quadruple> quadruples = ImmutableList.builder();
 
-            RDFReader.read(in, format, new Callback<Quadruple>() {
-                @Override
-                public void execute(Quadruple quad) {
-                    quadruples.add(quad);
-                }
-            });
+        RDFReader.read(in, format, new Callback<Quadruple>() {
+            @Override
+            public void execute(Quadruple quad) {
+                quadruples.add(quad);
+            }
+        });
 
-            this.add(quadruples.build());
+        this.add(quadruples.build());
 
-            in.close();
-
-            return true;
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            return false;
-        }
+        in.close();
     }
 
     /**

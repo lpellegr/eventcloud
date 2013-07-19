@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -74,9 +75,10 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
      *            method is called.
      */
     public void setAttributes(Request<K> request, StructuredOverlay overlay) {
-        super.id = request.getId();
-        this.dispatchTimestamp = request.getDispatchTimestamp();
-        this.outboundHopCount = request.getHopCount();
+        super.id = request.id;
+        super.aggregationId = request.aggregationId;
+        this.dispatchTimestamp = request.dispatchTimestamp;
+        this.outboundHopCount = request.hopCount;
     }
 
     /**

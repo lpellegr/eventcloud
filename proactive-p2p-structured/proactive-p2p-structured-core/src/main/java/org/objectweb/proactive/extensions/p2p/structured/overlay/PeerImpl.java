@@ -35,9 +35,10 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
+import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponseReceiver;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
 import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
@@ -89,7 +90,7 @@ import org.slf4j.LoggerFactory;
         // callable and runnable operations are compatible under some conditions
         @Compatible(value = {
                 "receiveCallableOperation", "receiveRunnableOperation"}, condition = "this.areCompatible")})
-public class PeerImpl extends AbstractComponent implements Peer,
+public class PeerImpl extends AbstractComponent implements PeerInterface,
         PeerAttributeController, ComponentEndActive, Serializable {
 
     private static final long serialVersionUID = 150L;
@@ -161,11 +162,11 @@ public class PeerImpl extends AbstractComponent implements Peer,
                               SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         if (this.overlay == null) {
             this.overlay = overlayProvider.get();
+            this.overlay.bodyId = PAActiveObject.getBodyOnThis().getID();
+            this.overlay.multiActiveService = this.multiActiveService;
             this.overlay.overlayProvider = overlayProvider;
             this.overlay.stub = stub;
             this.overlay.url = PAActiveObject.getUrl(stub);
-            this.overlay.multiActiveService = this.multiActiveService;
-            this.overlay.getRequestResponseManager().setOverlay(this.overlay);
         }
     }
 
@@ -282,7 +283,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     @MemberOf("routing")
-    public void route(RequestResponseMessage<?> msg) {
+    public void forward(RequestResponseMessage<?> msg) {
+        msg.incrementHopCount(1);
         msg.route(this.overlay);
     }
 
@@ -291,17 +293,8 @@ public class PeerImpl extends AbstractComponent implements Peer,
      */
     @Override
     @MemberOf("routing")
-    public void sendv(Request<?> request) {
-        this.overlay.dispatchv(request);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @MemberOf("routing")
-    public Response<?> send(Request<?> request) {
-        return this.overlay.dispatch(request);
+    public void route(RequestResponseMessage<?> msg) {
+        msg.route(this.overlay);
     }
 
     /**
@@ -318,6 +311,24 @@ public class PeerImpl extends AbstractComponent implements Peer,
     @Override
     public String dump() {
         return this.overlay.dump();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @MemberOf("routing")
+    public <T extends Request<?>> void dispatch(List<T> requests,
+                                                Serializable context,
+                                                ResponseCombiner responseCombiner,
+                                                FinalResponseReceiver responseDestination) {
+        this.overlay.messageManager.getAggregationTable().register(
+                requests.get(0).getAggregationId(), context, responseCombiner,
+                responseDestination, requests.size());
+
+        for (Request<?> request : requests) {
+            request.route(this.overlay);
+        }
     }
 
     /**

@@ -43,6 +43,7 @@ import org.w3c.dom.Document;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import easybox.petalslink.com.esrawreport._1.EJaxbReportListType;
 import easybox.petalslink.com.esrawreport._1.EJaxbReportTimeStampType;
@@ -195,7 +196,10 @@ public class ProxyMonitoringManagerImpl extends AbstractComponent implements
 
     private synchronized ExecutorService getCachedThreadPool() {
         if (this.cachedThreadPool == null) {
-            this.cachedThreadPool = Executors.newCachedThreadPool();
+            this.cachedThreadPool =
+                    Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat(
+                            this.getClass().getSimpleName() + "-pool-thread-%d")
+                            .build());
         }
 
         return this.cachedThreadPool;

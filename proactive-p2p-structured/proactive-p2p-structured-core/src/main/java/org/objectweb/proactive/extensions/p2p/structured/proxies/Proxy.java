@@ -16,10 +16,12 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
-import java.io.Closeable;
+import java.io.Serializable;
+import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -29,27 +31,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public interface Proxy extends Closeable {
-
-    /**
-     * Sends a request over the overlay by using message passing but without any
-     * response in return.
-     * 
-     * @param request
-     *            the request to handle.
-     */
-    void sendv(Request<?> request);
-
-    /**
-     * Sends a request over the overlay by using message passing but without any
-     * response in return.
-     * 
-     * @param request
-     *            the request to handle.
-     * @param peer
-     *            the stub from where the request is sent.
-     */
-    void sendv(Request<?> request, Peer peer);
+public interface Proxy extends ProxyAttributeController {
 
     /**
      * Sends a request over the overlay by using message passing.
@@ -72,6 +54,33 @@ public interface Proxy extends Closeable {
      * @return the response in agreement with the request type sent.
      */
     Response<?> send(Request<?> request, Peer peer);
+
+    Serializable send(List<? extends Request<?>> requests,
+                      Serializable context, ResponseCombiner responseCombiner);
+
+    Serializable send(List<? extends Request<?>> requests,
+                      Serializable context, ResponseCombiner responseCombiner,
+                      Peer peer);
+
+    /**
+     * Sends a request over the overlay by using message passing but without any
+     * response in return.
+     * 
+     * @param request
+     *            the request to handle.
+     */
+    void sendv(Request<?> request);
+
+    /**
+     * Sends a request over the overlay by using message passing but without any
+     * response in return.
+     * 
+     * @param request
+     *            the request to handle.
+     * @param peer
+     *            the stub from where the request is sent.
+     */
+    void sendv(Request<?> request, Peer peer);
 
     /**
      * Returns a peer stub randomly selected among the stubs managed by a

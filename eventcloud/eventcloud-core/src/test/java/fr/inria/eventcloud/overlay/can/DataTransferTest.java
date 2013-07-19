@@ -41,6 +41,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.SubscribeApi;
@@ -83,7 +84,8 @@ public class DataTransferTest {
 
     @Test
     public void testMiscDataTransfer() throws NetworkAlreadyJoinedException,
-            PeerNotActivatedException, NetworkNotJoinedException {
+            PeerNotActivatedException, NetworkNotJoinedException,
+            EventCloudIdNotManaged {
         this.eventCloudId = this.deployer.newEventCloud(1, 1);
 
         SemanticPeer firstPeer =
@@ -151,10 +153,15 @@ public class DataTransferTest {
                 "Second generated quadruple is {}",
                 quadruple2.toString(StringRepresentation.CODE_POINTS));
 
+        PutGetApi putgetProxy =
+                ProxyFactory.newPutGetProxy(
+                        this.deployer.getEventCloudsRegistryUrl(),
+                        this.eventCloudId);
+
         // add two quadruples whose one must be conveyed to the second peer when
         // it joins the first peer
-        firstPeer.add(quadruple1);
-        firstPeer.add(quadruple2);
+        putgetProxy.add(quadruple1);
+        putgetProxy.add(quadruple2);
 
         Assert.assertEquals(2, Operations.findQuadruplesOperation(
                 firstPeer, QuadruplePattern.ANY).size());

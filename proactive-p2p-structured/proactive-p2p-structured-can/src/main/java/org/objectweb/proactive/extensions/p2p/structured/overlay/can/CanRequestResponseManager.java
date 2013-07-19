@@ -37,20 +37,17 @@ public class CanRequestResponseManager extends RequestResponseManager {
 
     /*
      * Used to maintain the list of requests which have already been 
-     * received when anycast requests are executed.
+     * received when AnycastRouter is used.
      */
     private Set<MessageId> requestsAlreadyReceived;
 
     public CanRequestResponseManager() {
-        super();
+        super(P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+
         this.requestsAlreadyReceived =
                 Collections.newSetFromMap(new ConcurrentHashMap<MessageId, Boolean>(
                         16, 0.75f,
                         P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue()));
-    }
-
-    public void markRequestAsReceived(MessageId requestId) {
-        this.requestsAlreadyReceived.add(requestId);
     }
 
     /**
@@ -88,7 +85,6 @@ public class CanRequestResponseManager extends RequestResponseManager {
     @Override
     public void clear() {
         super.clear();
-
         this.requestsAlreadyReceived.clear();
     }
 
