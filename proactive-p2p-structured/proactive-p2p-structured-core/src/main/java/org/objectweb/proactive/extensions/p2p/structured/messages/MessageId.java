@@ -18,7 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
+import org.objectweb.proactive.core.UniqueID;
 
 /**
  * Message Identifier.
@@ -29,7 +29,7 @@ public final class MessageId implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
-    private final OverlayId producerId;
+    private final UniqueID producerId;
 
     private final long producerSequenceId;
 
@@ -43,8 +43,8 @@ public final class MessageId implements Serializable {
      */
     private transient String toString;
 
-    public MessageId(OverlayId overlayId, long sequenceId) {
-        this.producerId = overlayId;
+    public MessageId(UniqueID proxyId, long sequenceId) {
+        this.producerId = proxyId;
         this.producerSequenceId = sequenceId;
     }
 

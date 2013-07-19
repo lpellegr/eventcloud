@@ -17,15 +17,12 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
-import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
-import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.MutualExclusionManager;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -43,7 +40,9 @@ public abstract class StructuredOverlay implements DataHandler {
 
     protected OverlayId id;
 
-    protected AtomicLong sequencer;
+    protected UniqueID bodyId;
+
+    private final AtomicLong sequencer;
 
     protected RequestResponseManager messageManager;
 
@@ -79,31 +78,6 @@ public abstract class StructuredOverlay implements DataHandler {
     protected StructuredOverlay(RequestResponseManager messageManager) {
         this();
         this.messageManager = messageManager;
-    }
-
-    /**
-     * Dispatches the request over the overlay by using message passing. The
-     * request is sent asynchronously without any response expected.
-     * 
-     * @param request
-     *            the request to dispatch.
-     */
-    public void dispatchv(Request<?> request) {
-        this.messageManager.dispatchv(request, this);
-    }
-
-    /**
-     * Dispatches the request over the overlay by using message passing. The
-     * request is supposed to create a response which is sent back to the
-     * sender.
-     * 
-     * @param request
-     *            the request to dispatch.
-     * 
-     * @return a response associated to the type of the request.
-     */
-    public Response<?> dispatch(Request<?> request) {
-        return this.messageManager.dispatch(request, this);
     }
 
     public abstract void create();
@@ -147,14 +121,6 @@ public abstract class StructuredOverlay implements DataHandler {
         return this.mutualExclusionManager;
     }
 
-    private long getNextSequenceNumber() {
-        return this.sequencer.getAndIncrement();
-    }
-
-    public MessageId newMessageId() {
-        return new MessageId(this.id, this.getNextSequenceNumber());
-    }
-
     public SerializableProvider<? extends StructuredOverlay> getOverlayProvider() {
         return this.overlayProvider;
     }
@@ -178,21 +144,8 @@ public abstract class StructuredOverlay implements DataHandler {
         return this.messageManager;
     }
 
-    /**
-     * Returns the {@link ResponseEntry} associated to the given
-     * {@code responseId} from the {@link RequestResponseManager}.
-     * 
-     * @param responseId
-     *            the response identifier to look for.
-     * @return the {@link ResponseEntry} associated to the given
-     *         {@code responseId} or {@code null} if no entry was found.
-     */
-    public ResponseEntry getResponseEntry(MessageId responseId) {
-        return this.messageManager.getResponsesReceived().get(responseId);
-    }
-
-    public Map<MessageId, ResponseEntry> getResponseEntries() {
-        return this.messageManager.getResponsesReceived();
+    public MessageId newMessageId() {
+        return new MessageId(this.bodyId, this.sequencer.getAndIncrement());
     }
 
     /**

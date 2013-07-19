@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.response.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -53,23 +52,6 @@ public class ForwardResponse<E extends Element> extends Response<Coordinate<E>> 
         super.constraintsValidator =
                 new UnicastConstraintsValidator<E>(
                         ((ForwardRequest<E>) request).getSenderCoordinate());
-    }
-
-    /**
-     * Handles the last step for the current response using the specified
-     * {@link StructuredOverlay}.
-     * 
-     * @param overlay
-     *            the overlay to use in order to handle the response.
-     */
-    public void handle(StructuredOverlay overlay) {
-        ResponseEntry entry = overlay.getResponseEntries().get(super.getId());
-
-        synchronized (entry) {
-            entry.incrementResponsesCount(1);
-            entry.setResponse(this);
-            entry.notifyAll();
-        }
     }
 
     /**

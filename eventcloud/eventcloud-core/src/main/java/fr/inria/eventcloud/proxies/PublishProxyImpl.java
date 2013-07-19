@@ -22,11 +22,8 @@ import java.net.URL;
 import java.util.Collection;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
-import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +45,7 @@ import fr.inria.eventcloud.utils.RDFReader;
  * 
  * @see ProxyFactory
  */
-@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
-public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
+public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
         PublishProxyAttributeController {
 
     private static final Logger log =
@@ -75,6 +71,7 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
      * Empty constructor required by ProActive.
      */
     public PublishProxyImpl() {
+        super();
     }
 
     /**
@@ -83,8 +80,8 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
     @Override
     public void setAttributes(EventCloudCache proxy) {
         if (super.eventCloudCache == null) {
+            super.setAttributes(proxy.getTrackers());
             super.eventCloudCache = proxy;
-            super.proxy = Proxies.newProxy(super.eventCloudCache.getTrackers());
         }
     }
 
@@ -156,9 +153,18 @@ public class PublishProxyImpl extends AbstractProxy implements PublishProxy,
      */
     @Override
     public void runComponentActivity(Body body) {
-        new ComponentMultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_HARD_LIMIT_PUBLISH_PROXIES.getValue(),
-                true, false);
+        super.multiActiveService = new ComponentMultiActiveService(body);
+        super.multiActiveService.multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
+                false, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String prefixName() {
+        return "publish-proxy";
     }
 
 }

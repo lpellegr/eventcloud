@@ -92,6 +92,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
+import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
@@ -322,6 +323,8 @@ public class PublishSubscribeBenchmark {
 
                     private EventCloudDeployer deployer;
 
+                    private PutGetProxy putgetProxy;
+
                     private List<CustomPublishProxy> publishProxies;
 
                     private List<SubscribeApi> subscribeProxies;
@@ -386,6 +389,10 @@ public class PublishSubscribeBenchmark {
                         EventCloudId eventCloudId =
                                 this.deployer.getEventCloudDescription()
                                         .getId();
+
+                        this.putgetProxy =
+                                (PutGetProxy) ProxyFactory.newPutGetProxy(
+                                        registryURL, eventCloudId);
 
                         this.publishProxies =
                                 PublishSubscribeBenchmark.this.createPublishProxies(
@@ -602,9 +609,7 @@ public class PublishSubscribeBenchmark {
 
                         if (PublishSubscribeBenchmark.this.measureStorageTime) {
                             RetrieveStorageEndTimesResponse response =
-                                    (RetrieveStorageEndTimesResponse) PAFuture.getFutureValue(this.deployer.getRandomPeer()
-                                            .send(
-                                                    new RetrieveStorageEndTimesRequest()));
+                                    (RetrieveStorageEndTimesResponse) PAFuture.getFutureValue(this.putgetProxy.send(new RetrieveStorageEndTimesRequest()));
 
                             long publicationsStorageTime =
                                     response.getResult()

@@ -16,15 +16,15 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.messages;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.benchmarks.pubsub.StorageTimes;
 import fr.inria.eventcloud.benchmarks.pubsub.overlay.CustomSemanticOverlay;
-import fr.inria.eventcloud.messages.request.can.StatefulQuadruplePatternRequest;
+import fr.inria.eventcloud.messages.request.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
 public class RetrieveStorageEndTimesRequest extends

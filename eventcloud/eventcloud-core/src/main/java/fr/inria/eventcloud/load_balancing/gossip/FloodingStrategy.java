@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroad
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.load_balancing.LoadReport;
-import fr.inria.eventcloud.messages.request.can.StatelessQuadruplePatternRequest;
+import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 
@@ -40,7 +40,7 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
      */
     @Override
     public void push(SemanticCanOverlay overlay, LoadReport loadReport) {
-        overlay.getStub().sendv(new FloodingLoadRequest(loadReport));
+        overlay.getStub().route(new FloodingLoadRequest(loadReport));
     }
 
     public static class FloodingLoadRequest extends

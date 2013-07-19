@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -56,7 +57,9 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
     @Override
     public void makeDecision(StructuredOverlay overlay,
                              AnycastResponse<E> response) {
-        ResponseEntry entry = overlay.getResponseEntry(response.getId());
+        ResponseEntry entry =
+                overlay.getRequestResponseManager().getResponseEntry(
+                        response.getId());
 
         // ensure that only one thread at a time can access the response entry
         // when we receive two responses related to a same initial request
@@ -69,10 +72,10 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
             entry.incrementResponsesCount(1);
 
             // we are on a synchronization point and all responses are received,
-            // we must ensure that potential operation performed in background
-            // is terminated before to send back the response.
+            // we must ensure that operations performed in background are
+            // terminated before to send back the response.
             if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
-                localResponse.synchronizationPointUnlocked(overlay);
+                localResponse.beforeSendingBackResponse(overlay);
 
                 // we are on the initiator of the query we need to wake up its
                 // thread in order to remove the synchronization point
@@ -89,9 +92,8 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
 
                     // the response has been handled and sent back so we can
                     // remove it from the table.
-                    overlay.getRequestResponseManager()
-                            .getResponsesReceived()
-                            .remove(localResponse.getId());
+                    overlay.getRequestResponseManager().removeResponseEntry(
+                            localResponse.getId());
                 }
             }
         }
@@ -107,12 +109,8 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
         // path in the forward and backward direction.
         response.setOutboundHopCount(response.getInboundHopCount());
 
-        ResponseEntry entry =
-                overlay.getResponseEntries().get(response.getId());
-
-        synchronized (entry) {
-            entry.notifyAll();
-        }
+        overlay.getRequestResponseManager().notifyRequester(
+                response.getId(), response.getAggregationId());
     }
 
     /**
@@ -122,14 +120,13 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
     protected void route(StructuredOverlay overlay, AnycastResponse<E> response) {
         AnycastRoutingEntry entry =
                 response.getAnycastRoutingList().removeLast();
-        response.incrementHopCount(1);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Routing response " + response.getId() + " from "
                     + overlay + " to " + entry.getPeerStub());
         }
 
-        entry.getPeerStub().route(response);
+        ((PeerInternal) entry.getPeerStub()).forward(response);
     }
 
 }

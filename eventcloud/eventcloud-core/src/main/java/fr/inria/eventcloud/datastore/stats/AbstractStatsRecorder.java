@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -203,7 +204,11 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
         public BackgroundRecorder(int nbThreads) {
             this.futures = new ConcurrentLinkedQueue<ListenableFuture<?>>();
             this.threadPool =
-                    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nbThreads));
+                    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(
+                            nbThreads,
+                            new ThreadFactoryBuilder().setNameFormat(
+                                    this.getClass().getSimpleName()
+                                            + "-pool-thread-%d").build()));
         }
 
         @Override

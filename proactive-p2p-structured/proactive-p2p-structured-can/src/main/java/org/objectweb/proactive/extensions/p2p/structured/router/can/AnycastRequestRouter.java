@@ -29,6 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestResponseManager;
@@ -64,7 +65,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
 
     /**
      * This method is called just before the next routing step when the request
-     * reach a peer which validates the routing constraints. By default the
+     * reach a peer which validates all the routing constraints. By default the
      * implementation is empty. This method must be overridden if necessary.
      * 
      * @param overlay
@@ -118,12 +119,10 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             }
             if (request.getResponseProvider() != null) {
                 // send back an empty response
-                request.getAnycastRoutingList()
+                ((PeerInternal) request.getAnycastRoutingList()
                         .removeLast()
-                        .getPeerStub()
-                        .route(
-                                request.getResponseProvider().get(
-                                        request, overlay));
+                        .getPeerStub()).forward(request.getResponseProvider()
+                        .get(request, overlay));
             }
         } else {
             // the current overlay validates the constraints
@@ -171,12 +170,11 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
-                overlay.getResponseEntries().put(
-                        request.getId(), new ResponseEntry(1));
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
-                response.incrementHopCount(1);
                 response.route(overlay);
             }
         } else {
@@ -193,9 +191,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
-                    response.incrementHopCount(1);
-                    overlay.getResponseEntries().put(
-                            response.getId(), new ResponseEntry(1));
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, new ResponseEntry(1));
                     response.route(overlay);
                 }
             }
@@ -214,10 +211,11 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                         new ResponseEntry(neighborsToSendTo.size());
 
                 if (request.getResponseProvider() != null) {
-                    overlay.getResponseEntries().put(request.getId(), entry);
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, entry);
 
-                    // constructs the routing list used by responses for routing
-                    // back
+                    // constructs the routing list used for routing back the
+                    // responses
                     request.getAnycastRoutingList().add(
                             new AnycastRoutingEntry(
                                     overlay.getId(), overlay.getStub()));
@@ -236,7 +234,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                                         + request.getId() + " from " + overlay
                                         + " -> " + p);
                             }
-                            p.route(request);
+                            ((PeerInternal) p).forward(request);
                         }
                     }
                 }
@@ -319,8 +317,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
 
         if (neighborChosen == null) {
             if (request.getResponseProvider() != null) {
-                overlay.getResponseEntries().put(
-                        request.getId(), new ResponseEntry(1));
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
                 request.getResponseProvider().get(request, overlay).route(
                         overlayCAN);
             }
@@ -342,15 +340,15 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
         // sends the message to it
         try {
             if (request.getResponseProvider() != null) {
-                overlay.getResponseEntries().put(
-                        request.getId(), new ResponseEntry(1));
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
 
                 request.getAnycastRoutingList().add(
                         new AnycastRoutingEntry(
                                 overlay.getId(), overlay.getStub()));
             }
 
-            neighborChosen.getStub().route(request);
+            ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
             logger.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());

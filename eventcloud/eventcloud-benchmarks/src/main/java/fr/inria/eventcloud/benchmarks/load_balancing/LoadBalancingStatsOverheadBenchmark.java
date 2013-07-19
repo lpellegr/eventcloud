@@ -52,7 +52,7 @@ import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
-import fr.inria.eventcloud.messages.request.can.AddQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.AddQuadrupleRequest;
 import fr.inria.eventcloud.utils.RDFReader;
 
 /**

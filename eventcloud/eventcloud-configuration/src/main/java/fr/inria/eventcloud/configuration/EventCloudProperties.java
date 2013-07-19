@@ -349,6 +349,15 @@ public class EventCloudProperties {
                     "eventcloud.subscriber.cache.max.entries", 200000);
 
     /**
+     * Defines the cache engine used by subscribers to prevent duplicates with
+     * some publish/subscribe algorithms. The values allowed are {@code ehcache}
+     * and {@code infinispan}. The last is the default one.
+     */
+    public static final PropertyString SUBSCRIBER_CACHE_ENGINE =
+            new PropertyString(
+                    "eventcloud.subscriber.cache.engine", "infinispan");
+
+    /**
      * Defines whether JMX statistics must be exposed or not.
      */
     public static final PropertyBoolean EXPOSE_JMX_STATISTICS =
@@ -367,7 +376,7 @@ public class EventCloudProperties {
      * Defines the hard limit used by each publish proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_HARD_LIMIT_PUBLISH_PROXIES =
+    public static final PropertyInteger MAO_SOFT_LIMIT_PUBLISH_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.hard.limit.publish.proxies",
                     Runtime.getRuntime().availableProcessors() + 1);
@@ -376,7 +385,7 @@ public class EventCloudProperties {
      * Defines the hard limit used by each putget proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_HARD_LIMIT_PUTGET_PROXIES =
+    public static final PropertyInteger MAO_SOFT_LIMIT_PUTGET_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.hard.limit.putget.proxies",
                     Runtime.getRuntime().availableProcessors() + 1);
@@ -385,7 +394,7 @@ public class EventCloudProperties {
      * Defines the hard limit used by each subscribe proxy that runs with multi
      * active serving.
      */
-    public static final PropertyInteger MAO_HARD_LIMIT_SUBSCRIBE_PROXIES =
+    public static final PropertyInteger MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.hard.limit.subscribe.proxies",
                     Runtime.getRuntime().availableProcessors() * 4);

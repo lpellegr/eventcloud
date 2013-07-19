@@ -20,8 +20,10 @@ import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -59,8 +61,8 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
     @Override
     public void makeDecision(StructuredOverlay overlay, T request) {
         if (request.getHopCount() == 0 && request.getResponseProvider() != null) {
-            overlay.getResponseEntries().put(
-                    request.getId(), new ResponseEntry(1));
+            overlay.getRequestResponseManager().putResponseEntry(
+                    request, new ResponseEntry(1));
         }
 
         if (request.validatesKeyConstraints(overlay)) {
@@ -75,16 +77,12 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
      */
     @Override
     protected void handle(StructuredOverlay overlay, T request) {
-        if (log.isDebugEnabled()) {
-            log.debug("Peer " + overlay + " validates the contraints "
-                    + request.getKey() + " specified by request "
-                    + request.getId());
-        }
-
         this.onDestinationReached(overlay, request);
 
         if (request.getResponseProvider() != null) {
-            request.getResponseProvider().get(request, overlay).route(overlay);
+            Response<Coordinate<E>> response =
+                    request.getResponseProvider().get(request, overlay);
+            response.route(overlay);
         }
     }
 
@@ -94,7 +92,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
     @Override
     @SuppressWarnings("unchecked")
     protected void route(StructuredOverlay overlay, T request) {
-        CanOverlay<E> overlayCAN = ((CanOverlay<E>) overlay);
+        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -102,7 +100,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
-                    overlayCAN.getZone().contains(
+                    canOverlay.getZone().contains(
                             dimension, request.getKey().getElement(dimension));
 
             if (direction == -1) {
@@ -122,15 +120,16 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         // selects one neighbor in the dimension and the direction previously
         // affected
         NeighborEntry<E> neighborChosen =
-                overlayCAN.nearestNeighbor(
+                canOverlay.nearestNeighbor(
                         request.getKey(), dimension, direction);
 
         if (neighborChosen == null) {
             if (request.getResponseProvider() != null) {
-                overlay.getResponseEntries().put(
-                        request.getId(), new ResponseEntry(1));
-                request.getResponseProvider().get(request, overlay).route(
-                        overlayCAN);
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
+                Response<Coordinate<E>> response =
+                        request.getResponseProvider().get(request, overlay);
+                response.route(canOverlay);
             }
 
             log.warn(
@@ -152,12 +151,12 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         }
 
         try {
-            request.incrementHopCount(1);
-            neighborChosen.getStub().route(request);
+            ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
             log.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }
     }
+
 }

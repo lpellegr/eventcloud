@@ -21,7 +21,7 @@ import java.util.List;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.benchmarks.pubsub.StorageTimes;
-import fr.inria.eventcloud.messages.response.can.StatefulQuadruplePatternResponse;
+import fr.inria.eventcloud.messages.response.StatefulQuadruplePatternResponse;
 
 /**
  * Response associated to {@link RetrieveStorageEndTimesRequest}.

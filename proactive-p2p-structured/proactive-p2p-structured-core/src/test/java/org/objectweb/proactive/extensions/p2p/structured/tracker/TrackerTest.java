@@ -102,7 +102,7 @@ public class TrackerTest implements Serializable {
     public static class MockOverlay extends StructuredOverlay {
 
         public MockOverlay() {
-            super(new RequestResponseManager() {
+            super(new RequestResponseManager(16) {
                 private static final long serialVersionUID = 150L;
             });
         }

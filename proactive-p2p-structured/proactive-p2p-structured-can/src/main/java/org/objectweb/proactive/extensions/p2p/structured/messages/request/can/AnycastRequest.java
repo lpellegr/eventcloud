@@ -20,11 +20,11 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRouting
 import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
@@ -48,14 +48,14 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
-     * {@link ResponseProvider}. This means that this request is not supposed to
+     * {@link ResponseProvider}. It means that this request is not supposed to
      * sent back a response.
      * 
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
     public AnycastRequest(AnycastConstraintsValidator<E> validator) {
-        super(validator, null);
+        super(validator);
     }
 
     /**

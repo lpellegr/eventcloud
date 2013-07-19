@@ -27,6 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInterface;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -125,7 +126,8 @@ public final class PeerFactory extends AbstractFactory {
             Peer peer =
                     ComponentUtils.createComponentAndGetInterface(
                             PeerImpl.PEER_ADL, context,
-                            PeerImpl.PEER_SERVICES_ITF, Peer.class, true);
+                            PeerImpl.PEER_SERVICES_ITF, PeerInterface.class,
+                            true);
 
             ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
                     peer, overlayProvider);

@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -66,11 +67,12 @@ public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends 
      */
     @Override
     protected void handle(StructuredOverlay overlay, T response) {
-        logger.debug(
-                "The peer {} contains the key to reach {}", overlay,
-                response.getKey());
+        overlay.getRequestResponseManager()
+                .getResponseEntry(response.getId())
+                .setResponse(response);
 
-        overlay.getRequestResponseManager().pushFinalResponse(response);
+        overlay.getRequestResponseManager().notifyRequester(
+                response.getId(), response.getAggregationId());
     }
 
     /**
@@ -79,7 +81,7 @@ public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends 
     @Override
     @SuppressWarnings("unchecked")
     protected void route(StructuredOverlay overlay, T response) {
-        CanOverlay<E> overlayCAN = ((CanOverlay<E>) overlay);
+        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
 
         byte dimension = 0;
         byte direction = NeighborTable.DIRECTION_ANY;
@@ -87,7 +89,7 @@ public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends 
         // finds the dimension on which the key to reach is not contained
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
-                    overlayCAN.getZone().contains(
+                    canOverlay.getZone().contains(
                             dimension, response.getKey().getElement(dimension));
 
             if (direction == -1) {
@@ -102,7 +104,7 @@ public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends 
         // selects one neighbor in the dimension and the direction previously
         // affected
         NeighborEntry<E> neighborChosen =
-                overlayCAN.nearestNeighbor(
+                canOverlay.nearestNeighbor(
                         response.getKey(), dimension, direction);
 
         if (logger.isDebugEnabled()) {
@@ -118,8 +120,7 @@ public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends 
 
         // sends the message to it
         try {
-            response.incrementHopCount(1);
-            neighborChosen.getStub().route(response);
+            ((PeerInternal) neighborChosen.getStub()).forward(response);
         } catch (ProActiveRuntimeException e) {
             logger.error(
                     "Error while sending the message to the neighbor managing {}",

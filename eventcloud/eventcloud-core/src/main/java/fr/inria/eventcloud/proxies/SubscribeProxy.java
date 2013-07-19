@@ -18,6 +18,8 @@ package fr.inria.eventcloud.proxies;
 
 import java.io.Serializable;
 
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
+
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.CompoundEvent;

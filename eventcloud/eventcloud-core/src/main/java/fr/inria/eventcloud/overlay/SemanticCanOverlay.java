@@ -53,6 +53,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -198,7 +199,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
             this.ephemeralSubscriptionsGarbageColletor =
-                    Executors.newSingleThreadScheduledExecutor();
+                    Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(
+                            "EphemeralSubscriptionsGC")
+                            .build());
             this.ephemeralSubscriptionsGarbageColletor.scheduleWithFixedDelay(
                     new Runnable() {
                         @Override

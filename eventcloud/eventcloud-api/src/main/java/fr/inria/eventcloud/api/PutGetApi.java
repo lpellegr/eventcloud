@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.api;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -72,8 +73,9 @@ public interface PutGetApi {
      * @param format
      *            the format that is used to read the data from the input
      *            stream.
+     * @throws IOException
      */
-    public boolean add(URL url, SerializationFormat format);
+    public void add(URL url, SerializationFormat format) throws IOException;
 
     /**
      * Indicates whether the specified quadruples is contained by the

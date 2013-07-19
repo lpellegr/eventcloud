@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
@@ -42,6 +43,13 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     protected MessageId id;
 
     /**
+     * Identifier used to combine several requests as one. This id identifier is
+     * set and used when a set of requests are dispatched together with a call
+     * from {@link Proxy#send(java.util.List, Serializable, ResponseCombiner)}
+     */
+    protected MessageId aggregationId;
+
+    /**
      * Constraints validator used to make the routing decision possible.
      */
     protected transient ConstraintsValidator<K> constraintsValidator;
@@ -49,7 +57,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     /**
      * The number of hops between the source and the destination of the message.
      */
-    private int hopCount = 0;
+    protected int hopCount = 0;
 
     /**
      * Constructs a new RequestResponseMessage with the specified
@@ -85,6 +93,10 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      */
     public MessageId getId() {
         return this.id;
+    }
+
+    public MessageId getAggregationId() {
+        return this.aggregationId;
     }
 
     /**
@@ -125,6 +137,14 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
     @Override
     @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
+        // this condition is useful to set an id to requests that are routed
+        // directly without passing by a proxy. Requests allowed to bypass
+        // proxies are those for which no response is sent back. However, to do
+        // so is risked and we suppose that users know what they are doing.
+        if (this.id == null) {
+            this.id = overlay.newMessageId();
+        }
+
         ((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(
                 overlay, this);
     }

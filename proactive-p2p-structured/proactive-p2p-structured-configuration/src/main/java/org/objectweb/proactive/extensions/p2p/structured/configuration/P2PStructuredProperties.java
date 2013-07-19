@@ -95,7 +95,7 @@ public class P2PStructuredProperties {
             new PropertyString("can.element.display", "codepoints");
 
     /**
-     * Defines the soft limit used by each peer that runs with multi active
+     * Defines the soft limit used by each peer that runs with multiactive
      * serving.
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_PEERS =
@@ -103,7 +103,15 @@ public class P2PStructuredProperties {
                     .availableProcessors() + 1);
 
     /**
-     * Defines the soft limit used by each tracker that runs with multi active
+     * Defines the soft limit used by each proxy that runs with multiactive
+     * serving.
+     */
+    public static final PropertyInteger MAO_SOFT_LIMIT_PROXIES =
+            new PropertyInteger("mao.soft.limit.proxies", Runtime.getRuntime()
+                    .availableProcessors() + 1);
+
+    /**
+     * Defines the soft limit used by each tracker that runs with multiactive
      * serving.
      */
     public static final PropertyInteger MAO_SOFT_LIMIT_TRACKERS =

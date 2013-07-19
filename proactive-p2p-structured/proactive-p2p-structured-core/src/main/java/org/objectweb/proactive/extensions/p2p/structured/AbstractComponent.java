@@ -76,6 +76,13 @@ public abstract class AbstractComponent implements ComponentInitActive,
      */
     @Override
     public void initComponentActivity(Body body) {
+        // FIXME: to avoid some deadlock with components the method
+        // setImmediateServices has to be handled in immediate services. This
+        // configuration should be done in the ProActive source code.
+        body.setImmediateService("setImmediateServices", false);
+        body.setImmediateService("setAttributes", false);
+        // body.setImmediateService("unExposeComponentAsWebService", false);
+
         this.loadLogbackConfigurationFromIS();
         this.loadLog4jConfigurationFromIS();
         this.loadConfigurationFromIS();

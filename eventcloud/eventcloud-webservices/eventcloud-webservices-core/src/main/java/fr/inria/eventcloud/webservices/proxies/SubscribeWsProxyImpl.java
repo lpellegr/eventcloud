@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.webservices.proxies;
 
+import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
@@ -59,6 +61,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String subscribeSignal(String sparqlQuery,
                                   String subscriberWsEndpointUrl) {
         Subscription subscription = new Subscription(sparqlQuery);
@@ -73,6 +76,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String subscribeBinding(String sparqlQuery,
                                    String subscriberWsEndpointUrl) {
         Subscription subscription = new Subscription(sparqlQuery);
@@ -87,6 +91,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public String subscribeCompoundEvent(String sparqlQuery,
                                          String subscriberWsEndpointUrl) {
 
@@ -102,6 +107,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("parallel")
     public void unsubscribe(String id) {
         this.unsubscribe(SubscriptionId.parseSubscriptionId(id));
     }

@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.can;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymen
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -39,9 +37,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
@@ -56,8 +53,6 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAn
 public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static final int NB_PEERS = 10;
-
-    private Proxy proxy;
 
     public AnycastLookupRequestTest() {
         super(
@@ -76,8 +71,6 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     @Override
     public void setUp() {
         super.setUp();
-
-        this.proxy = Proxies.newProxy(super.getRandomTracker());
     }
 
     @Test
@@ -88,10 +81,12 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                                 Character.toChars(P2PStructuredProperties.CAN_UPPER_BOUND.getValue() - 1)));
 
         GetZonesValidatingConstraintsResponse response =
-                (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(this.proxy.send(
-                        new GetZonesValidatingConstraintsRequest(
-                                new Coordinate<StringElement>(null, elt, null)),
-                        super.getPeer(0)));
+                (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(super.getProxy()
+                        .send(
+                                new GetZonesValidatingConstraintsRequest(
+                                        new Coordinate<StringElement>(
+                                                null, elt, null)),
+                                super.getPeer(0)));
 
         checkResponse(response);
 
@@ -103,13 +98,14 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testAnycastRequestWithoutResponse() throws InterruptedException {
-        this.proxy.sendv(new SetValuesRequest());
+        super.getProxy().sendv(new SetValuesRequest());
 
         // sleep because the previous call is supposed to be asynchronous
         Thread.sleep(1000);
 
         GetValuesResponse response =
-                (GetValuesResponse) PAFuture.getFutureValue(this.proxy.send(new GetValuesRequest()));
+                (GetValuesResponse) PAFuture.getFutureValue(super.getProxy()
+                        .send(new GetValuesRequest()));
 
         checkResponse(response);
 
@@ -123,12 +119,6 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     @Override
     public void tearDown() {
         super.tearDown();
-
-        try {
-            this.proxy.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private static class CustomCanOverlay extends StringCanOverlay {
@@ -187,7 +177,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         private List<Boolean> result = new ArrayList<Boolean>();
 
         @Override
-        public void synchronizationPointUnlocked(StructuredOverlay overlay) {
+        public void beforeSendingBackResponse(StructuredOverlay overlay) {
             if (this.validatesKeyConstraints(overlay)) {
                 this.result.add(((CustomCanOverlay) overlay).value);
             }
@@ -235,7 +225,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                 new ArrayList<Zone<StringElement>>();
 
         @Override
-        public void synchronizationPointUnlocked(StructuredOverlay overlay) {
+        public void beforeSendingBackResponse(StructuredOverlay overlay) {
             if (this.validatesKeyConstraints(overlay)) {
                 this.zonesValidatingConstraints.add(((StringCanOverlay) overlay).getZone());
             }

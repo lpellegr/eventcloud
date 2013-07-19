@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages;
 
+import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -48,9 +49,23 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
     /**
      * Timestamp of the creation of the message.
      */
-    private long dispatchTimestamp;
+    protected long dispatchTimestamp;
 
-    private ResponseProvider<? extends Response<K>, K> responseProvider;
+    protected ResponseProvider<? extends Response<K>, K> responseProvider;
+
+    // initial requester
+    protected FinalResponseReceiver responseDestination;
+
+    /**
+     * Constructs a new request with the specified {@code validator}. The
+     * request is assumed to generate no response (no final destination or
+     * response provider if specified).
+     * 
+     * @param validator
+     */
+    public Request(ConstraintsValidator<K> validator) {
+        this(validator, null);
+    }
 
     /**
      * Constructs a new request with the specified {@code validator} and
@@ -87,6 +102,15 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
 
         this.dispatchTimestamp = dispatchTimestamp;
         this.responseProvider = responseProvider;
+    }
+
+    /**
+     * Returns a remote reference to the final receiver.
+     * 
+     * @return the remote reference to the final receiver.
+     */
+    public FinalResponseReceiver getResponseDestination() {
+        return this.responseDestination;
     }
 
     /**

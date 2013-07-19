@@ -54,10 +54,10 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
                         NodeFactory.createURI("http://www.namespace.org/predicate_abcde"),
                         NodeFactory.createLiteral("abcde"));
         quadruples.add(quadruple);
-        super.getRandomSemanticPeer().add(quadruple);
+        super.getPutGetProxy().add(quadruple);
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o FILTER (?o <= \"zzzzz\")} }")
                         .getResult();
@@ -96,10 +96,10 @@ public class FilterValidatorTest extends JunitByClassEventCloudDeployer {
                         NodeFactory.createURI("http://www.namespace.org/predicate_abcde"),
                         NodeFactory.createURI("http://www.namespace.org/abcde"));
         quadruples.add(quadruple);
-        super.getRandomSemanticPeer().add(quadruple);
+        super.getPutGetProxy().add(quadruple);
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o FILTER (str(?o) <= \"http://www.namespace.org/zzzzz\")} }")
                         .getResult();

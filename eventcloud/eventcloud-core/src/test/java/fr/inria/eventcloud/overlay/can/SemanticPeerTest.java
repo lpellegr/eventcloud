@@ -37,19 +37,14 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
-import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -74,11 +69,11 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         List<Quadruple> quadruplesFound =
-                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
+                super.getPutGetProxy().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
@@ -95,10 +90,10 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             quadruples.add(QuadrupleGenerator.random());
         }
 
-        super.getRandomSemanticPeer().add(quadruples);
+        super.getPutGetProxy().add(quadruples);
 
         List<Quadruple> quadruplesFound =
-                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
+                super.getPutGetProxy().find(QuadruplePattern.ANY);
 
         for (Quadruple quad : quadruplesFound) {
             Assert.assertTrue(quadruples.contains(quad));
@@ -110,44 +105,44 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testContainsQuadruple() {
         Quadruple quadToCheck = QuadrupleGenerator.random();
-        Assert.assertFalse(super.getRandomSemanticPeer().contains(quadToCheck));
+        Assert.assertFalse(super.getPutGetProxy().contains(quadToCheck));
 
-        super.getRandomSemanticPeer().add(quadToCheck);
-        Assert.assertTrue(super.getRandomSemanticPeer().contains(quadToCheck));
+        super.getPutGetProxy().add(quadToCheck);
+        Assert.assertTrue(super.getPutGetProxy().contains(quadToCheck));
     }
 
     @Test
     public void testCountQuadruplePattern() {
-        Assert.assertEquals(0, super.getRandomSemanticPeer().count(
+        Assert.assertEquals(0, super.getPutGetProxy().count(
                 QuadruplePattern.ANY));
 
         for (int i = 0; i < 10; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+            super.getPutGetProxy().add(QuadrupleGenerator.random());
         }
 
-        Assert.assertEquals(10, super.getRandomSemanticPeer().count(
+        Assert.assertEquals(10, super.getPutGetProxy().count(
                 QuadruplePattern.ANY));
 
         Node graph = NodeFactory.createURI("http://example.org/graph");
         for (int i = 0; i < 5; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random(graph));
+            super.getPutGetProxy().add(QuadrupleGenerator.random(graph));
         }
 
-        Assert.assertEquals(5, super.getRandomSemanticPeer().count(
+        Assert.assertEquals(5, super.getPutGetProxy().count(
                 new QuadruplePattern(graph, Node.ANY, Node.ANY, Node.ANY)));
 
-        Assert.assertEquals(15, super.getRandomSemanticPeer().count(
+        Assert.assertEquals(15, super.getPutGetProxy().count(
                 QuadruplePattern.ANY));
     }
 
     @Test
     public void testDeleteQuadruple() {
         Quadruple quad = QuadrupleGenerator.random();
-        super.getRandomSemanticPeer().add(quad);
-        Assert.assertTrue(super.getRandomSemanticPeer().contains(quad));
+        super.getPutGetProxy().add(quad);
+        Assert.assertTrue(super.getPutGetProxy().contains(quad));
 
-        super.getRandomSemanticPeer().delete(quad);
-        Assert.assertFalse(super.getRandomSemanticPeer().contains(quad));
+        super.getPutGetProxy().delete(quad);
+        Assert.assertFalse(super.getPutGetProxy().contains(quad));
     }
 
     @Test
@@ -158,11 +153,11 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
             quadruples.add(QuadrupleGenerator.random());
         }
 
-        super.getRandomSemanticPeer().delete(
-                new ArrayList<Quadruple>(quadruples));
+        super.getPutGetProxy().delete(new ArrayList<Quadruple>(quadruples));
 
-        Assert.assertEquals(0, super.getRandomSemanticPeer().find(
-                QuadruplePattern.ANY).size());
+        Assert.assertEquals(0, super.getPutGetProxy()
+                .find(QuadruplePattern.ANY)
+                .size());
     }
 
     @Test
@@ -179,18 +174,18 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 quadruple = QuadrupleGenerator.random();
             }
             quadruples.add(quadruple);
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         List<Quadruple> quadruplesRemoved =
-                super.getRandomSemanticPeer().delete(
+                super.getPutGetProxy().delete(
                         new QuadruplePattern(
                                 graphValue, Node.ANY, Node.ANY, Node.ANY));
 
         quadruplesRemoved = PAFuture.getFutureValue(quadruplesRemoved);
 
         List<Quadruple> quadruplesFound =
-                super.getRandomSemanticPeer().find(QuadruplePattern.ANY);
+                super.getPutGetProxy().find(QuadruplePattern.ANY);
 
         Assert.assertEquals(80, quadruplesFound.size());
 
@@ -213,21 +208,21 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
     @Test
     public void testExecuteSparqlAsk() throws MalformedSparqlQueryException {
-        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Quadruple quad =
                 QuadrupleGenerator.random(NodeFactory.createURI("http://sparql.org"));
-        super.getRandomSemanticPeer().add(quad);
+        super.getPutGetProxy().add(quad);
 
-        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
-        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?g { <" + quad.getSubject().toString()
                         + "> ?p ?o } }").getResult());
 
-        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH <http://sparql.com> { ?s ?p ?o } }").getResult());
     }
 
@@ -240,12 +235,12 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         Assert.assertEquals(
                 100,
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlConstruct(
                                 "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult()
@@ -260,11 +255,11 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         for (int i = 0; i < 100; i++) {
             quadruple = QuadrupleGenerator.random();
             quadruples.add(quadruple);
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult();
@@ -294,11 +289,11 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testExecuteSparqlSelect2() throws MalformedSparqlQueryException {
         for (int i = 0; i < 100; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+            super.getPutGetProxy().add(QuadrupleGenerator.random());
         }
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10")
                         .getResult();
@@ -310,23 +305,12 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     public void testExecuteSparqlSelect3()
             throws MalformedSparqlQueryException, ProActiveException,
             EventCloudIdNotManaged {
-        EventCloudsRegistry registry =
-                EventCloudsRegistryFactory.newEventCloudsRegistry();
-        EventCloudDeployer deployer = (EventCloudDeployer) super.deployer;
-        String registryUrl = registry.register("registry");
-        registry.register(deployer);
-
-        PublishApi publishProxy =
-                ProxyFactory.newPublishProxy(
-                        registryUrl, deployer.getEventCloudDescription()
-                                .getId());
-
         for (int i = 0; i < 10; i++) {
-            publishProxy.publish(QuadrupleGenerator.random());
+            super.getPublishProxy().publish(QuadrupleGenerator.random());
         }
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT ?g { GRAPH ?g { ?s ?p ?o } }")
                         .getResult();
@@ -338,7 +322,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
 
         resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "PREFIX eventcloud: <http://eventcloud.inria.fr/function#> SELECT ?shortGraph { GRAPH ?g { ?s ?p ?o . BIND(eventcloud:removeMetadata(?g) AS ?shortGraph) } }")
                         .getResult();
@@ -355,16 +339,16 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testExecuteSparqlSelect4() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
-            super.getRandomSemanticPeer().add(QuadrupleGenerator.random());
+            super.getPutGetProxy().add(QuadrupleGenerator.random());
         }
 
         Quadruple quadruple = QuadrupleGenerator.random();
         for (int i = 0; i < 5; i++) {
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT DISTINCT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } LIMIT 10")
                         .getResult();
@@ -375,17 +359,16 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testExecuteSparqlSelect5() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
-            super.getRandomSemanticPeer().add(
-                    QuadrupleGenerator.randomWithLiteral());
+            super.getPutGetProxy().add(QuadrupleGenerator.randomWithLiteral());
         }
 
         Quadruple quadruple = QuadrupleGenerator.randomWithLiteral();
         for (int i = 0; i < 5; i++) {
-            super.getRandomSemanticPeer().add(quadruple);
+            super.getPutGetProxy().add(quadruple);
         }
 
         ResultSet resultSet =
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlSelect(
                                 "SELECT DISTINCT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } } ORDER BY DESC(?o) LIMIT 10")
                         .getResult();
@@ -412,18 +395,18 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     @Test
     public void testExecuteSparqlWithEmptyNetwork()
             throws MalformedSparqlQueryException {
-        Assert.assertFalse(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertFalse(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
 
         Assert.assertEquals(
                 0,
-                super.getRandomSemanticPeer()
+                super.getPutGetProxy()
                         .executeSparqlConstruct(
                                 "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }")
                         .getResult()
                         .size());
 
-        Assert.assertFalse(super.getRandomSemanticPeer()
+        Assert.assertFalse(super.getPutGetProxy()
                 .executeSparqlSelect(
                         "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }")
                 .getResult()
@@ -452,25 +435,22 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         QuadrupleGenerator.random()};
 
         for (Quadruple quad : quads) {
-            super.getRandomSemanticPeer().add(quad);
+            super.getPutGetProxy().add(quad);
         }
 
         // test with ask query form
-        Assert.assertTrue(super.getRandomSemanticPeer().executeSparqlAsk(
+        Assert.assertTrue(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?a { ?b ?c <" + commonURI.toString() + "> . <"
                         + commonURI.toString() + "> ?e ?f } }").getResult());
 
         // test with construct query form
-        Assert.assertEquals(2, super.getRandomSemanticPeer()
-                .executeSparqlConstruct(
-                        "CONSTRUCT { ?a ?b ?c . ?a ?d ?e } WHERE { GRAPH ?a { ?b ?c <"
-                                + commonURI.toString() + "> . <"
-                                + commonURI.toString() + "> ?d ?e } }")
-                .getResult()
-                .size());
+        Assert.assertEquals(2, super.getPutGetProxy().executeSparqlConstruct(
+                "CONSTRUCT { ?a ?b ?c . ?a ?d ?e } WHERE { GRAPH ?a { ?b ?c <"
+                        + commonURI.toString() + "> . <" + commonURI.toString()
+                        + "> ?d ?e } }").getResult().size());
 
         // test with select query form
-        Assert.assertTrue(super.getRandomSemanticPeer()
+        Assert.assertTrue(super.getPutGetProxy()
                 .executeSparqlSelect(
                         "SELECT ?a WHERE { GRAPH ?a { ?b ?c <"
                                 + commonURI.toString() + "> . <"
@@ -483,7 +463,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     public void testMeasurementsReturnedBySparqlQuery()
             throws MalformedSparqlQueryException {
         SparqlAskResponse response =
-                super.getRandomSemanticPeer().executeSparqlAsk(
+                super.getPutGetProxy().executeSparqlAsk(
                         "ASK { GRAPH ?g { ?s ?p ?o } }");
 
         log.debug(

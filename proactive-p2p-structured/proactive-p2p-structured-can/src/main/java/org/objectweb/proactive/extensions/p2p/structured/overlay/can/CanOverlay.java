@@ -47,6 +47,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNe
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -739,8 +740,10 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         // TODO: share with all reassignmentNeighbors
         if (pendingRequests.size() > 0) {
-            reassignmentNeighbors.values().iterator().next().getStub().inject(
-                    pendingRequests);
+            ((PeerInternal) reassignmentNeighbors.values()
+                    .iterator()
+                    .next()
+                    .getStub()).inject(pendingRequests);
         }
 
         // // restarts the component activity to handle new join or create

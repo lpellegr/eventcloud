@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 
@@ -129,7 +130,11 @@ public class PubSubBenchmarkBSBM {
         this.datastoreType = type;
         this.receiveExpectedEventsStopwatch = new Stopwatch();
         this.threadPool =
-                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
+                Executors.newFixedThreadPool(
+                        SystemUtils.getOptimalNumberOfThreads(),
+                        new ThreadFactoryBuilder().setNameFormat(
+                                this.getClass().getSimpleName()
+                                        + "-pool-thread-%d").build());
         P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.setValue(true);
     }
 

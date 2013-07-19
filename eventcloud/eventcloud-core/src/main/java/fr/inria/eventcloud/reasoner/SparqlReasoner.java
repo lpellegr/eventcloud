@@ -23,7 +23,7 @@ import com.google.common.collect.FluentIterable;
 
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
 import fr.inria.eventcloud.exceptions.DecompositionException;
-import fr.inria.eventcloud.messages.request.can.SparqlAtomicRequest;
+import fr.inria.eventcloud.messages.request.SparqlAtomicRequest;
 
 /**
  * The aim of this SPARQL reasoner is to decompose a SPARQL query into several
