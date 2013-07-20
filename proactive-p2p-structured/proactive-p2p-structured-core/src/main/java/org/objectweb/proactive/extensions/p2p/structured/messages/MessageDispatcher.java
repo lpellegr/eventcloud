@@ -26,6 +26,7 @@ import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class MessageDispatcher {
      */
     public Response<?> dispatch(Request<?> request, Peer peer) {
         request.id = this.newMessageId();
-        request.responseDestination = this.receiverStub;
+        request.responseDestination = SerializedValue.create(this.receiverStub);
 
         this.entries.put(request.id, new Entry());
         peer.route(request);
@@ -111,6 +112,8 @@ public class MessageDispatcher {
         for (Request<?> request : requests) {
             request.id = this.newMessageId();
             request.aggregationId = aggregationId;
+            request.responseDestination =
+                    SerializedValue.create(this.receiverStub);
         }
 
         this.entries.put(aggregationId, new Entry());

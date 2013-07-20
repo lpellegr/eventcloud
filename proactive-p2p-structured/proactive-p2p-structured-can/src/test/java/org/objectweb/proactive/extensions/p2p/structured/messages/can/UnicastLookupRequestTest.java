@@ -192,9 +192,9 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static <T> void checkResponse(LookupResponse<StringElement> response,
                                           Peer target) {
-        Assert.assertTrue(response.getLatency() > 0);
-        Assert.assertTrue(response.getHopCount() > 0);
-        Assert.assertTrue(response.getInboundHopCount() > 0);
+        Assert.assertTrue(response.getLatency() >= 0);
+        Assert.assertTrue(response.getHopCount() >= 0);
+        Assert.assertTrue(response.getInboundHopCount() >= 0);
         Assert.assertTrue(response.getOutboundHopCount() > 0);
 
         Assert.assertEquals(target, response.getPeerFound());

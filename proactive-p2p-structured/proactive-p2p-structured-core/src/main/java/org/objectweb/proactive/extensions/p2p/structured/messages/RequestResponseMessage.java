@@ -24,6 +24,7 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -53,6 +54,11 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * Constraints validator used to make the routing decision possible.
      */
     protected transient ConstraintsValidator<K> constraintsValidator;
+
+    /**
+     * Reference to the requester that has to receive the final response.
+     */
+    protected SerializedValue<FinalResponseReceiver> responseDestination;
 
     /**
      * The number of hops between the source and the destination of the message.
@@ -85,6 +91,15 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * @return the timestamp of the creation of the message.
      */
     public abstract long getDispatchTimestamp();
+
+    /**
+     * Returns a reference to the requester.
+     * 
+     * @return the reference to the requester of the request.
+     */
+    public FinalResponseReceiver getResponseDestination() {
+        return this.responseDestination.getValue();
+    }
 
     /**
      * Returns the universally unique identifier which identifies the message.
@@ -182,9 +197,10 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      */
     @Override
     public String toString() {
-        return "RequestResponseMessage [id=" + this.id
-                + ", constraintsValidator=" + this.constraintsValidator
-                + ", hopCount=" + this.hopCount + "]";
+        return "RequestResponseMessage[id=" + this.id + ", aggregationId="
+                + this.aggregationId + ", constraintsValidator="
+                + this.constraintsValidator + ", hopCount=" + this.hopCount
+                + "]";
     }
 
     private void readObject(ObjectInputStream stream) throws IOException,

@@ -60,6 +60,12 @@ public abstract class RequestResponseManager implements Serializable {
         return this.responseTable.remove(responseId).responseEntry;
     }
 
+    public static void notifyRequester(Response<?> response) {
+        response.setDeliveryTime();
+        response.getResponseDestination().receive(
+                new FinalResponse(response.getId(), response));
+    }
+
     public void notifyRequester(MessageId responseId, MessageId aggregationId) {
         ResponseTable.Entry entry = this.responseTable.remove(responseId);
 
