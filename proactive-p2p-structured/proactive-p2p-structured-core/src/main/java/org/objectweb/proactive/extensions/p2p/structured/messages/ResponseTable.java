@@ -30,19 +30,20 @@ public class ResponseTable {
     public ResponseEntry put(Request<?> request, ResponseEntry responseEntry) {
         Entry result =
                 this.entries.put(request.id, new Entry(
-                        request.responseDestination, responseEntry));
+                        request.getResponseDestination(), responseEntry));
 
         if (result != null) {
             responseEntry = result.responseEntry;
         }
 
-        if (request.getHopCount() == 0) {
-            // does not forward requester stub since we maintain it in a table
-            // on the first peer that receive the request. However this
-            // reference should kept with the request if we care about fault
-            // tolerance
-            request.responseDestination = null;
-        }
+        // TODO remove?
+        // if (request.getHopCount() == 0) {
+        // // does not forward requester stub since we maintain it in a table
+        // // on the first peer that receive the request. However this
+        // // reference should kept with the request if we care about fault
+        // // tolerance
+        // request.responseDestination = null;
+        // }
 
         return responseEntry;
     }

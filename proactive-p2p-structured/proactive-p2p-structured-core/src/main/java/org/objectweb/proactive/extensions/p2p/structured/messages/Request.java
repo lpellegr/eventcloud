@@ -53,9 +53,6 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
 
     protected ResponseProvider<? extends Response<K>, K> responseProvider;
 
-    // initial requester
-    protected FinalResponseReceiver responseDestination;
-
     /**
      * Constructs a new request with the specified {@code validator}. The
      * request is assumed to generate no response (no final destination or
@@ -102,15 +99,6 @@ public abstract class Request<K> extends RequestResponseMessage<K> {
 
         this.dispatchTimestamp = dispatchTimestamp;
         this.responseProvider = responseProvider;
-    }
-
-    /**
-     * Returns a remote reference to the final receiver.
-     * 
-     * @return the remote reference to the final receiver.
-     */
-    public FinalResponseReceiver getResponseDestination() {
-        return this.responseDestination;
     }
 
     /**

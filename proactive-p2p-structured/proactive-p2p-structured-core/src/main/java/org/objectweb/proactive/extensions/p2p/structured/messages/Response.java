@@ -77,6 +77,7 @@ public abstract class Response<K> extends RequestResponseMessage<K> {
     public void setAttributes(Request<K> request, StructuredOverlay overlay) {
         super.id = request.id;
         super.aggregationId = request.aggregationId;
+        super.responseDestination = request.responseDestination;
         this.dispatchTimestamp = request.dispatchTimestamp;
         this.outboundHopCount = request.hopCount;
     }

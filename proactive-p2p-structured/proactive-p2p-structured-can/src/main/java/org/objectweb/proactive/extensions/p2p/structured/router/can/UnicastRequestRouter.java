@@ -21,7 +21,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -60,11 +59,6 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
      */
     @Override
     public void makeDecision(StructuredOverlay overlay, T request) {
-        if (request.getHopCount() == 0 && request.getResponseProvider() != null) {
-            overlay.getRequestResponseManager().putResponseEntry(
-                    request, new ResponseEntry(1));
-        }
-
         if (request.validatesKeyConstraints(overlay)) {
             this.handle(overlay, request);
         } else {
@@ -82,6 +76,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         if (request.getResponseProvider() != null) {
             Response<Coordinate<E>> response =
                     request.getResponseProvider().get(request, overlay);
+
             response.route(overlay);
         }
     }
@@ -125,15 +120,13 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
 
         if (neighborChosen == null) {
             if (request.getResponseProvider() != null) {
-                overlay.getRequestResponseManager().putResponseEntry(
-                        request, new ResponseEntry(1));
                 Response<Coordinate<E>> response =
                         request.getResponseProvider().get(request, overlay);
                 response.route(canOverlay);
             }
 
-            log.warn(
-                    "Trying to route a {} request but the key {} that is used "
+            log.error(
+                    "Trying to route a {} request but the key {} used "
                             + "is managed by no peer. You are probably using a key with "
                             + "values that are not between the minimum and the upper "
                             + "bound managed by the network.", this.getClass()
@@ -142,7 +135,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Message routed to a neigbour because the current peer "
+            log.debug("Request routed to a neigbour because the current peer "
                     + "managing " + overlay
                     + " does not contains the key to reach ("
                     + request.getKey()
@@ -153,7 +146,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         try {
             ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
-            log.error("Error while sending the message to the neighbor managing "
+            log.error("Error while forwarding a request to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }
