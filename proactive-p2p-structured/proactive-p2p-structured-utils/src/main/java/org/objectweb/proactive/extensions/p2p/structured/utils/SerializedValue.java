@@ -16,7 +16,10 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils;
 
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.ByteToObjectConverter;
@@ -38,7 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
  * @param <T>
  *            the value type to serialize.
  */
-public class SerializedValue<T> implements Serializable {
+public class SerializedValue<T> implements Externalizable {
 
     private static final long serialVersionUID = 150L;
 
@@ -46,11 +49,20 @@ public class SerializedValue<T> implements Serializable {
 
     private transient T value;
 
+    /**
+     * This constructor is required to work with efficient serialization through
+     * the {@link Externalizable} interface but should never be used manually.
+     * The correct manner to create an instance of this class is to use
+     * {@link #create(Object)}.
+     */
+    public SerializedValue() {
+    }
+
     protected SerializedValue(T value) {
         try {
             this.bytes = ObjectToByteConverter.convert(value);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -83,6 +95,27 @@ public class SerializedValue<T> implements Serializable {
 
     public byte[] getBytes() {
         return this.bytes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readExternal(ObjectInput in) throws IOException,
+            ClassNotFoundException {
+        int length = in.readInt();
+        byte[] content = new byte[length];
+        in.readFully(content);
+        this.bytes = content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(this.bytes.length);
+        out.write(this.bytes);
     }
 
 }
