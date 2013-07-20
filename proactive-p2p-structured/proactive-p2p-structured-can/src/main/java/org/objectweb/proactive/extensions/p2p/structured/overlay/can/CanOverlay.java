@@ -690,8 +690,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
 
         this.mutualExclusionManager.releaseCriticalSection();
 
-        // TODO: uncomment once load balancing issues fixed
-        // this.transferPendingRequests(reassignmentNeighbors);
+        this.transferPendingRequests(reassignmentNeighbors);
     }
 
     private void transferPendingRequests(ConcurrentMap<OverlayId, NeighborEntry<E>> reassignmentNeighbors) {
