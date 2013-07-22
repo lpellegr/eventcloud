@@ -19,12 +19,14 @@ package fr.inria.eventcloud.load_balancing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -391,6 +393,7 @@ public class LoadBalancingManager {
                     new ArrayList<LoadReport>(
                             LoadBalancingManager.this.loadReportsReceived.values());
 
+            // sorts the load reports by load
             Collections.sort(sortedLoadReports, new Comparator<LoadReport>() {
                 @Override
                 public int compare(LoadReport r1, LoadReport r2) {
@@ -400,33 +403,58 @@ public class LoadBalancingManager {
                 }
             });
 
-            // among the available entries, we have to find one that will not be
-            // overloaded once half of the current peer load is transfered to it
-            for (LoadReport possibleSolution : sortedLoadReports) {
-                double possibleSolutionLoad =
-                        possibleSolution.computeWeightedSum(LoadBalancingManager.this.criteria);
+            // removes the entry about the current peer, to avoid to balance the
+            // load with itself
+            Iterator<LoadReport> it = sortedLoadReports.iterator();
+            while (it.hasNext()) {
+                LoadReport loadReport = it.next();
 
-                log.debug(
-                        "Possible solution load={}, average overlay load={}, url={}",
-                        possibleSolutionLoad, averageOverlayLoad,
-                        possibleSolution.getPeerURL());
-
-                // compare to average overlay load
-                if (!possibleSolution.getPeerURL().equals(
-                        LoadBalancingManager.this.overlay.getPeerURL())
-                        &&
-                        // possibleSolution < ()
-                        // compare to emergency thresholds
-                        // &&
-                        this.satisfyEmergencyThresholds(
-                                currentLoadReport, possibleSolution)) {
-                    return possibleSolution.getPeerURL();
+                if (loadReport.getPeerURL().equals(
+                        LoadBalancingManager.this.overlay.getPeerURL())) {
+                    it.remove();
+                    break;
                 }
             }
 
-            log.debug("No solution found!");
-            // no solution found
-            return null;
+            // looks at the lower value
+            // if it is not satisfying the conditions there is no solution since
+            // all load reports have greater load value
+            double possibleSolutionLoad = -1;
+            if (sortedLoadReports.size() > 0) {
+                LoadReport possibleSolution = sortedLoadReports.get(0);
+
+                // among the available entries, we have to find one that will
+                // not be overloaded once half of the current peer load is
+                // transfered to it
+                if (this.satisfyEmergencyThresholds(
+                        currentLoadReport, possibleSolution)) {
+                    possibleSolutionLoad =
+                            possibleSolution.computeWeightedSum(LoadBalancingManager.this.criteria);
+                }
+            }
+
+            if (possibleSolutionLoad < 0) {
+                log.debug("No solution found!");
+                return null;
+            }
+
+            // finds other load reports that have the same load
+            int index = 1;
+            for (int i = 1; i < sortedLoadReports.size(); i++) {
+                double load =
+                        sortedLoadReports.get(i).computeWeightedSum(
+                                LoadBalancingManager.this.criteria);
+
+                if (DoubleMath.fuzzyEquals(load, possibleSolutionLoad, 1e-3)) {
+                    index++;
+                } else {
+                    break;
+                }
+            }
+
+            // picks a peer at random
+            return sortedLoadReports.get(RandomUtils.nextInt(index))
+                    .getPeerURL();
         }
 
         private boolean satisfyEmergencyThresholds(LoadReport current,
