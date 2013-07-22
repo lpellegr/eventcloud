@@ -31,12 +31,12 @@ main() {
 
     check_requirements
    
-    if [[ $# -eq 1 ]]
+    if [ $# -eq 1 ]
     then
-        if [[ $1 = "-k" ]]
+        if [ $1 = "-k" ]
         then
             undeploy
-        elif [[ $1 = "-kc" ]]
+        elif [ $1 = "-kc" ]
         then
             undeploy
             remove_logs
@@ -44,7 +44,7 @@ main() {
             print_usage
         fi
     else
-        if [[ -d $INSTANCES_DIR ]];
+        if [ -d $INSTANCES_DIR ];
 	    then
 	        echo "EventClouds registry already running. Use -k or -kc option to kill all existing instances."
 	        return 1;
@@ -58,17 +58,22 @@ main() {
 }
 
 check_requirements() {
-    if ! command_exists java
+    COMMAND_EXISTS=$(command_exists java)
+    if [ $COMMAND_EXISTS -eq 0 ]
     then
         print_java_requirements
         exit 1
     fi
-	if ! command_exists python
+	
+    COMMAND_EXISTS=$(command_exists python)
+    if [ $COMMAND_EXISTS -eq 0 ]
     then
         print_python_requirements
         exit 1
     fi
-    if ! command_exists watchmedo
+	
+    COMMAND_EXISTS=$(command_exists watchmedo)
+    if [ $COMMAND_EXISTS -eq 0 ]
     then
         print_watchdog_requirements
         exit 1
@@ -99,7 +104,7 @@ print_usage() {
 }
 
 command_exists() {
-    return $(type $1 &> /dev/null)
+    command -v $1 >/dev/null && echo "1" || echo "0"
 }
 
 deploy() {
@@ -172,7 +177,7 @@ deploy_ws_eventclouds_management() {
 # $1 absolute path to directory where file creation is expected
 # $2 expected filename
 wait_file_creation() {
-    if [[ ! -f $1/$2 ]]
+    if [ ! -f $1/$2 ]
     then
     	python $BUNDLE_HOME/scripts/filename-watchdog.py $1 $2 &> /dev/null
     fi
@@ -197,7 +202,7 @@ remove_logs() {
 
 # $1 an absolute path to an instance file
 kill_process() {
-    if [[ -f $1 ]]
+    if [ -f $1 ]
     then
         kill -9 $(cat $1.pid) &> /dev/null
     fi
