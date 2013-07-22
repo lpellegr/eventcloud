@@ -1,9 +1,9 @@
 #!/bin/sh
 
 export_variables() {
-	cd $SCRIPT_DIR/..
+    cd $SCRIPT_DIR/..
     export BUNDLE_HOME=$PWD
-	cd $CURRENT_DIR
+    cd $CURRENT_DIR
 	
     export PATH_TO_LIBRARIES=$BUNDLE_HOME/libs
     export PATH_TO_RESOURCES=$BUNDLE_HOME/resources
@@ -25,3 +25,4 @@ debug_variables() {
 }
 
 export_variables
+

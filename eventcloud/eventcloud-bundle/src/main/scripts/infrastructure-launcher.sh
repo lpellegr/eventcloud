@@ -206,3 +206,4 @@ kill_process() {
 main $@
 
 . $BUNDLE_HOME/scripts/configuration/unset-environment.sh
+
