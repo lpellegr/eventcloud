@@ -1,6 +1,12 @@
 #!/bin/sh
 
-. $(dirname $0)/configuration/set-environment.sh
+# The following script should work properly with sh, bash and zsh unix shells.
+# If you use another shell such as csh or ksh it is at your own risk and peril
+
+CURRENT_DIR=$PWD
+SCRIPT_DIR=$(dirname ${BASH_SOURCE:-$0})
+
+. $SCRIPT_DIR/configuration/set-environment.sh
 
 # Paths to output files
 LOGS_DIR=$BUNDLE_HOME/logs
@@ -20,7 +26,7 @@ WS_EVENTCLOUDS_HTTP_PORT=9000
 
 trap clear 1 2 15
 
-function main() {
+main() {
     cd $BUNDLE_HOME
 
     check_requirements
@@ -30,30 +36,28 @@ function main() {
         if [[ $1 = "-k" ]]
         then
             undeploy
-            return 0;
         elif [[ $1 = "-kc" ]]
         then
             undeploy
             remove_logs
-            return 0
         else
             print_usage
         fi
-    fi;
-
-    if [[ -d $INSTANCES_DIR ]];
-    then
-	    echo "EventClouds registry already running. Use -k or -kc option to kill all existing instances."
-	    return 1;
-    fi;
-
-    mkdir -p $INSTANCES_DIR &> /dev/null
-    mkdir -p $LOGS_DIR &> /dev/null
+    else
+        if [[ -d $INSTANCES_DIR ]];
+	    then
+	        echo "EventClouds registry already running. Use -k or -kc option to kill all existing instances."
+	        return 1;
+    	fi;
+		
+        mkdir -p $INSTANCES_DIR &> /dev/null
+        mkdir -p $LOGS_DIR &> /dev/null
     
-    deploy
+        deploy
+    fi
 }
 
-function check_requirements() {
+check_requirements() {
     if ! command_exists java
     then
         print_java_requirements
@@ -71,34 +75,34 @@ function check_requirements() {
     fi
 }
 
-function print_java_requirements() {
+print_java_requirements() {
     echo "Java is required!"
     echo "Download from http://www.oracle.com/technetwork/java/javase/downloads/index.html and install it"
 }
 
-function print_python_requirements() {
+print_python_requirements() {
     echo "Python is required!"
     echo "Download from http://www.python.org/download/ and install it"
 }
 
-function print_watchdog_requirements() {
+print_watchdog_requirements() {
     echo "Please install the watchdog library by using *one* of the following commands:"
     echo "  sudo easy_install watchdog"
     echo "  sudo pip install watchdog"
 }
 
-function print_usage() {
+print_usage() {
     echo "usage: infrastructure-launcher.sh [-k|-kc]"
     echo "       -k  kills the running instance"
     echo "       -kc kills the running instance and removes the log files"
     exit 1
 }
 
-function command_exists() {
+command_exists() {
     return $(type $1 &> /dev/null)
 }
 
-function deploy() {
+deploy() {
     # deploy the eventclouds registry
     deploy_eventclouds_registry
 
@@ -109,7 +113,7 @@ function deploy() {
     echo "    $LOGS_DIR"
 }
 
-function deploy_eventclouds_registry() {
+deploy_eventclouds_registry() {
     java -Xms128m -Xmx256m \
      -server \
      -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.local.only=false \
@@ -138,7 +142,7 @@ function deploy_eventclouds_registry() {
     echo "    $EVENTCLOUDS_REGISTRY_URL"
 }
 
-function deploy_ws_eventclouds_management() {
+deploy_ws_eventclouds_management() {
     java -Xms256m -Xmx10240m \
      -server \
      -Djava.security.policy=$PATH_TO_RESOURCES/proactive.security.policy \
@@ -167,32 +171,32 @@ function deploy_ws_eventclouds_management() {
 
 # $1 absolute path to directory where file creation is expected
 # $2 expected filename
-function wait_file_creation() {
+wait_file_creation() {
     if [[ ! -f $1/$2 ]]
     then
     	python $BUNDLE_HOME/scripts/filename-watchdog.py $1 $2 &> /dev/null
     fi
 }
 
-function clear() {
+clear() {
     undeploy
     remove_logs
     exit 2
 }
 
-function undeploy() {
+undeploy() {
     kill_process $REGISTRY_INSTANCE_FILE
     kill_process $INSTANCES_DIR/ws-eventclouds-management
 
     rm -rf $INSTANCES_DIR &> /dev/null
 }
 
-function remove_logs() {
+remove_logs() {
     rm -rf $LOGS_DIR &> /dev/null
 }
 
 # $1 an absolute path to an instance file
-function kill_process() {
+kill_process() {
     if [[ -f $1 ]]
     then
         kill -9 $(cat $1.pid) &> /dev/null

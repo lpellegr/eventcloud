@@ -1,13 +1,12 @@
 #!/bin/sh
 
-CURRENT_DIR=$PWD/$(dirname $0)
-
-function export_variables() {
-    cd $CURRENT_DIR/..
+export_variables() {
+	cd $SCRIPT_DIR/..
     export BUNDLE_HOME=$PWD
+	cd $CURRENT_DIR
+	
     export PATH_TO_LIBRARIES=$BUNDLE_HOME/libs
     export PATH_TO_RESOURCES=$BUNDLE_HOME/resources
-    cd $CURRENT_DIR
 	
     unset CLASSPATH
     export CLASSPATH="$PATH_TO_LIBRARIES/*:${CLASSPATH}"
@@ -15,7 +14,7 @@ function export_variables() {
     debug_variables
 }
 
-function debug_variables() {
+debug_variables() {
     if [ $DEBUG ];
     then
         echo "--> Using BUNDLE_HOME=${BUNDLE_HOME}"
