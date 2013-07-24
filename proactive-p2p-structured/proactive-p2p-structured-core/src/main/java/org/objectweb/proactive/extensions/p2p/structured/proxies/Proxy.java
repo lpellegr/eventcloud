@@ -55,9 +55,39 @@ public interface Proxy extends ProxyAttributeController {
      */
     Response<?> send(Request<?> request, Peer peer);
 
+    /**
+     * Dispatches the specified requests in parallel.
+     * 
+     * @param requests
+     *            the requests to dispatch in parallel.
+     * @param context
+     *            a context that can be any serializable object.
+     * @param responseCombiner
+     *            the response combiner used to combine intermediate responses.
+     * 
+     * @return a response associated to the type of the requests sent once the
+     *         intermediate responses have been combined with the specified
+     *         response combiner.
+     */
     Serializable send(List<? extends Request<?>> requests,
                       Serializable context, ResponseCombiner responseCombiner);
 
+    /**
+     * Dispatches the specified requests in parallel from the specified peer.
+     * 
+     * @param requests
+     *            the requests to dispatch in parallel.
+     * @param context
+     *            a context that can be any serializable object.
+     * @param responseCombiner
+     *            the response combiner used to combine intermediate responses.
+     * @param peer
+     *            the peer from where the request is sent.
+     * 
+     * @return a response associated to the type of the requests sent once the
+     *         intermediate responses have been combined with the specified
+     *         response combiner.
+     */
     Serializable send(List<? extends Request<?>> requests,
                       Serializable context, ResponseCombiner responseCombiner,
                       Peer peer);
