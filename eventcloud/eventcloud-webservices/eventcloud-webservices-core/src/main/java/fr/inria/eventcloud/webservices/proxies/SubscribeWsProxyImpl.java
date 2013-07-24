@@ -61,7 +61,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public String subscribeSignal(String sparqlQuery,
                                   String subscriberWsEndpointUrl) {
         Subscription subscription = new Subscription(sparqlQuery);
@@ -76,7 +76,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public String subscribeBinding(String sparqlQuery,
                                    String subscriberWsEndpointUrl) {
         Subscription subscription = new Subscription(sparqlQuery);
@@ -91,7 +91,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public String subscribeCompoundEvent(String sparqlQuery,
                                          String subscriberWsEndpointUrl) {
 
@@ -107,7 +107,7 @@ public class SubscribeWsProxyImpl extends SubscribeProxyImpl implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void unsubscribe(String id) {
         this.unsubscribe(SubscriptionId.parseSubscriptionId(id));
     }
