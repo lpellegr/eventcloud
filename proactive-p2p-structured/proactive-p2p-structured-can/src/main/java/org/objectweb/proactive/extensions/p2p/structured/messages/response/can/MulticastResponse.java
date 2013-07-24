@@ -48,6 +48,8 @@ public class MulticastResponse<E extends Element> extends
 
     private ReversePathStack<E> reversePathStack;
 
+    private ConstraintsValidator<Coordinate<E>> requestConstraintValidator;
+
     private boolean isEmpty = false;
 
     public MulticastResponse() {
@@ -65,6 +67,8 @@ public class MulticastResponse<E extends Element> extends
 
         MulticastRequest<E> anycastRequest = (MulticastRequest<E>) request;
 
+        this.requestConstraintValidator =
+                anycastRequest.getConstraintsValidator();
         this.reversePathStack = anycastRequest.getReversePathStack();
         this.constraintsValidator =
                 new UnicastConstraintsValidator<E>(
@@ -81,9 +85,9 @@ public class MulticastResponse<E extends Element> extends
      * constraints, the request may go through some peers that does not validate
      * the constraints. Thus, because the responses follow the reverse path, it
      * is possible to have a synchronization point on a peer that does not
-     * validate the constraints. To detect if the current peer on which a
-     * synchronization point is unlocked, look at
-     * {@link MulticastResponse#validatesKeyConstraints(StructuredOverlay)}.
+     * validate the constraints. To check if the peer is validating the
+     * constraints you can use
+     * {@link #validatesRequestKeyConstraints(StructuredOverlay)}.
      * 
      * @param overlay
      *            the overlay on which this method is called.
@@ -163,6 +167,10 @@ public class MulticastResponse<E extends Element> extends
 
     public void setIsEmpty(boolean value) {
         this.isEmpty = value;
+    }
+
+    public boolean validatesRequestKeyConstraints(StructuredOverlay overlay) {
+        return this.requestConstraintValidator.validatesKeyConstraints(overlay);
     }
 
 }

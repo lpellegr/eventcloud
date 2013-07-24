@@ -21,13 +21,16 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.EfficientBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -41,7 +44,11 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvi
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.EfficientBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.runners.EachRoutingAlgorithm;
+import org.objectweb.proactive.extensions.p2p.structured.runners.RoutingAlgorithm;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 
 /**
@@ -50,6 +57,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Broadcast
  * 
  * @author lpellegr
  */
+@RunWith(EachRoutingAlgorithm.class)
 public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static final int NB_PEERS = 10;
@@ -83,10 +91,8 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         GetZonesValidatingConstraintsResponse response =
                 (GetZonesValidatingConstraintsResponse) PAFuture.getFutureValue(super.getProxy()
                         .send(
-                                new GetZonesValidatingConstraintsRequest(
-                                        new Coordinate<StringElement>(
-                                                null, elt, null)),
-                                super.getPeer(0)));
+                                createGetZoneValidatingConstraintsRequest(new Coordinate<StringElement>(
+                                        null, elt, null)), super.getPeer(0)));
 
         checkResponse(response);
 
@@ -99,14 +105,14 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     @Test
     public void testMulticastRequestWithoutResponse()
             throws InterruptedException {
-        super.getProxy().sendv(new SetValuesRequest());
+        super.getProxy().sendv(createSetValuesRequest());
 
         // sleep because the previous call is supposed to be asynchronous
         Thread.sleep(1000);
 
         GetValuesResponse response =
                 (GetValuesResponse) PAFuture.getFutureValue(super.getProxy()
-                        .send(new GetValuesRequest()));
+                        .send(createGetValuesRequest()));
 
         checkResponse(response);
 
@@ -122,28 +128,71 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         super.tearDown();
     }
 
+    private static MulticastRequest<StringElement> createGetZoneValidatingConstraintsRequest(Coordinate<StringElement> coordinatesToReach) {
+        switch (RoutingAlgorithm.toUse()) {
+            case EFFICIENT_BROADCAST:
+                return new GetZonesValidatingConstraintsEfficientRequest(
+                        coordinatesToReach);
+            case FLOODING_BROADCAST:
+                return new GetZonesValidatingConstraintsFloodingRequest(
+                        coordinatesToReach);
+            case OPTIMAL_BROADCAST:
+                return new GetZonesValidatingConstraintsOptimalRequest(
+                        coordinatesToReach);
+        }
+
+        throw new IllegalStateException();
+    }
+
+    private static MulticastRequest<StringElement> createSetValuesRequest() {
+        switch (RoutingAlgorithm.toUse()) {
+            case EFFICIENT_BROADCAST:
+                return new SetValuesEfficientRequest();
+            case FLOODING_BROADCAST:
+                return new SetValuesFloodingRequest();
+            case OPTIMAL_BROADCAST:
+                return new SetValuesOptimalRequest();
+        }
+
+        throw new IllegalStateException();
+    }
+
+    private static MulticastRequest<StringElement> createGetValuesRequest() {
+        switch (RoutingAlgorithm.toUse()) {
+            case EFFICIENT_BROADCAST:
+                return new GetValuesEfficientRequest();
+            case FLOODING_BROADCAST:
+                return new GetValuesFloodingRequest();
+            case OPTIMAL_BROADCAST:
+                return new GetValuesOptimalRequest();
+        }
+
+        throw new IllegalStateException();
+    }
+
     private static class CustomCanOverlay extends StringCanOverlay {
 
         private boolean value = false;
 
     }
 
-    private static class SetValuesRequest extends
+    private static class SetValuesFloodingRequest extends
             MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
-        public SetValuesRequest() {
+        public SetValuesFloodingRequest() {
             super(new BroadcastConstraintsValidator<StringElement>(
                     CoordinateFactory.newStringCoordinate()));
         }
 
         @Override
         public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
-            return new FloodingBroadcastRequestRouter<GetZonesValidatingConstraintsRequest, StringElement>() {
+            return new FloodingBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
                                                            MulticastRequest<StringElement> request) {
+
                     ((CustomCanOverlay) overlay).value = true;
                 };
             };
@@ -151,12 +200,60 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class GetValuesRequest extends
+    private static class SetValuesEfficientRequest extends
+            EfficientBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public SetValuesEfficientRequest() {
+            super(new BroadcastConstraintsValidator<StringElement>(
+                    CoordinateFactory.newStringCoordinate()));
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return new EfficientBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
+                @Override
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
+                                                           MulticastRequest<StringElement> request) {
+
+                    ((CustomCanOverlay) overlay).value = true;
+                };
+            };
+        }
+
+    }
+
+    private static class SetValuesOptimalRequest extends
+            OptimalBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public SetValuesOptimalRequest() {
+            super(new BroadcastConstraintsValidator<StringElement>(
+                    CoordinateFactory.newStringCoordinate()));
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return new OptimalBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
+                @Override
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
+                                                           MulticastRequest<StringElement> request) {
+
+                    ((CustomCanOverlay) overlay).value = true;
+                };
+            };
+        }
+
+    }
+
+    private static class GetValuesFloodingRequest extends
             MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
-        public GetValuesRequest() {
+        public GetValuesFloodingRequest() {
             super(
                     new BroadcastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
@@ -170,6 +267,63 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     });
         }
 
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
+    }
+
+    private static class GetValuesEfficientRequest extends
+            EfficientBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public GetValuesEfficientRequest() {
+            super(
+                    new BroadcastConstraintsValidator<StringElement>(
+                            CoordinateFactory.newStringCoordinate()),
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
+                        private static final long serialVersionUID = 150L;
+
+                        @Override
+                        public MulticastResponse<StringElement> get() {
+                            return new GetValuesResponse();
+                        }
+                    });
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
+    }
+
+    private static class GetValuesOptimalRequest extends
+            OptimalBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public GetValuesOptimalRequest() {
+            super(
+                    new BroadcastConstraintsValidator<StringElement>(
+                            CoordinateFactory.newStringCoordinate()),
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
+                        private static final long serialVersionUID = 150L;
+
+                        @Override
+                        public MulticastResponse<StringElement> get() {
+                            return new GetValuesResponse();
+                        }
+                    });
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
     }
 
     private static class GetValuesResponse extends
@@ -181,7 +335,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
         @Override
         public void beforeSendingBackResponse(StructuredOverlay overlay) {
-            if (this.validatesKeyConstraints(overlay)) {
+            if (this.validatesRequestKeyConstraints(overlay)) {
                 this.result.add(((CustomCanOverlay) overlay).value);
             }
         }
@@ -197,12 +351,12 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class GetZonesValidatingConstraintsRequest extends
+    private static class GetZonesValidatingConstraintsFloodingRequest extends
             MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
-        public GetZonesValidatingConstraintsRequest(
+        public GetZonesValidatingConstraintsFloodingRequest(
                 Coordinate<StringElement> coordinatesToReach) {
             super(
                     new BroadcastConstraintsValidator<StringElement>(
@@ -217,6 +371,65 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     });
         }
 
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
+    }
+
+    private static class GetZonesValidatingConstraintsEfficientRequest extends
+            EfficientBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public GetZonesValidatingConstraintsEfficientRequest(
+                Coordinate<StringElement> coordinatesToReach) {
+            super(
+                    new BroadcastConstraintsValidator<StringElement>(
+                            coordinatesToReach),
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
+                        private static final long serialVersionUID = 150L;
+
+                        @Override
+                        public MulticastResponse<StringElement> get() {
+                            return new GetZonesValidatingConstraintsResponse();
+                        }
+                    });
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
+    }
+
+    private static class GetZonesValidatingConstraintsOptimalRequest extends
+            OptimalBroadcastRequest<StringElement> {
+
+        private static final long serialVersionUID = 150L;
+
+        public GetZonesValidatingConstraintsOptimalRequest(
+                Coordinate<StringElement> coordinatesToReach) {
+            super(
+                    new BroadcastConstraintsValidator<StringElement>(
+                            coordinatesToReach),
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
+                        private static final long serialVersionUID = 150L;
+
+                        @Override
+                        public MulticastResponse<StringElement> get() {
+                            return new GetZonesValidatingConstraintsResponse();
+                        }
+                    });
+        }
+
+        @Override
+        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+            return RoutingAlgorithm.createRouterToUse();
+        }
+
     }
 
     private static class GetZonesValidatingConstraintsResponse extends
@@ -229,7 +442,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
         @Override
         public void beforeSendingBackResponse(StructuredOverlay overlay) {
-            if (this.validatesKeyConstraints(overlay)) {
+            if (this.validatesRequestKeyConstraints(overlay)) {
                 this.zonesValidatingConstraints.add(((StringCanOverlay) overlay).getZone());
             }
         }
