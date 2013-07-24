@@ -19,35 +19,36 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * List used by {@link AnycastRequest} and {@link AnycastResponse} to store
- * {@link AnycastRoutingEntry}. It contains an {@link AnycastRoutingEntry} for
- * each {@link Peer} met while routing an {@link AnycastRequest}.
+ * List used by {@link MulticastRequest} and {@link MulticastResponse} to store
+ * {@link ReversePathEntry reverse path entries}. It contains an
+ * {@link ReversePathEntry} for each {@link Peer} met while routing a
+ * {@link MulticastRequest}.
  * 
  * @author lpellegr
  */
-public class AnycastRoutingList<E extends Element> extends
-        LinkedList<AnycastRoutingEntry<E>> {
+public class ReversePathStack<E extends Element> extends
+        LinkedList<ReversePathEntry<E>> {
 
     private static final long serialVersionUID = 150L;
 
     /**
      * Search the specified {@link UUID} which is associated to a {@link Peer}
-     * identifier in the current list composed of {@link AnycastRoutingEntry}.
+     * identifier in the current list composed of {@link ReversePathEntry}.
      * 
      * @param peerId
      *            the {@link UUID} to look for.
-     * @return the {@link AnycastRoutingEntry} found or <code>null</code> if not
+     * @return the {@link ReversePathEntry} found or <code>null</code> if not
      *         found.
      */
-    public AnycastRoutingEntry<E> getRoutingResponseEntryBy(OverlayId peerId) {
-        for (AnycastRoutingEntry<E> entry : this) {
+    public ReversePathEntry<E> getRoutingResponseEntryBy(OverlayId peerId) {
+        for (ReversePathEntry<E> entry : this) {
             if (entry.getPeerId().equals(peerId)) {
                 return entry;
             }

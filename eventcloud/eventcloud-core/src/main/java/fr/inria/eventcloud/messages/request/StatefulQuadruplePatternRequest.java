@@ -19,13 +19,13 @@ package fr.inria.eventcloud.messages.request;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.StatefulQuadruplePatternResponse;
@@ -38,7 +38,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * quadruple pattern which is specified when the request is created. This
  * request is said stateful because it maintains a state about the action which
  * is executed by overriding
- * {@link #onPeerValidatingKeyConstraints(CanOverlay, AnycastRequest, QuadruplePattern)}
+ * {@link #onPeerValidatingKeyConstraints(CanOverlay, MulticastRequest, QuadruplePattern)}
  * . This state can be retrieved later when the response is routed back.
  * 
  * @author lpellegr
@@ -58,7 +58,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
     }
 
     public StatefulQuadruplePatternRequest(
-            AnycastConstraintsValidator<SemanticElement> constraintsValidator,
+            MulticastConstraintsValidator<SemanticElement> constraintsValidator,
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatefulQuadruplePatternResponse<T>, Coordinate<SemanticElement>> responseProvider) {
         super(constraintsValidator, quadPattern, responseProvider);
@@ -81,7 +81,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
      * The object which is returned must be {@link Serializable}.
      */
     public abstract T onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                     AnycastRequest<SemanticElement> request,
+                                                     MulticastRequest<SemanticElement> request,
                                                      QuadruplePattern quadruplePattern);
 
     /**
@@ -92,7 +92,7 @@ public abstract class StatefulQuadruplePatternRequest<T> extends
         return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
-                                                       final AnycastRequest<SemanticElement> request) {
+                                                       final MulticastRequest<SemanticElement> request) {
                 final SemanticRequestResponseManager messagingManager =
                         (SemanticRequestResponseManager) overlay.getRequestResponseManager();
 

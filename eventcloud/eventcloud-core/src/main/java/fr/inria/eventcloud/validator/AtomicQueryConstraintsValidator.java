@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -53,7 +53,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  * @author mantoine
  */
 public final class AtomicQueryConstraintsValidator extends
-        AnycastConstraintsValidator<SemanticElement> {
+        MulticastConstraintsValidator<SemanticElement> {
 
     private static final long serialVersionUID = 150L;
 

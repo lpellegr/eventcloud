@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -141,7 +141,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
          */
         @Override
         public Map<OverlayId, LoadInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                                              AnycastRequest<SemanticElement> request,
+                                                                              MulticastRequest<SemanticElement> request,
                                                                               QuadruplePattern quadruplePattern) {
             SemanticCanOverlay customOverlay = (SemanticCanOverlay) overlay;
 

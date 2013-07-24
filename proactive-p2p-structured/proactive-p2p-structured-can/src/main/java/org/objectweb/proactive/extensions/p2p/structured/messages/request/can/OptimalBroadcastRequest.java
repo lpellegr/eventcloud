@@ -18,13 +18,13 @@ package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 /**
  * Message used to dispatch a request to all peers validating the specified
@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
  * @author jrochas
  */
 public class OptimalBroadcastRequest<E extends Element> extends
-        AnycastRequest<E> {
+        MulticastRequest<E> {
 
     private static final long serialVersionUID = 150L;
 
@@ -62,7 +62,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
-    public OptimalBroadcastRequest(AnycastConstraintsValidator<E> validator) {
+    public OptimalBroadcastRequest(MulticastConstraintsValidator<E> validator) {
         super(validator);
     }
 
@@ -76,14 +76,14 @@ public class OptimalBroadcastRequest<E extends Element> extends
      *            the responseProvider to use when a response has to be created.
      */
     public OptimalBroadcastRequest(
-            AnycastConstraintsValidator<E> validator,
-            ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> responseProvider) {
+            MulticastConstraintsValidator<E> validator,
+            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> responseProvider) {
         super(validator, responseProvider);
     }
 
     public OptimalBroadcastRequest(
-            AnycastConstraintsValidator<E> validator,
-            ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
+            MulticastConstraintsValidator<E> validator,
+            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> provider,
             MessageId messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
 

@@ -53,7 +53,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlrea
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetSplitHistoryOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetSplitHistoryResponseOperation;
@@ -64,9 +64,9 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -545,12 +545,12 @@ public class Can2dVisualizer extends JFrame {
 
     @SuppressWarnings("unused")
     private static final class PrintSplitHistoryRequest extends
-            AnycastRequest<StringElement> {
+            MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
         public PrintSplitHistoryRequest() {
-            super(new DefaultAnycastConstraintsValidator<StringElement>(
+            super(new BroadcastConstraintsValidator<StringElement>(
                     new Coordinate<StringElement>(null, null)));
         }
 
@@ -558,11 +558,11 @@ public class Can2dVisualizer extends JFrame {
          * {@inheritDoc}
          */
         @Override
-        public AnycastRequestRouter<AnycastRequest<StringElement>, StringElement> getRouter() {
-            return new AnycastRequestRouter<AnycastRequest<StringElement>, StringElement>() {
+        public FloodingBroadcastRequestRouter<MulticastRequest<StringElement>, StringElement> getRouter() {
+            return new FloodingBroadcastRequestRouter<MulticastRequest<StringElement>, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
-                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest<StringElement> request) {
+                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest<StringElement> request) {
                     System.err.println("Peer " + overlay.getZone());
                     for (SplitEntry entry : overlay.getSplitHistory()) {
                         System.err.println("  " + entry);

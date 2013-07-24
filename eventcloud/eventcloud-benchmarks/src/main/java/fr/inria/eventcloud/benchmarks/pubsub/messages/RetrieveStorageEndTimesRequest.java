@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.messages;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
@@ -50,7 +50,7 @@ public class RetrieveStorageEndTimesRequest extends
      */
     @Override
     public StorageTimes onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                       AnycastRequest<SemanticElement> request,
+                                                       MulticastRequest<SemanticElement> request,
                                                        QuadruplePattern quadruplePattern) {
         CustomSemanticOverlay customOverlay = (CustomSemanticOverlay) overlay;
 

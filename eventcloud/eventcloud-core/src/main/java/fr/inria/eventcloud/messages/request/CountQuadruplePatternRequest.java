@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.messages.request;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
@@ -64,7 +64,7 @@ public class CountQuadruplePatternRequest extends
      */
     @Override
     public Long onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                               AnycastRequest<SemanticElement> request,
+                                               MulticastRequest<SemanticElement> request,
                                                QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(

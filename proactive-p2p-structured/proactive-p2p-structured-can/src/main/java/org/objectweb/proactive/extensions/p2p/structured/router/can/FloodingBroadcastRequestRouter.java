@@ -24,10 +24,10 @@ import java.util.Iterator;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -42,8 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This router is used to route the messages of type {@link AnycastRequest}. The
- * request is supposed to reach one or more peers depending of the key
+ * This router is used to route the messages of type {@link MulticastRequest}.
+ * The request is supposed to reach one or more peers depending of the key
  * associated to the request to route.
  * 
  * @param <T>
@@ -53,13 +53,13 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element>
-        extends Router<AnycastRequest<E>, Coordinate<E>> {
+public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Element>
+        extends Router<MulticastRequest<E>, Coordinate<E>> {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(AnycastRequestRouter.class);
+            LoggerFactory.getLogger(FloodingBroadcastRequestRouter.class);
 
-    public AnycastRequestRouter() {
+    public FloodingBroadcastRequestRouter() {
         super();
     }
 
@@ -76,7 +76,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      *            the message which is handled.
      */
     public void onPeerValidatingKeyConstraints(CanOverlay<E> overlay,
-                                               AnycastRequest<E> request) {
+                                               MulticastRequest<E> request) {
         // to be override if necessary
     }
 
@@ -86,7 +86,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
     @Override
     @SuppressWarnings("unchecked")
     public void makeDecision(StructuredOverlay overlay,
-                             AnycastRequest<E> request) {
+                             MulticastRequest<E> request) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
                 canOverlay.getRequestResponseManager();
@@ -163,7 +163,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      */
     @Override
     protected void handle(final StructuredOverlay overlay,
-                          final AnycastRequest<E> request) {
+                          final MulticastRequest<E> request) {
         @SuppressWarnings("unchecked")
         CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
 
@@ -176,9 +176,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 overlay.getRequestResponseManager().putResponseEntry(
                         request, new ResponseEntry(1));
 
-                AnycastResponse<E> response =
-                        (AnycastResponse<E>) request.getResponseProvider().get(
-                                request, overlay);
+                MulticastResponse<E> response =
+                        (MulticastResponse<E>) request.getResponseProvider()
+                                .get(request, overlay);
                 response.route(overlay);
             }
         } else {
@@ -195,8 +195,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                     overlay.getRequestResponseManager().putResponseEntry(
                             request, new ResponseEntry(1));
 
-                    AnycastResponse<E> response =
-                            (AnycastResponse<E>) request.getResponseProvider()
+                    MulticastResponse<E> response =
+                            (MulticastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
                     response.route(overlay);
                 }
@@ -221,8 +221,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
 
                     // constructs the routing list used for routing back the
                     // responses
-                    request.getAnycastRoutingList().add(
-                            new AnycastRoutingEntry<E>(
+                    request.getReversePathStack().add(
+                            new ReversePathEntry<E>(
                                     overlay.getId(), canOverlay.getZone()
                                             .getLowerBound()));
                 }
@@ -252,15 +252,15 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
     }
 
     private NeighborTable<E> getNeighborsToSendTo(final CanOverlay<E> overlay,
-                                                  final AnycastRequest<E> msg) {
+                                                  final MulticastRequest<E> msg) {
         NeighborTable<E> neighborsToSendTo = new NeighborTable<E>();
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : overlay.getNeighborTable().get(
                         dimension, direction).values()) {
-                    AnycastRoutingEntry<E> entryCommingFromSender =
-                            msg.getAnycastRoutingList()
+                    ReversePathEntry<E> entryCommingFromSender =
+                            msg.getReversePathStack()
                                     .getRoutingResponseEntryBy(entry.getId());
                     /*
                      * If msg contains the neighbor identifier in its routing
@@ -290,7 +290,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
      *            the message to route.
      */
     @Override
-    protected void route(StructuredOverlay overlay, AnycastRequest<E> request) {
+    protected void route(StructuredOverlay overlay, MulticastRequest<E> request) {
         @SuppressWarnings("unchecked")
         CanOverlay<E> overlayCAN = (CanOverlay<E>) overlay;
 
@@ -351,8 +351,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 overlay.getRequestResponseManager().putResponseEntry(
                         request, new ResponseEntry(1));
 
-                request.getAnycastRoutingList().add(
-                        new AnycastRoutingEntry<E>(
+                request.getReversePathStack().add(
+                        new ReversePathEntry<E>(
                                 overlay.getId(), overlayCAN.getZone()
                                         .getLowerBound()));
             }

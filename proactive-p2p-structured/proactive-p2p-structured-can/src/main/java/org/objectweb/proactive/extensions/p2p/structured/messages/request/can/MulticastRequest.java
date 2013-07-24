@@ -16,18 +16,18 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathStack;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 /**
  * Message used to dispatch a request to all peers validating the specified
@@ -38,12 +38,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastCo
  * 
  * @author lpellegr
  */
-public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
+public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> {
 
     private static final long serialVersionUID = 150L;
 
-    protected AnycastRoutingList<E> anycastRoutingList =
-            new AnycastRoutingList<E>();
+    protected final ReversePathStack<E> reversePathStack;
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
@@ -53,8 +52,8 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
      * @param validator
      *            the constraints validator to use for checking the constraints.
      */
-    public AnycastRequest(AnycastConstraintsValidator<E> validator) {
-        super(validator);
+    public MulticastRequest(MulticastConstraintsValidator<E> validator) {
+        this(validator, null);
     }
 
     /**
@@ -66,22 +65,24 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
      * @param responseProvider
      *            the responseProvider to use when a response has to be created.
      */
-    public AnycastRequest(
-            AnycastConstraintsValidator<E> validator,
-            ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> responseProvider) {
+    public MulticastRequest(
+            MulticastConstraintsValidator<E> validator,
+            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> responseProvider) {
         super(validator, responseProvider);
+
+        this.reversePathStack = new ReversePathStack<E>();
     }
 
     /**
-     * Returns the {@link AnycastRoutingList} containing the
-     * {@link AnycastRoutingEntry} to use in order to route the response.
+     * Returns the {@link ReversePathStack} containing the
+     * {@link ReversePathEntry entries} to use in order to route the response.
      * 
-     * @return the {@link AnycastRoutingList} containing the
-     *         {@link AnycastRoutingEntry} to use in order to route the
+     * @return the {@link ReversePathStack} containing the
+     *         {@link ReversePathEntry entries} to use in order to route the
      *         response.
      */
-    public AnycastRoutingList<E> getAnycastRoutingList() {
-        return this.anycastRoutingList;
+    public ReversePathStack<E> getReversePathStack() {
+        return this.reversePathStack;
     }
 
     /**
@@ -89,11 +90,11 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
      */
     @Override
     public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
-        return new AnycastRequestRouter<AnycastRequest<E>, E>();
+        return new FloodingBroadcastRequestRouter<MulticastRequest<E>, E>();
     }
 
     public boolean validatesKeyConstraints(Zone<E> zone) {
-        return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
+        return ((MulticastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
 
     /**
@@ -108,7 +109,7 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
         buf.append(this.getId());
         buf.append(", stack:\n");
 
-        for (AnycastRoutingEntry<E> entry : this.anycastRoutingList) {
+        for (ReversePathEntry<E> entry : this.reversePathStack) {
             buf.append("  - ");
             buf.append(entry.getPeerCoordinate());
             buf.append('\n');

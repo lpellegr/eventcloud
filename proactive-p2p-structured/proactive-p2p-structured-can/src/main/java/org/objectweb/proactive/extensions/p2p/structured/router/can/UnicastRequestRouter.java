@@ -119,12 +119,6 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
                         request.getKey(), dimension, direction);
 
         if (neighborChosen == null) {
-            if (request.getResponseProvider() != null) {
-                Response<Coordinate<E>> response =
-                        request.getResponseProvider().get(request, overlay);
-                response.route(canOverlay);
-            }
-
             log.error(
                     "Trying to route a {} request but the key {} used "
                             + "is managed by no peer. You are probably using a key with "

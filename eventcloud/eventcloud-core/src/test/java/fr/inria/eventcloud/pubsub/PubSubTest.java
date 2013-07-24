@@ -67,16 +67,15 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 
 /**
- * Tests cases for operations in {@link SubscribeProxy} and {@link PublishProxy}
- * .
+ * Tests cases for operations in {@link SubscribeProxy subscribe} and
+ * {@link PublishProxy publish} proxies .
  * 
  * @author lpellegr
  */
 @RunWith(EachPublishSubscribeAlgorithm.class)
-public class SubscribeProxyTest {
+public class PubSubTest {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(SubscribeProxyTest.class);
+    private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
 
     private static List<CompoundEvent> events = new ArrayList<CompoundEvent>();
 

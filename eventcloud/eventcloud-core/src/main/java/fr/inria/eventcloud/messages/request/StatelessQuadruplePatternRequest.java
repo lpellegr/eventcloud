@@ -16,15 +16,15 @@
  **/
 package fr.inria.eventcloud.messages.request;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.AnycastConstraintsValidator;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.StatelessQuadruplePatternResponse;
@@ -64,14 +64,14 @@ public abstract class StatelessQuadruplePatternRequest extends
     public StatelessQuadruplePatternRequest(
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
-        super(new DefaultAnycastConstraintsValidator<SemanticElement>(
+        super(new BroadcastConstraintsValidator<SemanticElement>(
                 SemanticCoordinateFactory.newSemanticCoordinate(quadPattern)),
                 responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
     public StatelessQuadruplePatternRequest(
-            AnycastConstraintsValidator<SemanticElement> validator,
+            MulticastConstraintsValidator<SemanticElement> validator,
             QuadruplePattern quadPattern,
             ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
         super(validator, responseProvider);
@@ -96,7 +96,7 @@ public abstract class StatelessQuadruplePatternRequest extends
         return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
             @Override
             public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
-                                                       final AnycastRequest<SemanticElement> request) {
+                                                       final MulticastRequest<SemanticElement> request) {
                 StatelessQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
                         overlay,
                         StatelessQuadruplePatternRequest.this.quadruplePattern.getValue());

@@ -40,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -411,7 +411,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     private static OptimalBroadcastRequest<StringElement> createFloodingRequest() {
         return new OptimalBroadcastRequest<StringElement>(
-                new DefaultAnycastConstraintsValidator<StringElement>(
+                new BroadcastConstraintsValidator<StringElement>(
                         CoordinateFactory.newStringCoordinate()));
     }
 

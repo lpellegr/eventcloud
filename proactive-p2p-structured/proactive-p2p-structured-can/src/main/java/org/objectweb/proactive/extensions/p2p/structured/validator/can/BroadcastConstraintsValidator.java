@@ -23,17 +23,17 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
 
 /**
- * This class is the default validator for {@link AnycastRequestRouter}. This
- * validator assumes that all coordinate elements set to {@code null} match the
- * constraints.
+ * This class is the default validator for
+ * {@link FloodingBroadcastRequestRouter}. This validator assumes that all
+ * coordinate elements set to {@code null} match the constraints.
  * 
  * @author lpellegr
  */
-public class DefaultAnycastConstraintsValidator<E extends StringElement>
-        extends AnycastConstraintsValidator<E> {
+public class BroadcastConstraintsValidator<E extends StringElement> extends
+        MulticastConstraintsValidator<E> {
 
     private static final long serialVersionUID = 150L;
 
@@ -44,7 +44,7 @@ public class DefaultAnycastConstraintsValidator<E extends StringElement>
      * @param key
      *            the key to reach.
      */
-    public DefaultAnycastConstraintsValidator(Coordinate<E> key) {
+    public BroadcastConstraintsValidator(Coordinate<E> key) {
         super(checkNotNull(key));
     }
 

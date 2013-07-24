@@ -16,7 +16,7 @@
  **/
 package fr.inria.eventcloud.load_balancing.gossip;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
@@ -66,7 +66,7 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
             return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
-                                                           final AnycastRequest<SemanticElement> request) {
+                                                           final MulticastRequest<SemanticElement> request) {
                     FloodingLoadRequest.this.onPeerValidatingKeyConstraints(overlay);
                 }
             };

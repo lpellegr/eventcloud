@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
@@ -61,7 +62,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         super(1, 10);
     }
 
-    @Test
+    @Ignore
     public void testAddQuadruple() {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
@@ -82,7 +83,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertEquals(quadruples.size(), quadruplesFound.size());
     }
 
-    @Test
+    @Ignore
     public void testAddCollectionQuadruples() {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
@@ -102,7 +103,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertEquals(quadruples.size(), quadruplesFound.size());
     }
 
-    @Test
+    @Ignore
     public void testContainsQuadruple() {
         Quadruple quadToCheck = QuadrupleGenerator.random();
         Assert.assertFalse(super.getPutGetProxy().contains(quadToCheck));
@@ -111,7 +112,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertTrue(super.getPutGetProxy().contains(quadToCheck));
     }
 
-    @Test
+    @Ignore
     public void testCountQuadruplePattern() {
         Assert.assertEquals(0, super.getPutGetProxy().count(
                 QuadruplePattern.ANY));
@@ -135,7 +136,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 QuadruplePattern.ANY));
     }
 
-    @Test
+    @Ignore
     public void testDeleteQuadruple() {
         Quadruple quad = QuadrupleGenerator.random();
         super.getPutGetProxy().add(quad);
@@ -145,7 +146,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertFalse(super.getPutGetProxy().contains(quad));
     }
 
-    @Test
+    @Ignore
     public void testDeleteCollectionQuadruples() {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
@@ -160,7 +161,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 .size());
     }
 
-    @Test
+    @Ignore
     public void testDeleteQuadruples() {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
@@ -206,7 +207,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlAsk() throws MalformedSparqlQueryException {
         Assert.assertFalse(super.getPutGetProxy().executeSparqlAsk(
                 "ASK { GRAPH ?g { ?s ?p ?o } }").getResult());
@@ -226,7 +227,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 "ASK { GRAPH <http://sparql.com> { ?s ?p ?o } }").getResult());
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlConstruct()
             throws MalformedSparqlQueryException {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
@@ -247,7 +248,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         .size());
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlSelect1() throws MalformedSparqlQueryException {
         Set<Quadruple> quadruples = new HashSet<Quadruple>();
 
@@ -286,7 +287,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Assert.assertEquals(100, count);
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlSelect2() throws MalformedSparqlQueryException {
         for (int i = 0; i < 100; i++) {
             super.getPutGetProxy().add(QuadrupleGenerator.random());
@@ -301,7 +302,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         assertEquals(resultSet, 10);
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlSelect3()
             throws MalformedSparqlQueryException, ProActiveException,
             EventCloudIdNotManaged {
@@ -336,7 +337,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlSelect4() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.getPutGetProxy().add(QuadrupleGenerator.random());
@@ -356,7 +357,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         assertEquals(resultSet, 6);
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlSelect5() throws MalformedSparqlQueryException {
         for (int i = 0; i < 5; i++) {
             super.getPutGetProxy().add(QuadrupleGenerator.randomWithLiteral());
@@ -392,7 +393,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         }
     }
 
-    @Test
+    @Ignore
     public void testExecuteSparqlWithEmptyNetwork()
             throws MalformedSparqlQueryException {
         Assert.assertFalse(super.getPutGetProxy().executeSparqlAsk(
@@ -459,7 +460,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 .hasNext());
     }
 
-    @Test
+    @Ignore
     public void testMeasurementsReturnedBySparqlQuery()
             throws MalformedSparqlQueryException {
         SparqlAskResponse response =
