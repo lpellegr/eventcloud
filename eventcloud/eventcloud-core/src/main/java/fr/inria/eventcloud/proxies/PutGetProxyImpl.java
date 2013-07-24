@@ -27,7 +27,7 @@ import java.util.List;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 
 import com.google.common.collect.ImmutableList;
@@ -113,9 +113,9 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public boolean add(Quadruple quad) {
-        PAFuture.waitFor(super.send(new AddQuadrupleRequest(quad)));
+        PAFuture.waitFor(this.addAsync(quad));
         return true;
     }
 
@@ -123,9 +123,9 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public boolean add(Collection<Quadruple> quads) {
-        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
+        List<Response<?>> results = new ArrayList<Response<?>>(quads.size());
 
         for (final Quadruple quad : quads) {
             results.add(this.addAsync(quad));
@@ -136,10 +136,8 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
         return true;
     }
 
-    @MemberOf("parallel")
-    private BooleanWrapper addAsync(Quadruple quad) {
-        super.send(new AddQuadrupleRequest(quad));
-        return new BooleanWrapper(true);
+    private Response<?> addAsync(Quadruple quad) {
+        return super.send(new AddQuadrupleRequest(quad));
     }
 
     /**
@@ -148,9 +146,10 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * @throws IOException
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public void add(URL url, SerializationFormat format) throws IOException {
-        final Builder<BooleanWrapper> results = ImmutableList.builder();
+        final Builder<Response<?>> results = ImmutableList.builder();
+
         InputStream in = url.openConnection().getInputStream();
 
         RDFReader.read(in, format, new Callback<Quadruple>() {
@@ -169,7 +168,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public boolean contains(Quadruple quad) {
         return ((BooleanForwardResponse) PAFuture.getFutureValue(super.send(new ContainsQuadrupleRequest(
                 quad)))).getResult();
@@ -179,9 +178,9 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public boolean delete(Quadruple quad) {
-        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
+        PAFuture.waitFor(this.deleteAsync(quad));
         return true;
     }
 
@@ -189,9 +188,9 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public boolean delete(Collection<Quadruple> quads) {
-        List<BooleanWrapper> results = new ArrayList<BooleanWrapper>();
+        List<Response<?>> results = new ArrayList<Response<?>>(quads.size());
 
         for (final Quadruple quad : quads) {
             results.add(this.deleteAsync(quad));
@@ -206,27 +205,25 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public List<Quadruple> delete(QuadruplePattern quadPattern) {
         QuadruplePatternResponse response =
                 (QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new DeleteQuadruplesRequest(
                         quadPattern.getGraph(), quadPattern.getSubject(),
                         quadPattern.getPredicate(), quadPattern.getObject())));
+
         return response.getResult();
     }
 
-    @MemberOf("parallel")
-    public BooleanWrapper deleteAsync(Quadruple quad) {
-        PAFuture.waitFor(super.send(new DeleteQuadrupleRequest(quad)));
-
-        return new BooleanWrapper(true);
+    private Response<?> deleteAsync(Quadruple quad) {
+        return super.send(new DeleteQuadrupleRequest(quad));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public long count(QuadruplePattern quadPattern) {
         return ((CountQuadruplePatternResponse) PAFuture.getFutureValue((super.send(new CountQuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -237,7 +234,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public long count(String sparqlQuery) throws MalformedSparqlQueryException {
         SparqlResponse<?> response = this.executeSparqlQuery(sparqlQuery);
 
@@ -271,7 +268,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public List<Quadruple> find(QuadruplePattern quadPattern) {
         return ((QuadruplePatternResponse) PAFuture.getFutureValue((super.send(new QuadruplePatternRequest(
                 quadPattern.getGraph(), quadPattern.getSubject(),
@@ -282,7 +279,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
             throws MalformedSparqlQueryException {
         sparqlQuery = sparqlQuery.trim();
@@ -305,7 +302,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
@@ -317,14 +314,14 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
                                 sparqlAskQuery, SparqlQueryType.ASK),
                         SparqlResponseCombiner.getInstance());
 
-        return (SparqlAskResponse) result;
+        return (SparqlAskResponse) PAFuture.getFutureValue(result);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
@@ -337,14 +334,14 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
                                 sparqlConstructQuery, SparqlQueryType.CONSTRUCT),
                         SparqlResponseCombiner.getInstance());
 
-        return (SparqlConstructResponse) result;
+        return (SparqlConstructResponse) PAFuture.getFutureValue(result);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
         throw new UnsupportedOperationException();
     }
@@ -353,7 +350,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelNotSelfCompatible")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
@@ -365,7 +362,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
                                 sparqlSelectQuery, SparqlQueryType.SELECT),
                         SparqlResponseCombiner.getInstance());
 
-        return (SparqlSelectResponse) result;
+        return (SparqlSelectResponse) PAFuture.getFutureValue(result);
     }
 
     /**

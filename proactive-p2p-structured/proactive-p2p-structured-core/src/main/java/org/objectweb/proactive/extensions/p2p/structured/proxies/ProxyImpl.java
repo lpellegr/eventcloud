@@ -25,7 +25,9 @@ import java.util.UUID;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
 import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.core.ProActiveException;
@@ -53,7 +55,13 @@ import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveServi
  * 
  * @author lpellegr
  */
-@DefineGroups({@Group(name = "parallel", selfCompatible = true)})
+@DefineGroups({
+        @Group(name = "parallelSelfCompatible", selfCompatible = true),
+        @Group(name = "parallelNotSelfCompatible", selfCompatible = false),
+        @Group(name = "receive", selfCompatible = true)})
+@DefineRules({
+        @Compatible(value = {"parallelSelfCompatible", "receive"}),
+        @Compatible(value = {"parallelNotSelfCompatible", "receive"})})
 public class ProxyImpl extends AbstractComponent implements
         FinalResponseReceiver, Proxy {
 
@@ -89,7 +97,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void sendv(Request<?> request) {
         this.sendv(request, this.selectPeer());
     }
@@ -98,7 +106,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void sendv(final Request<?> request, final Peer peer) {
         if (request.getResponseProvider() != null) {
             throw new IllegalArgumentException(
@@ -118,7 +126,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Response<?> send(final Request<?> request) {
         return this.send(request, this.selectPeer());
     }
@@ -127,7 +135,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Response<?> send(final Request<?> request, Peer peer) {
         if (request.getResponseProvider() == null) {
             throw new IllegalArgumentException(
@@ -147,7 +155,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Serializable send(List<? extends Request<?>> requests,
                              Serializable context,
                              ResponseCombiner responseCombiner) {
@@ -158,7 +166,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Serializable send(List<? extends Request<?>> requests,
                              Serializable context,
                              ResponseCombiner responseCombiner, Peer peer) {
@@ -184,7 +192,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("receive")
     public void receive(FinalResponse response) {
         this.messageDispatcher.push(response);
     }
@@ -193,7 +201,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Peer selectPeer() {
         if (this.peers == null || this.peers.isEmpty()) {
             List<Peer> newStubs = this.selectTracker().getPeers();
