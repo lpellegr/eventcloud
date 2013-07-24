@@ -86,6 +86,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
             MessageId messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
+
         // if messageId==null then this is the request
         // received by the initiator.
         if (messageId == null) {

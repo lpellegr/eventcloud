@@ -42,10 +42,8 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
 
     private static final long serialVersionUID = 150L;
 
-    private AnycastRoutingList<E> anycastRoutingList =
+    protected AnycastRoutingList<E> anycastRoutingList =
             new AnycastRoutingList<E>();
-
-    private boolean alreadyReceived = false;
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
@@ -72,14 +70,6 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
             AnycastConstraintsValidator<E> validator,
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> responseProvider) {
         super(validator, responseProvider);
-    }
-
-    public void markAsAlreadyReceived() {
-        this.alreadyReceived = true;
-    }
-
-    public boolean isAlreadyReceived() {
-        return this.alreadyReceived;
     }
 
     /**
@@ -111,15 +101,20 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
      */
     @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
-        buf.append(this.getId());
+        StringBuffer buf = new StringBuffer();
 
-        buf.append("\nStack: \n");
+        buf.append(this.getClass().getSimpleName());
+        buf.append("[id=");
+        buf.append(this.getId());
+        buf.append(", stack:\n");
+
         for (AnycastRoutingEntry<E> entry : this.anycastRoutingList) {
             buf.append("  - ");
             buf.append(entry.getPeerCoordinate());
             buf.append('\n');
         }
+
+        buf.append("]");
 
         return buf.toString();
     }

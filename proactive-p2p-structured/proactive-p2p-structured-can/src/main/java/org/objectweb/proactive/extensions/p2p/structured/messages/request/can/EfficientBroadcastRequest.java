@@ -16,8 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
@@ -43,13 +41,9 @@ public class EfficientBroadcastRequest<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private boolean alreadyReceived = false;
-
     // The identifier of the broadcast request.
     private MessageId originalMessageId;
 
-    private AnycastRoutingList<E> broadcastRoutingList =
-            new AnycastRoutingList<E>();
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
     private byte[][] directions;
@@ -86,6 +80,7 @@ public class EfficientBroadcastRequest<E extends Element> extends
             ResponseProvider<? extends AnycastResponse<E>, Coordinate<E>> provider,
             MessageId messageId, byte[][] directions, Element[] splitPlans) {
         super(validator, provider);
+
         // if messageId==null then this is the request received by the
         // initiator.
         if (messageId == null) {
@@ -93,29 +88,8 @@ public class EfficientBroadcastRequest<E extends Element> extends
         } else {
             this.originalMessageId = messageId;
         }
+
         this.directions = directions;
-    }
-
-    @Override
-    public void markAsAlreadyReceived() {
-        this.alreadyReceived = true;
-    }
-
-    @Override
-    public boolean isAlreadyReceived() {
-        return this.alreadyReceived;
-    }
-
-    /**
-     * Returns the {@link AnycastRoutingList} containing the
-     * {@link AnycastRoutingEntry} to use in order to route the response.
-     * 
-     * @return the {@link AnycastRoutingList} containing the
-     *         {@link AnycastRoutingEntry} to use in order to route the
-     *         response.
-     */
-    public AnycastRoutingList<E> getBroadcastRoutingList() {
-        return this.broadcastRoutingList;
     }
 
     /**
@@ -126,27 +100,12 @@ public class EfficientBroadcastRequest<E extends Element> extends
         return new EfficientBroadcastRequestRouter<EfficientBroadcastRequest<E>, E>();
     }
 
-    @Override
-    public boolean validatesKeyConstraints(Zone<E> zone) {
-        return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public String toString() {
-        StringBuffer buf = new StringBuffer("AnycastQueryMessage ID=");
-        buf.append(this.getId());
-
-        buf.append("\nStack: \n");
-        for (AnycastRoutingEntry<E> entry : this.broadcastRoutingList) {
-            buf.append("  - ");
-            buf.append(entry.getPeerCoordinate());
-            buf.append('\n');
-        }
-
-        return buf.toString();
+    public boolean validatesKeyConstraints(Zone<E> zone) {
+        return ((AnycastConstraintsValidator<E>) super.constraintsValidator).validatesKeyConstraints(zone);
     }
 
     public byte[][] getDirections() {
