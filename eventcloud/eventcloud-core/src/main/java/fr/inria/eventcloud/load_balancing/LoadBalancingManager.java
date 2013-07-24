@@ -341,6 +341,7 @@ public class LoadBalancingManager {
             }
         }
 
+        @SuppressWarnings("unused")
         private void notifyNeighborsAboutLoadChange(LoadReport loadReport) {
             double gossipRatio =
                     EventCloudProperties.LOAD_BALANCING_GOSSIP_RATIO.getDefaultValue();
