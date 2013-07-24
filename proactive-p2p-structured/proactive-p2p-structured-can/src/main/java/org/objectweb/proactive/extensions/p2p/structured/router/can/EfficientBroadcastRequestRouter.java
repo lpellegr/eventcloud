@@ -182,6 +182,9 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
+
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
@@ -198,6 +201,9 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                 super.onDestinationReached(overlay, request);
 
                 if (request.getResponseProvider() != null) {
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, new ResponseEntry(1));
+
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);

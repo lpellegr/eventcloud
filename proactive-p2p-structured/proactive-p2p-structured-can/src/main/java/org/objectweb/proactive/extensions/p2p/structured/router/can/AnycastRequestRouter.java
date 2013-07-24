@@ -173,6 +173,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
+                overlay.getRequestResponseManager().putResponseEntry(
+                        request, new ResponseEntry(1));
+
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
@@ -189,6 +192,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 super.onDestinationReached(overlay, request);
 
                 if (request.getResponseProvider() != null) {
+                    overlay.getRequestResponseManager().putResponseEntry(
+                            request, new ResponseEntry(1));
+
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
