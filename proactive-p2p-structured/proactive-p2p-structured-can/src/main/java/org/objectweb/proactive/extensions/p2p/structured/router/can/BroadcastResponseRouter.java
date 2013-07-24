@@ -62,62 +62,77 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends E
     @Override
     public void makeDecision(StructuredOverlay overlay,
                              MulticastResponse<E> response) {
+        if (response.isEmpty()) {
+            response.setConstraintsValidator(new UnicastConstraintsValidator<E>(
+                    response.getReversePathStack()
+                            .removeLast()
+                            .getPeerCoordinate()));
+            response.setIsEmpty(false);
 
-        if (response.validatesKeyConstraints(overlay)) {
-            ResponseEntry entry =
-                    overlay.getRequestResponseManager().getResponseEntry(
-                            response.getId());
+            this.route(overlay, response);
+        } else {
+            if (response.validatesKeyConstraints(overlay)) {
+                ResponseEntry entry =
+                        overlay.getRequestResponseManager().getResponseEntry(
+                                response.getId());
 
-            if (entry == null) {
-                throw new IllegalStateException("No entry found on "
-                        + overlay.getId() + " for message id "
-                        + response.getId());
-            }
+                if (entry == null) {
+                    throw new IllegalStateException("No entry found on "
+                            + overlay.getId() + " for message id "
+                            + response.getId());
+                }
 
-            // ensure that only one thread at a time can access the response
-            // entry when we receive two responses related to a same initial
-            // request
-            synchronized (entry) {
-                @SuppressWarnings("unchecked")
-                MulticastResponse<E> localResponse =
-                        (MulticastResponse<E>) entry.getResponse();
-                localResponse =
-                        MulticastResponse.merge(localResponse, response);
-                entry.setResponse(localResponse);
-                entry.incrementResponsesCount(1);
+                // ensure that only one thread at a time can access the response
+                // entry when we receive two responses related to a same initial
+                // request
+                synchronized (entry) {
+                    @SuppressWarnings("unchecked")
+                    MulticastResponse<E> localResponse =
+                            (MulticastResponse<E>) entry.getResponse();
+                    localResponse =
+                            MulticastResponse.merge(localResponse, response);
+                    entry.setResponse(localResponse);
+                    entry.incrementResponsesCount(1);
 
-                // we are on a synchronization point and all responses are
-                // received, we must ensure that operations performed in
-                // background are terminated before to send back the response.
-                if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
-                    localResponse.beforeSendingBackResponse(overlay);
+                    // we are on a synchronization point and all responses are
+                    // received, we must ensure that operations performed in
+                    // background are terminated before to send back the
+                    // response.
+                    if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
+                        localResponse.beforeSendingBackResponse(overlay);
 
-                    // we are on the initiator of the query we need to wake up
-                    // its thread in order to remove the synchronization point
-                    if (localResponse.getReversePathStack().size() == 0) {
-                        this.handle(overlay, localResponse);
-                    } else {
-                        log.debug(
-                                "All subreplies received on {} for request {}",
-                                overlay, response.getId());
+                        // we are on the initiator of the query we need to wake
+                        // up its thread in order to remove the synchronization
+                        // point
+                        if (localResponse.getReversePathStack().size() == 0) {
+                            this.handle(overlay, localResponse);
+                        } else {
+                            log.debug(
+                                    "All subreplies received on {} for request {}",
+                                    overlay, response.getId());
 
-                        // the response has been handled and sent back so we can
-                        // remove it from the table.
-                        localResponse.setConstraintsValidator(new UnicastConstraintsValidator<E>(
-                                localResponse.getReversePathStack()
-                                        .removeLast()
-                                        .getPeerCoordinate()));
+                            // the response has been handled and sent back so we
+                            // can remove it from the table.
+                            localResponse.setConstraintsValidator(new UnicastConstraintsValidator<E>(
+                                    localResponse.getReversePathStack()
+                                            .removeLast()
+                                            .getPeerCoordinate()));
 
-                        // the synchronization point is on a peer in the
-                        // sub-tree. we call the route method in order to know
-                        // where to sent back the response.
-                        this.route(overlay, localResponse);
+                            // the response has been handled and sent back so we
+                            // can remove it from the table.
+                            overlay.getRequestResponseManager()
+                                    .removeResponseEntry(localResponse.getId());
 
+                            // the synchronization point is on a peer in the
+                            // sub-tree. we call the route method in order to
+                            // know where to sent back the response.
+                            this.route(overlay, localResponse);
+                        }
                     }
                 }
+            } else {
+                this.route(overlay, response);
             }
-        } else {
-            this.route(overlay, response);
         }
     }
 
@@ -175,7 +190,7 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends E
                         response.getKey(), dimension, direction);
 
         if (neighborChosen == null) {
-            log.error(
+            log.warn(
                     "Trying to route a {} response but the key {} used "
                             + "is managed by no peer. You are probably using a key with "
                             + "values that are not between the minimum and the upper "

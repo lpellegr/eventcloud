@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Element>
         extends Router<MulticastRequest<E>, Coordinate<E>> {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(FloodingBroadcastRequestRouter.class);
 
     public FloodingBroadcastRequestRouter() {
@@ -93,11 +93,11 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
 
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.getBcastDebug()) {
+        if (JobLogger.isBcastDebugEnabled()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                logger.error("Cannot log broadcast algorithm : "
+                log.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
@@ -105,10 +105,11 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
 
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            logger.debug(
+            log.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
-            if (JobLogger.getBcastDebug()) {
+
+            if (JobLogger.isBcastDebugEnabled()) {
                 Date receiveTime = new Date();
                 String timestamp =
                         JobLogger.getDateFormat().format(receiveTime);
@@ -121,20 +122,24 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             }
 
             if (request.getResponseProvider() != null) {
+                MulticastResponse<E> response =
+                        (MulticastResponse<E>) request.getResponseProvider()
+                                .get(request, overlay);
+                response.setIsEmpty(true);
+
                 // sends back an empty response
-                canOverlay.getStub().route(
-                        request.getResponseProvider().get(request, overlay));
+                canOverlay.getStub().route(response);
             }
         } else {
             // the current overlay validates the constraints
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Request " + request.getId() + " is on peer "
+                if (log.isDebugEnabled()) {
+                    log.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
 
-                if (JobLogger.getBcastDebug()) {
+                if (JobLogger.isBcastDebugEnabled()) {
                     Date receiveTime = new Date();
                     String timestamp =
                             JobLogger.getDateFormat().format(receiveTime);
@@ -205,8 +210,8 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             // operation and the current peer must await for the number
             // of responses sent.
             else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Sending request " + request.getId() + " to "
+                if (log.isDebugEnabled()) {
+                    log.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -237,10 +242,9 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
                         while (it.hasNext()) {
                             Peer p = it.next().getStub();
 
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Sending request "
-                                        + request.getId() + " from " + overlay
-                                        + " to " + p);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Sending request " + request.getId()
+                                        + " from " + overlay + " to " + p);
                             }
 
                             ((PeerInternal) p).forward(request);
@@ -327,15 +331,23 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             if (request.getResponseProvider() != null) {
                 overlay.getRequestResponseManager().putResponseEntry(
                         request, new ResponseEntry(1));
+
                 request.getResponseProvider().get(request, overlay).route(
                         overlayCAN);
             }
 
+            log.warn(
+                    "Trying to route a {} request but the key {} used "
+                            + "is managed by no peer. You are probably using a key with "
+                            + "values that are not between the minimum and the upper "
+                            + "bound managed by the network.", this.getClass()
+                            .getSimpleName(), request.getKey());
+
             return;
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("The message is routed to a neigbour because the current peer "
+        if (log.isDebugEnabled()) {
+            log.debug("The message is routed to a neigbour because the current peer "
                     + "managing "
                     + overlay
                     + " does not contains the key to reach ("
@@ -359,7 +371,7 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
 
             ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
-            logger.error("Error while sending the message to the neighbor managing "
+            log.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }

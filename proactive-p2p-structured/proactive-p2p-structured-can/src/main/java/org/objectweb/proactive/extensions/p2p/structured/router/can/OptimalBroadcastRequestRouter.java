@@ -94,7 +94,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
 
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.getBcastDebug()) {
+        if (JobLogger.isBcastDebugEnabled()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
@@ -104,13 +104,22 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
             }
         }
 
-        // the current overlay has already received the request
-        if (!messagingManager.receiveRequest(request.getId())) {
+        boolean requestAlreadyReceived = false;
+
+        // the optimal broadcast algorithm does not trigger duplicates, thus
+        // check for duplicates is done only when debug mode is enabled
+        if (JobLogger.isBcastDebugEnabled()) {
+            requestAlreadyReceived =
+                    !messagingManager.receiveRequest(request.getId());
+        }
+
+        // the current peer has already received the request
+        if (requestAlreadyReceived) {
             log.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
-            if (JobLogger.getBcastDebug()) {
+            if (JobLogger.isBcastDebugEnabled()) {
                 Date receiveTime = new Date();
                 String timestamp =
                         JobLogger.getDateFormat().format(receiveTime);
@@ -122,12 +131,16 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
             }
 
             if (request.getResponseProvider() != null) {
+                MulticastResponse<E> response =
+                        (MulticastResponse<E>) request.getResponseProvider()
+                                .get(request, overlay);
+                response.setIsEmpty(true);
+
                 // sends back an empty response
-                canOverlay.getStub().route(
-                        request.getResponseProvider().get(request, overlay));
+                canOverlay.getStub().route(response);
             }
         } else {
-            // the current overlay validates the constraints
+            // the current peer validates the constraints
             // log "1" message
             if (request.validatesKeyConstraints(canOverlay)) {
                 if (log.isDebugEnabled()) {
@@ -136,7 +149,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                             + request.getKey());
                 }
 
-                if (JobLogger.getBcastDebug()) {
+                if (JobLogger.isBcastDebugEnabled()) {
                     Date receiveTime = new Date();
                     String timestamp =
                             JobLogger.getDateFormat().format(receiveTime);
@@ -149,9 +162,9 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
 
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
             } else {
-                // The current overlay doesn't validate the constraints but
+                // The current peer doesn't validate the constraints but
                 // it is needed to route the message anyway, log "-1" message
-                if (JobLogger.getBcastDebug()) {
+                if (JobLogger.isBcastDebugEnabled()) {
                     Date receiveTime = new Date();
                     String timestamp =
                             JobLogger.getDateFormat().format(receiveTime);

@@ -39,6 +39,7 @@ public class CanRequestResponseManager extends RequestResponseManager {
      * Used to maintain the list of requests which have already been 
      * received when AnycastRouter is used.
      */
+    // TODO: old entries must be garbage collected to avoid memory leak
     private Set<MessageId> requestsAlreadyReceived;
 
     public CanRequestResponseManager() {
@@ -77,6 +78,10 @@ public class CanRequestResponseManager extends RequestResponseManager {
      */
     public boolean receiveRequest(MessageId requestId) {
         return this.requestsAlreadyReceived.add(requestId);
+    }
+
+    public int getNbRequestsTraced() {
+        return this.requestsAlreadyReceived.size();
     }
 
     /**

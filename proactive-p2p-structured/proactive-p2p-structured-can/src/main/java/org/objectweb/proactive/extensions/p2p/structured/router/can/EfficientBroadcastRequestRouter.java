@@ -94,7 +94,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
 
         // retrieves the hostname for debugging purpose
         String hostname = "";
-        if (JobLogger.getBcastDebug()) {
+        if (JobLogger.isBcastDebugEnabled()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
@@ -110,7 +110,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
-            if (JobLogger.getBcastDebug()) {
+            if (JobLogger.isBcastDebugEnabled()) {
                 Date receiveTime = new Date();
                 String timestamp =
                         JobLogger.getDateFormat().format(receiveTime);
@@ -122,9 +122,13 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
             }
 
             if (request.getResponseProvider() != null) {
+                MulticastResponse<E> response =
+                        (MulticastResponse<E>) request.getResponseProvider()
+                                .get(request, overlay);
+                response.setIsEmpty(true);
+
                 // sends back an empty response
-                canOverlay.getStub().route(
-                        request.getResponseProvider().get(request, overlay));
+                canOverlay.getStub().route(response);
             }
         } else {
             // the current overlay validates the constraints
@@ -134,7 +138,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
-                if (JobLogger.getBcastDebug()) {
+                if (JobLogger.isBcastDebugEnabled()) {
                     Date receiveTime = new Date();
                     String timestamp =
                             JobLogger.getDateFormat().format(receiveTime);
@@ -149,7 +153,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
             } else {
                 // Log "-1" message to say that the overlay is only a router,
                 // not a receiver
-                if (JobLogger.getBcastDebug()) {
+                if (JobLogger.isBcastDebugEnabled()) {
                     Date receiveTime = new Date();
                     String timestamp =
                             JobLogger.getDateFormat().format(receiveTime);

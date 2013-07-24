@@ -74,7 +74,7 @@ public class JobLogger {
         return LOG_DIRECTORY;
     }
 
-    public static boolean getBcastDebug() {
+    public static boolean isBcastDebugEnabled() {
         return BCAST_DEBUG;
     }
 

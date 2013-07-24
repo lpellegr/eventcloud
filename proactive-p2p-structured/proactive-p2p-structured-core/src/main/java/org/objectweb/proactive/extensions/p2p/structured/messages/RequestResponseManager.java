@@ -89,6 +89,10 @@ public abstract class RequestResponseManager implements Serializable {
         return this.aggregationTable;
     }
 
+    public ResponseTable getResponseTable() {
+        return this.responseTable;
+    }
+
     public void clear() {
         this.aggregationTable.clear();
         this.responseTable.clear();

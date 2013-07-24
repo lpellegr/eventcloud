@@ -335,6 +335,11 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         buf.append(super.id);
         buf.append(" manages zone ");
         buf.append(this);
+        buf.append(", contains ");
+        buf.append(this.getRequestResponseManager().getResponseTable().size());
+        buf.append(" response entries and ");
+        buf.append(this.getRequestResponseManager().getNbRequestsTraced());
+        buf.append(" requests traced");
 
         if (this.neighborTable.size() > 0) {
             buf.append(" and has the following neighbor(s):\n");
