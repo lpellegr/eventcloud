@@ -5,12 +5,12 @@
 	<parent>
 		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>1.5.0</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>eventcloud-deployment</artifactId>
-	<version>1.5.0</version>
+	<version>1.6.0-SNAPSHOT</version>
 	<name>eventcloud-deployment</name>
 
 	<packaging>pom</packaging>
