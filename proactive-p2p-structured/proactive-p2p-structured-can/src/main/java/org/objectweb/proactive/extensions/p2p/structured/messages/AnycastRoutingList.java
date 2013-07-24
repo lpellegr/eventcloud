@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.An
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * List used by {@link AnycastRequest} and {@link AnycastResponse} to store
@@ -31,7 +32,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
+public class AnycastRoutingList<E extends Element> extends
+        LinkedList<AnycastRoutingEntry<E>> {
 
     private static final long serialVersionUID = 150L;
 
@@ -44,8 +46,8 @@ public class AnycastRoutingList extends LinkedList<AnycastRoutingEntry> {
      * @return the {@link AnycastRoutingEntry} found or <code>null</code> if not
      *         found.
      */
-    public AnycastRoutingEntry getRoutingResponseEntryBy(OverlayId peerId) {
-        for (AnycastRoutingEntry entry : this) {
+    public AnycastRoutingEntry<E> getRoutingResponseEntryBy(OverlayId peerId) {
+        for (AnycastRoutingEntry<E> entry : this) {
             if (entry.getPeerId().equals(peerId)) {
                 return entry;
             }

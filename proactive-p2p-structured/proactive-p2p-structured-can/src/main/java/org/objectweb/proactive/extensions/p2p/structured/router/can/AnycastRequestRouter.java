@@ -89,7 +89,8 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                              AnycastRequest<E> request) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
-                (CanRequestResponseManager) canOverlay.getRequestResponseManager();
+                canOverlay.getRequestResponseManager();
+
         // retrieves the hostname for debugging purpose
         String hostname = "";
         if (JobLogger.getBcastDebug()) {
@@ -101,6 +102,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                 e.printStackTrace();
             }
         }
+
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
             logger.debug(
@@ -117,12 +119,11 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                         + JobLogger.getLineSeparator());
 
             }
+
             if (request.getResponseProvider() != null) {
-                // send back an empty response
-                ((PeerInternal) request.getAnycastRoutingList()
-                        .removeLast()
-                        .getPeerStub()).forward(request.getResponseProvider()
-                        .get(request, overlay));
+                // sends back an empty response
+                canOverlay.getStub().route(
+                        request.getResponseProvider().get(request, overlay));
             }
         } else {
             // the current overlay validates the constraints
@@ -132,6 +133,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
+
                 if (JobLogger.getBcastDebug()) {
                     Date receiveTime = new Date();
                     String timestamp =
@@ -142,6 +144,7 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                             + canOverlay.getNeighborTable().size()
                             + JobLogger.getLineSeparator());
                 }
+
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
 
                 // sends the message to the other neighbors which validates the
@@ -170,8 +173,6 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
-                overlay.getRequestResponseManager().putResponseEntry(
-                        request, new ResponseEntry(1));
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
@@ -191,8 +192,6 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
-                    overlay.getRequestResponseManager().putResponseEntry(
-                            request, new ResponseEntry(1));
                     response.route(overlay);
                 }
             }
@@ -217,8 +216,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                     // constructs the routing list used for routing back the
                     // responses
                     request.getAnycastRoutingList().add(
-                            new AnycastRoutingEntry(
-                                    overlay.getId(), overlay.getStub()));
+                            new AnycastRoutingEntry<E>(
+                                    overlay.getId(), canOverlay.getZone()
+                                            .getLowerBound()));
                 }
 
                 for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -227,13 +227,16 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                                 neighborsToSendTo.get(dim, direction)
                                         .values()
                                         .iterator();
+
                         while (it.hasNext()) {
                             Peer p = it.next().getStub();
+
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Sending request "
                                         + request.getId() + " from " + overlay
-                                        + " -> " + p);
+                                        + " to " + p);
                             }
+
                             ((PeerInternal) p).forward(request);
                         }
                     }
@@ -250,15 +253,14 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : overlay.getNeighborTable().get(
                         dimension, direction).values()) {
-                    AnycastRoutingEntry entryCommingFromSender =
+                    AnycastRoutingEntry<E> entryCommingFromSender =
                             msg.getAnycastRoutingList()
                                     .getRoutingResponseEntryBy(entry.getId());
                     /*
-                     * If msg contains the neighbor identifier in its
-                     * routing list, we know that this neighbor has
-                     * already receive the query and we can remove it from the
-                     * neighbors we need to send the query: it avoids sometimes a
-                     * remote call.
+                     * If msg contains the neighbor identifier in its routing
+                     * list, we know that this neighbor has already received the
+                     * query and we can remove it from the neighbors we need to
+                     * send the query: it avoids sometimes a remote call.
                      */
                     if (entryCommingFromSender == null
                             && msg.validatesKeyConstraints(entry.getZone())) {
@@ -344,8 +346,9 @@ public class AnycastRequestRouter<T extends AnycastRequest<E>, E extends Element
                         request, new ResponseEntry(1));
 
                 request.getAnycastRoutingList().add(
-                        new AnycastRoutingEntry(
-                                overlay.getId(), overlay.getStub()));
+                        new AnycastRoutingEntry<E>(
+                                overlay.getId(), overlayCAN.getZone()
+                                        .getLowerBound()));
             }
 
             ((PeerInternal) neighborChosen.getStub()).forward(request);

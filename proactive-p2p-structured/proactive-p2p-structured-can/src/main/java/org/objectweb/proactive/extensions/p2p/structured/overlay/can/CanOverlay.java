@@ -303,6 +303,14 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CanRequestResponseManager getRequestResponseManager() {
+        return (CanRequestResponseManager) super.getRequestResponseManager();
+    }
+
+    /**
      * Returns the history of the splits.
      * 
      * @return the history of the splits.

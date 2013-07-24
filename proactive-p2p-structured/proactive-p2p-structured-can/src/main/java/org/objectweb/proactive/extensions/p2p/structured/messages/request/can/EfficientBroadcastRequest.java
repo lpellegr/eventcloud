@@ -47,7 +47,9 @@ public class EfficientBroadcastRequest<E extends Element> extends
 
     // The identifier of the broadcast request.
     private MessageId originalMessageId;
-    private AnycastRoutingList broadcastRoutingList = new AnycastRoutingList();
+
+    private AnycastRoutingList<E> broadcastRoutingList =
+            new AnycastRoutingList<E>();
     // The directions on which the broadcast request has to be propagated by the
     // peer receiving it.
     private byte[][] directions;
@@ -112,7 +114,7 @@ public class EfficientBroadcastRequest<E extends Element> extends
      *         {@link AnycastRoutingEntry} to use in order to route the
      *         response.
      */
-    public AnycastRoutingList getBroadcastRoutingList() {
+    public AnycastRoutingList<E> getBroadcastRoutingList() {
         return this.broadcastRoutingList;
     }
 
@@ -138,9 +140,9 @@ public class EfficientBroadcastRequest<E extends Element> extends
         buf.append(this.getId());
 
         buf.append("\nStack: \n");
-        for (AnycastRoutingEntry entry : this.broadcastRoutingList) {
+        for (AnycastRoutingEntry<E> entry : this.broadcastRoutingList) {
             buf.append("  - ");
-            buf.append(entry.getPeerStub());
+            buf.append(entry.getPeerCoordinate());
             buf.append('\n');
         }
 

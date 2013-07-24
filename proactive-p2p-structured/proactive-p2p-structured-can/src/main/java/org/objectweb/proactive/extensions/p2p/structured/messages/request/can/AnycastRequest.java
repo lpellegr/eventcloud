@@ -42,7 +42,8 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
 
     private static final long serialVersionUID = 150L;
 
-    private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
+    private AnycastRoutingList<E> anycastRoutingList =
+            new AnycastRoutingList<E>();
 
     private boolean alreadyReceived = false;
 
@@ -89,7 +90,7 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
      *         {@link AnycastRoutingEntry} to use in order to route the
      *         response.
      */
-    public AnycastRoutingList getAnycastRoutingList() {
+    public AnycastRoutingList<E> getAnycastRoutingList() {
         return this.anycastRoutingList;
     }
 
@@ -114,9 +115,9 @@ public class AnycastRequest<E extends Element> extends Request<Coordinate<E>> {
         buf.append(this.getId());
 
         buf.append("\nStack: \n");
-        for (AnycastRoutingEntry entry : this.anycastRoutingList) {
+        for (AnycastRoutingEntry<E> entry : this.anycastRoutingList) {
             buf.append("  - ");
-            buf.append(entry.getPeerStub());
+            buf.append(entry.getPeerCoordinate());
             buf.append('\n');
         }
 

@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E extends Element>
         extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(EfficientBroadcastRequestRouter.class);
 
     public EfficientBroadcastRequestRouter() {
@@ -90,23 +90,26 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                              EfficientBroadcastRequest<E> request) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
-                (CanRequestResponseManager) canOverlay.getRequestResponseManager();
+                canOverlay.getRequestResponseManager();
+
         // retrieves the hostname for debugging purpose
         String hostname = "";
         if (JobLogger.getBcastDebug()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                logger.error("Cannot log broadcast algorithm : "
+                log.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
         }
+
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            logger.debug(
+            log.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
+
             if (JobLogger.getBcastDebug()) {
                 Date receiveTime = new Date();
                 String timestamp =
@@ -117,18 +120,17 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                         + canOverlay.getNeighborTable().size()
                         + JobLogger.getLineSeparator());
             }
+
             if (request.getResponseProvider() != null) {
-                // send back an empty response
-                ((PeerInternal) request.getAnycastRoutingList()
-                        .removeLast()
-                        .getPeerStub()).forward(request.getResponseProvider()
-                        .get(request, overlay));
+                // sends back an empty response
+                canOverlay.getStub().route(
+                        request.getResponseProvider().get(request, overlay));
             }
         } else {
             // the current overlay validates the constraints
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Request " + request.getId() + " is on peer "
+                if (log.isDebugEnabled()) {
+                    log.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
@@ -142,9 +144,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                             + canOverlay.getNeighborTable().size()
                             + JobLogger.getLineSeparator());
                 }
+
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
-                // sends the message to the other neighbors which validates the
-                // constraints
             } else {
                 // Log "-1" message to say that the overlay is only a router,
                 // not a receiver
@@ -159,6 +160,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                             + JobLogger.getLineSeparator());
                 }
             }
+
             this.handle(overlay, request);
         }
     }
@@ -180,8 +182,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
-                overlay.getRequestResponseManager().putResponseEntry(
-                        request, new ResponseEntry(1));
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
@@ -201,8 +201,6 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
-                    overlay.getRequestResponseManager().putResponseEntry(
-                            request, new ResponseEntry(1));
                     response.route(overlay);
                 }
             }
@@ -210,8 +208,8 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
             // operation and the current peer must await for the number
             // of responses sent.
             else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Sending request " + request.getId() + " to "
+                if (log.isDebugEnabled()) {
+                    log.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -227,8 +225,9 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                     // constructs the routing list used by responses for routing
                     // back
                     request.getAnycastRoutingList().add(
-                            new AnycastRoutingEntry(
-                                    overlay.getId(), overlay.getStub()));
+                            new AnycastRoutingEntry<E>(
+                                    overlay.getId(), canOverlay.getZone()
+                                            .getLowerBound()));
                 }
 
                 for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -239,11 +238,12 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                         while (it.hasNext()) {
                             NeighborEntryWrapper<E> neighborEntry = it.next();
                             Peer p = neighborEntry.getNeighborEntry().getStub();
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Sending request "
-                                        + request.getId() + " from " + overlay
-                                        + " -> " + p);
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("Sending request " + request.getId()
+                                        + " from " + overlay + " to " + p);
                             }
+
                             request.setDirections(neighborEntry.getDirections());
                             ((PeerInternal) p).forward(request);
                         }
@@ -255,7 +255,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
 
     /**
      * Apply the M-CAN broadcast algorithm to select the peers to forward the
-     * message.
+     * message to.
      * 
      * @param overlay
      * @param request
@@ -293,6 +293,7 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
                                 dim, direction));
             }
         }
+
         for (byte dimension = (byte) (dimensions - 1); dimension >= 0; dimension--) {
 
             for (byte direction = 0; direction < 2; direction++) {
@@ -359,12 +360,14 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
     @Override
     protected void route(StructuredOverlay overlay,
                          EfficientBroadcastRequest<E> request) {
-        // This method is not used with this broadcast algorithm because a
-        // message
-        // has to follow a unique path and no heuristics can be made to route
-        // the message to peers validating the constraint. Hence, we always use
-        // the EfficientBroadcastRequestRouter#handle method and never this one,
-        // since the behavior should be the same for both methods.
+        /*
+         * This method is not used with this broadcast algorithm because a
+         * message has to follow a unique path and no heuristics can be made to
+         * route the message to peers validating the constraint. Hence, we
+         * always use the EfficientBroadcastRequestRouter#handle method and
+         * never this one, since the behavior should be the same for both
+         * methods.
+         */
     }
 
     /**
@@ -417,4 +420,5 @@ public class EfficientBroadcastRequestRouter<T extends AnycastRequest<E>, E exte
         }
         return directions;
     }
+
 }
