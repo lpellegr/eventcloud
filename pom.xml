@@ -282,7 +282,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-mao-bundle</artifactId>
-				<version>12</version>
+				<version>5.4.0</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>
