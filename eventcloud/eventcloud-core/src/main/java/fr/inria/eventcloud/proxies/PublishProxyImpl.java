@@ -23,7 +23,6 @@ import java.util.Collection;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +88,8 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void publish(Quadruple quad) {
-        if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-            log.info("About to publish quad : " + quad.getSubject() + " "
-                    + quad.getPredicate() + " " + quad.getObject());
-        }
-
         super.selectPeer().publish(quad);
     }
 
@@ -103,7 +97,7 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void publish(CompoundEvent event) {
         if (log.isTraceEnabled()) {
             // log information for integration test purposes
@@ -119,7 +113,7 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void publish(Collection<CompoundEvent> events) {
         for (CompoundEvent event : events) {
             this.publish(event);
@@ -130,7 +124,7 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void publish(URL url, SerializationFormat format) {
         try {
             InputStream in = url.openConnection().getInputStream();

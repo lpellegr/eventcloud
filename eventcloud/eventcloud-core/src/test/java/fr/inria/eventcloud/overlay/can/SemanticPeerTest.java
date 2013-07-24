@@ -28,6 +28,7 @@ import org.objectweb.proactive.core.ProActiveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.hp.hpl.jena.graph.Node;
@@ -419,10 +420,10 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
         Node commonURI = NodeGenerator.randomUri();
         Node graphValue = NodeGenerator.randomUri();
 
-        // two quadruples share the same value respectively for the object and
-        // subject component and they have the same graphValue
-        Quadruple[] quads =
-                {
+        // two quadruples share the same value respectively for the object
+        // and subject component and they have the same graphValue
+        List<Quadruple> quadruples =
+                ImmutableList.of(
                         new Quadruple(
                                 graphValue, NodeGenerator.randomUri(),
                                 NodeGenerator.randomUri(), commonURI),
@@ -432,11 +433,9 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                                 NodeGenerator.random()),
                         QuadrupleGenerator.random(),
                         QuadrupleGenerator.random(),
-                        QuadrupleGenerator.random()};
+                        QuadrupleGenerator.random());
 
-        for (Quadruple quad : quads) {
-            super.getPutGetProxy().add(quad);
-        }
+        super.getPutGetProxy().add(quadruples);
 
         // test with ask query form
         Assert.assertTrue(super.getPutGetProxy().executeSparqlAsk(

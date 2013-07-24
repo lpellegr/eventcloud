@@ -186,7 +186,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
             // even if we could have
             // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
-            // threads handling subscriptions in parallel, the subscribe method
+            // threads handling subscriptions in parallelSelfCompatible, the
+            // subscribe method
             // is not supposed to be called very often. We may allow some
             // contention at the price of less memory to be used
             this.subscriptions =
@@ -197,7 +198,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
                     new ConcurrentHashMap<NotificationId, BindingSolution>(
                             // At most
                             // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
-                            // threads can update the map in parallel. Each of
+                            // threads can update the map in
+                            // parallelSelfCompatible. Each of
                             // them can add part of a solution. The solution is
                             // eventually removed when all the sub solutions are
                             // received. Thus if we suppose that the average
@@ -245,7 +247,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void subscribe(fr.inria.eventcloud.api.Subscription subscription,
                           BindingNotificationListener listener) {
         this.indexSubscription(subscription, listener);
@@ -255,7 +257,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void subscribe(fr.inria.eventcloud.api.Subscription subscription,
                           CompoundEventNotificationListener listener) {
 
@@ -281,7 +283,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void subscribe(fr.inria.eventcloud.api.Subscription subscription,
                           SignalNotificationListener listener) {
         this.indexSubscription(subscription, listener);
@@ -334,7 +336,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void unsubscribe(SubscriptionId sid) {
         // once the subscription id is removed from the list of the
         // subscriptions which are matched, the notifications which are received
@@ -365,7 +367,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void receiveSbce1Or2(BindingNotification notification) {
         this.logNotificationReception(notification);
 
@@ -419,7 +421,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void receiveSbce3(BindingNotification notification) {
         this.logNotificationReception(notification);
 
@@ -451,7 +453,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     @SuppressWarnings("unchecked")
     public void receiveSbce2(QuadruplesNotification notification) {
         this.logNotificationReception(notification);
@@ -545,7 +547,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     @SuppressWarnings("unchecked")
     public void receiveSbce3(QuadruplesNotification notification) {
         this.logNotificationReception(notification);
@@ -574,7 +576,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void receiveSbce1Or2(SignalNotification notification) {
         this.receive(notification);
     }
@@ -583,7 +585,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public void receiveSbce3(SignalNotification notification) {
         this.receive(notification);
     }
@@ -622,7 +624,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@link CompoundEventNotificationListener}.
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     @SuppressWarnings("unchecked")
     public void receiveSbce1(PollingSignalNotification notification) {
         this.logNotificationReception(notification);
@@ -665,7 +667,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public final CompoundEvent reconstructCompoundEvent(NotificationId notificationId,
                                                         SubscriptionId subscriptionId,
                                                         Node eventId) {
@@ -820,7 +822,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public Subscription find(SubscriptionId id) {
         return this.subscriptions.get(id).subscription;
     }
@@ -830,7 +832,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * 
      * @return the URI at which the component is bind.
      */
-    @MemberOf("parallel")
+    @MemberOf("parallelSelfCompatible")
     public String getComponentUri() {
         return super.url;
     }
