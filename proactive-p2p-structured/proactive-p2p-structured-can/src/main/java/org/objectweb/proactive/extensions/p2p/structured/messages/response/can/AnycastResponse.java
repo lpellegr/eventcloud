@@ -22,6 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
@@ -61,13 +62,10 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
 
         AnycastRequest<E> anycastRequest = (AnycastRequest<E>) request;
 
-        this.anycastRoutingList =
-                ((AnycastRequest<E>) request).getAnycastRoutingList();
+        this.anycastRoutingList = anycastRequest.getAnycastRoutingList();
         this.constraintsValidator =
                 new UnicastConstraintsValidator<E>(
-                        anycastRequest.getAnycastRoutingList()
-                                .removeLast()
-                                .getPeerCoordinate());
+                        ((CanOverlay<E>) overlay).getZone().getLowerBound());
     }
 
     /**
