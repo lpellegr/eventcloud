@@ -93,7 +93,7 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
     @Override
     @SuppressWarnings("unchecked")
     public void route(StructuredOverlay overlay) {
-        if (this.senderCoordinate == null) {
+        if (this.senderCoordinate == null && this.responseProvider != null) {
             this.senderCoordinate =
                     SerializedValue.create(((CanOverlay<E>) overlay).getZone()
                             .getLowerBound());
