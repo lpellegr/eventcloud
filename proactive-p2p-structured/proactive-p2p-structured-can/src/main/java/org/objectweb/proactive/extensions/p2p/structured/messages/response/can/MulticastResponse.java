@@ -16,24 +16,24 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.response.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingList;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathStack;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
- * Response associated to {@link AnycastRequest}. This kind of response will use
- * the same path as the initial request for its routing. The concrete
- * implementation has to override {@link #mergeAttributes(AnycastResponse)} if
+ * Response associated to {@link MulticastRequest}. This kind of response will
+ * use the same path as the initial request for its routing. The concrete
+ * implementation has to override {@link #mergeAttributes(MulticastResponse)} if
  * it is supposed to sent back a response.
  * 
  * @param <E>
@@ -41,14 +41,14 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * 
  * @author lpellegr
  */
-public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> {
+public class MulticastResponse<E extends Element> extends
+        Response<Coordinate<E>> {
 
     private static final long serialVersionUID = 150L;
 
-    private AnycastRoutingList<E> anycastRoutingList =
-            new AnycastRoutingList<E>();
+    private ReversePathStack<E> reversePathStack = new ReversePathStack<E>();
 
-    public AnycastResponse() {
+    public MulticastResponse() {
         super();
     }
 
@@ -56,13 +56,14 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void setAttributes(Request<Coordinate<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
-        AnycastRequest<E> anycastRequest = (AnycastRequest<E>) request;
+        MulticastRequest<E> anycastRequest = (MulticastRequest<E>) request;
 
-        this.anycastRoutingList = anycastRequest.getAnycastRoutingList();
+        this.reversePathStack = anycastRequest.getReversePathStack();
         this.constraintsValidator =
                 new UnicastConstraintsValidator<E>(
                         ((CanOverlay<E>) overlay).getZone().getLowerBound());
@@ -80,7 +81,7 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      * is possible to have a synchronization point on a peer that does not
      * validate the constraints. To detect if the current peer on which a
      * synchronization point is unlocked, look at
-     * {@link AnycastResponse#validatesKeyConstraints(StructuredOverlay)}.
+     * {@link MulticastResponse#validatesKeyConstraints(StructuredOverlay)}.
      * 
      * @param overlay
      *            the overlay on which this method is called.
@@ -90,23 +91,23 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
     }
 
     /**
-     * Returns the {@link AnycastRoutingList} containing the
-     * {@link AnycastRoutingEntry} to use in order to route the response.
+     * Returns the {@link ReversePathStack} containing the
+     * {@link ReversePathEntry entries} to use in order to route the response.
      * 
-     * @return the {@link AnycastRoutingList} containing the
-     *         {@link AnycastRoutingEntry} to use in order to route the
+     * @return the {@link ReversePathStack} containing the
+     *         {@link ReversePathEntry entries} to use in order to route the
      *         response.
      */
-    public AnycastRoutingList<E> getAnycastRoutingList() {
-        return this.anycastRoutingList;
+    public ReversePathStack<E> getReversePathStack() {
+        return this.reversePathStack;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends AnycastResponse<E>, Coordinate<E>> getRouter() {
-        return new AnycastResponseRouter<AnycastResponse<E>, E>();
+    public Router<? extends MulticastResponse<E>, Coordinate<E>> getRouter() {
+        return new BroadcastResponseRouter<MulticastResponse<E>, E>();
     }
 
     /**
@@ -118,14 +119,14 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      * @param responseReceived
      *            the response to merge with the current one.
      */
-    public void mergeAttributes(AnycastResponse<E> responseReceived) {
+    public void mergeAttributes(MulticastResponse<E> responseReceived) {
         // to be overridden if necessary
     }
 
     /**
      * Merges two responses on a synchronization point. To merge information
      * which are specific to the type of response, you have to override
-     * {@link #mergeAttributes(AnycastResponse)}.
+     * {@link #mergeAttributes(MulticastResponse)}.
      * 
      * @param localResponse
      *            the response which has already been received and which is
@@ -137,10 +138,10 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      * @return a new response merging {@code localResponse} and
      *         {@code responseReceived} responses.
      * 
-     * @see #mergeAttributes(AnycastResponse)
+     * @see #mergeAttributes(MulticastResponse)
      */
-    public static <E extends Element> AnycastResponse<E> merge(AnycastResponse<E> localResponse,
-                                                               AnycastResponse<E> responseReceived) {
+    public static <E extends Element> MulticastResponse<E> merge(MulticastResponse<E> localResponse,
+                                                                 MulticastResponse<E> responseReceived) {
         if (localResponse == null) {
             return responseReceived;
         } else {

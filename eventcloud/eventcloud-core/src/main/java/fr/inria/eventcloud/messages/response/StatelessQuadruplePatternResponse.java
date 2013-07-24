@@ -16,8 +16,8 @@
  **/
 package fr.inria.eventcloud.messages.response;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
 
 import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
@@ -28,7 +28,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * @author lpellegr
  */
 public class StatelessQuadruplePatternResponse extends
-        AnycastResponse<SemanticElement> {
+        MulticastResponse<SemanticElement> {
 
     private static final long serialVersionUID = 150L;
 
@@ -40,8 +40,8 @@ public class StatelessQuadruplePatternResponse extends
      * {@inheritDoc}
      */
     @Override
-    public AnycastResponseRouter<AnycastResponse<SemanticElement>, SemanticElement> getRouter() {
-        return new AnycastResponseRouter<AnycastResponse<SemanticElement>, SemanticElement>();
+    public BroadcastResponseRouter<MulticastResponse<SemanticElement>, SemanticElement> getRouter() {
+        return new BroadcastResponseRouter<MulticastResponse<SemanticElement>, SemanticElement>();
     }
 
 }

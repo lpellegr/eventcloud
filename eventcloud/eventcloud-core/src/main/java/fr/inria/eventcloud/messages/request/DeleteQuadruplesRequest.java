@@ -18,7 +18,7 @@ package fr.inria.eventcloud.messages.request;
 
 import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 
 import com.google.common.collect.Lists;
@@ -56,7 +56,7 @@ public class DeleteQuadruplesRequest extends
      */
     @Override
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                          AnycastRequest<SemanticElement> request,
+                                                          MulticastRequest<SemanticElement> request,
                                                           QuadruplePattern quadruplePattern) {
         List<Quadruple> result = null;
 

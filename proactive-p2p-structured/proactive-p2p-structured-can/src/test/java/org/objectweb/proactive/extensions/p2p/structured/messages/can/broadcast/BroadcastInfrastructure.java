@@ -26,8 +26,8 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClass
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 import org.objectweb.proactive.extensions.p2p.structured.logger.LogReader;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.EfficientBroadcastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionCons
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 
 /**
  * This class aims to build the necessary random CAN, to choose the initiator of
@@ -138,13 +138,13 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         Request<Coordinate<StringElement>> request;
         if (this.constraint == null) {
             request =
-                    new AnycastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                    new MulticastRequest<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     CoordinateFactory.newStringCoordinate()));
         } else {
             request =
-                    new AnycastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                    new MulticastRequest<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     this.constraint));
         }
         this.printRequestSize(request);
@@ -177,12 +177,12 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         if (this.constraint == null) {
             request =
                     new EfficientBroadcastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     CoordinateFactory.newStringCoordinate()));
         } else {
             request =
                     new EfficientBroadcastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     this.constraint));
         }
         this.printRequestSize(request);
@@ -217,12 +217,12 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
         if (this.constraint == null) {
             request =
                     new OptimalBroadcastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     CoordinateFactory.newStringCoordinate()));
         } else {
             request =
                     new OptimalBroadcastRequest<StringElement>(
-                            new DefaultAnycastConstraintsValidator<StringElement>(
+                            new BroadcastConstraintsValidator<StringElement>(
                                     this.constraint));
 
         }

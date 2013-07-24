@@ -27,8 +27,8 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymen
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
@@ -40,21 +40,21 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionCons
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastRequestRouter;
-import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
-import org.objectweb.proactive.extensions.p2p.structured.validator.can.DefaultAnycastConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
+import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 
 /**
- * Tests associated to {@link AnycastRequestRouter} and
- * {@link AnycastResponseRouter}.
+ * Tests associated to {@link FloodingBroadcastRequestRouter} and
+ * {@link BroadcastResponseRouter}.
  * 
  * @author lpellegr
  */
-public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
+public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static final int NB_PEERS = 10;
 
-    public AnycastLookupRequestTest() {
+    public MulticastLookupRequestTest() {
         super(
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
@@ -127,21 +127,22 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class SetValuesRequest extends AnycastRequest<StringElement> {
+    private static class SetValuesRequest extends
+            MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
         public SetValuesRequest() {
-            super(new DefaultAnycastConstraintsValidator<StringElement>(
+            super(new BroadcastConstraintsValidator<StringElement>(
                     CoordinateFactory.newStringCoordinate()));
         }
 
         @Override
         public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
-            return new AnycastRequestRouter<GetZonesValidatingConstraintsRequest, StringElement>() {
+            return new FloodingBroadcastRequestRouter<GetZonesValidatingConstraintsRequest, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
-                                                           AnycastRequest<StringElement> request) {
+                                                           MulticastRequest<StringElement> request) {
                     ((CustomCanOverlay) overlay).value = true;
                 };
             };
@@ -149,19 +150,20 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     }
 
-    private static class GetValuesRequest extends AnycastRequest<StringElement> {
+    private static class GetValuesRequest extends
+            MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
         public GetValuesRequest() {
             super(
-                    new DefaultAnycastConstraintsValidator<StringElement>(
+                    new BroadcastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
-                    new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
                         private static final long serialVersionUID = 150L;
 
                         @Override
-                        public AnycastResponse<StringElement> get() {
+                        public MulticastResponse<StringElement> get() {
                             return new GetValuesResponse();
                         }
                     });
@@ -170,7 +172,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     private static class GetValuesResponse extends
-            AnycastResponse<StringElement> {
+            MulticastResponse<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
@@ -184,7 +186,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public void mergeAttributes(AnycastResponse<StringElement> responseReceived) {
+        public void mergeAttributes(MulticastResponse<StringElement> responseReceived) {
             this.result.addAll(((GetValuesResponse) responseReceived).getResult());
         }
 
@@ -195,20 +197,20 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     private static class GetZonesValidatingConstraintsRequest extends
-            AnycastRequest<StringElement> {
+            MulticastRequest<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
         public GetZonesValidatingConstraintsRequest(
                 Coordinate<StringElement> coordinatesToReach) {
             super(
-                    new DefaultAnycastConstraintsValidator<StringElement>(
+                    new BroadcastConstraintsValidator<StringElement>(
                             coordinatesToReach),
-                    new ResponseProvider<AnycastResponse<StringElement>, Coordinate<StringElement>>() {
+                    new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
                         private static final long serialVersionUID = 150L;
 
                         @Override
-                        public AnycastResponse<StringElement> get() {
+                        public MulticastResponse<StringElement> get() {
                             return new GetZonesValidatingConstraintsResponse();
                         }
                     });
@@ -217,7 +219,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     private static class GetZonesValidatingConstraintsResponse extends
-            AnycastResponse<StringElement> {
+            MulticastResponse<StringElement> {
 
         private static final long serialVersionUID = 150L;
 
@@ -232,7 +234,7 @@ public class AnycastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public void mergeAttributes(AnycastResponse<StringElement> responseReceived) {
+        public void mergeAttributes(MulticastResponse<StringElement> responseReceived) {
             this.zonesValidatingConstraints.addAll(((GetZonesValidatingConstraintsResponse) responseReceived).zonesValidatingConstraints);
         }
 

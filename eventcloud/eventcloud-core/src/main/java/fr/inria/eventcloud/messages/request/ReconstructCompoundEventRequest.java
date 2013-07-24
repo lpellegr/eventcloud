@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
      */
     @Override
     public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                          AnycastRequest<SemanticElement> request,
+                                                          MulticastRequest<SemanticElement> request,
                                                           QuadruplePattern quadruplePattern) {
         Set<HashCode> hashValues = this.hashValuesReceived.getValue();
         List<Quadruple> result = new ArrayList<Quadruple>();

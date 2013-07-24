@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
@@ -108,7 +108,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void mergeAttributes(AnycastResponse<SemanticElement> responseReceived) {
+    public void mergeAttributes(MulticastResponse<SemanticElement> responseReceived) {
         super.mergeAttributes(responseReceived);
 
         this.intermediateResults.addAll(((StatefulQuadruplePatternResponse<T>) responseReceived).intermediateResults);

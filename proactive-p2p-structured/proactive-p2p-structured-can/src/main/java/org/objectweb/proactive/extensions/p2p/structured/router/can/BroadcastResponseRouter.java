@@ -19,7 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.router.can;
 import org.objectweb.proactive.core.ProActiveRuntimeException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Router used to route {@link AnycastResponse}s. The path followed by the
+ * Router used to route {@link MulticastResponse}s. The path followed by the
  * response is the reverse path of the initial path followed by the request.
  * 
  * @param <T>
@@ -43,16 +43,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author lpellegr
  */
-public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Element>
-        extends Router<AnycastResponse<E>, Coordinate<E>> {
+public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends Element>
+        extends Router<MulticastResponse<E>, Coordinate<E>> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(AnycastResponseRouter.class);
+            LoggerFactory.getLogger(BroadcastResponseRouter.class);
 
     /**
      * Constructs a new AnycastResponseRouter without any constraints validator.
      */
-    public AnycastResponseRouter() {
+    public BroadcastResponseRouter() {
         super();
     }
 
@@ -61,21 +61,28 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
      */
     @Override
     public void makeDecision(StructuredOverlay overlay,
-                             AnycastResponse<E> response) {
+                             MulticastResponse<E> response) {
 
         if (response.validatesKeyConstraints(overlay)) {
             ResponseEntry entry =
                     overlay.getRequestResponseManager().getResponseEntry(
                             response.getId());
 
+            if (entry == null) {
+                throw new IllegalStateException("No entry found on "
+                        + overlay.getId() + " for message id "
+                        + response.getId());
+            }
+
             // ensure that only one thread at a time can access the response
             // entry when we receive two responses related to a same initial
             // request
             synchronized (entry) {
                 @SuppressWarnings("unchecked")
-                AnycastResponse<E> localResponse =
-                        (AnycastResponse<E>) entry.getResponse();
-                localResponse = AnycastResponse.merge(localResponse, response);
+                MulticastResponse<E> localResponse =
+                        (MulticastResponse<E>) entry.getResponse();
+                localResponse =
+                        MulticastResponse.merge(localResponse, response);
                 entry.setResponse(localResponse);
                 entry.incrementResponsesCount(1);
 
@@ -87,7 +94,7 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
 
                     // we are on the initiator of the query we need to wake up
                     // its thread in order to remove the synchronization point
-                    if (localResponse.getAnycastRoutingList().size() == 0) {
+                    if (localResponse.getReversePathStack().size() == 0) {
                         this.handle(overlay, localResponse);
                     } else {
                         log.debug(
@@ -97,7 +104,7 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
                         // the response has been handled and sent back so we can
                         // remove it from the table.
                         localResponse.setConstraintsValidator(new UnicastConstraintsValidator<E>(
-                                localResponse.getAnycastRoutingList()
+                                localResponse.getReversePathStack()
                                         .removeLast()
                                         .getPeerCoordinate()));
 
@@ -118,7 +125,8 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
      * {@inheritDoc}
      */
     @Override
-    protected void handle(StructuredOverlay overlay, AnycastResponse<E> response) {
+    protected void handle(StructuredOverlay overlay,
+                          MulticastResponse<E> response) {
         // the number of outbound hop count is equal to the number
         // of inbound hop count because the message follows the same
         // path in the forward and backward direction.
@@ -132,7 +140,8 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
      * {@inheritDoc}
      */
     @Override
-    protected void route(StructuredOverlay overlay, AnycastResponse<E> response) {
+    protected void route(StructuredOverlay overlay,
+                         MulticastResponse<E> response) {
         @SuppressWarnings("unchecked")
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
 

@@ -23,11 +23,11 @@ import java.util.Iterator;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathEntry;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
-import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
+import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -43,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This router is used to route the messages of type {@link AnycastRequest}. The
- * request is supposed to reach one or more peers depending of the key
+ * This router is used to route the messages of type {@link MulticastRequest}.
+ * The request is supposed to reach one or more peers depending of the key
  * associated to the request to route.
  * 
  * @param <T>
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jrochas
  */
-public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extends Element>
+public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Element>
         extends Router<OptimalBroadcastRequest<E>, Coordinate<E>> {
 
     private static final Logger log =
@@ -77,7 +77,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
      *            the message which is handled.
      */
     public void onPeerValidatingKeyConstraints(CanOverlay<E> overlay,
-                                               AnycastRequest<E> request) {
+                                               MulticastRequest<E> request) {
         // to be override if necessary
     }
 
@@ -189,9 +189,9 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                 overlay.getRequestResponseManager().putResponseEntry(
                         request, new ResponseEntry(1));
 
-                AnycastResponse<E> response =
-                        (AnycastResponse<E>) request.getResponseProvider().get(
-                                request, overlay);
+                MulticastResponse<E> response =
+                        (MulticastResponse<E>) request.getResponseProvider()
+                                .get(request, overlay);
                 response.route(overlay);
             }
         } else {
@@ -208,8 +208,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                     overlay.getRequestResponseManager().putResponseEntry(
                             request, new ResponseEntry(1));
 
-                    AnycastResponse<E> response =
-                            (AnycastResponse<E>) request.getResponseProvider()
+                    MulticastResponse<E> response =
+                            (MulticastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
                     response.route(overlay);
                 }
@@ -234,8 +234,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
 
                     // constructs the routing list used by responses for routing
                     // back
-                    request.getAnycastRoutingList().add(
-                            new AnycastRoutingEntry<E>(
+                    request.getReversePathStack().add(
+                            new ReversePathEntry<E>(
                                     overlay.getId(), canOverlay.getZone()
                                             .getLowerBound()));
                 }

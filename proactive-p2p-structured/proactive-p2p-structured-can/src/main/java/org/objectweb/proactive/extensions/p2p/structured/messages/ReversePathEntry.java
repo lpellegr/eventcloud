@@ -18,33 +18,31 @@ package org.objectweb.proactive.extensions.p2p.structured.messages;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
+import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
- * Contains information about {@link Peer}s met while routing an
- * {@link AnycastRequest}.
+ * Contains information about {@link Peer}s met while routing a
+ * {@link MulticastRequest}.
  * 
  * @author lpellegr
  */
-public class AnycastRoutingEntry<E extends Element> implements Serializable {
+public class ReversePathEntry<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
-    private OverlayId peerId;
+    private final OverlayId peerId;
 
-    private Coordinate<E> peerLowerCoordinate;
+    private final Coordinate<E> peerLowerCoordinate;
 
     public OverlayId getPeerId() {
         return this.peerId;
     }
 
-    public AnycastRoutingEntry(OverlayId peerID,
-            Coordinate<E> peerLowerCoordinate) {
-        super();
+    public ReversePathEntry(OverlayId peerID, Coordinate<E> peerLowerCoordinate) {
         this.peerId = peerID;
         this.peerLowerCoordinate = peerLowerCoordinate;
     }

@@ -33,19 +33,19 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * @param <E>
  *            the {@link Element}s type manipulated.
  */
-public abstract class AnycastConstraintsValidator<E extends Element> extends
+public abstract class MulticastConstraintsValidator<E extends Element> extends
         ConstraintsValidator<Coordinate<E>> {
 
     private static final long serialVersionUID = 150L;
 
     /**
-     * Constructs a new {@link AnycastConstraintsValidator} with the specified
+     * Constructs a new {@link MulticastConstraintsValidator} with the specified
      * {@code key}.
      * 
      * @param key
      *            the key to reach.
      */
-    public AnycastConstraintsValidator(Coordinate<E> key) {
+    public MulticastConstraintsValidator(Coordinate<E> key) {
         super(key);
     }
 
