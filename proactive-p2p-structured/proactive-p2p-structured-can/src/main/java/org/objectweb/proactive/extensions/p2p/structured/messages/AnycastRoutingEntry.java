@@ -21,6 +21,8 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.AnycastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 
 /**
  * Contains information about {@link Peer}s met while routing an
@@ -28,26 +30,27 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  * 
  * @author lpellegr
  */
-public class AnycastRoutingEntry implements Serializable {
+public class AnycastRoutingEntry<E extends Element> implements Serializable {
 
     private static final long serialVersionUID = 150L;
 
     private OverlayId peerId;
 
-    private Peer peerStub;
+    private Coordinate<E> peerLowerCoordinate;
 
     public OverlayId getPeerId() {
         return this.peerId;
     }
 
-    public AnycastRoutingEntry(OverlayId peerID, Peer peerStub) {
+    public AnycastRoutingEntry(OverlayId peerID,
+            Coordinate<E> peerLowerCoordinate) {
         super();
         this.peerId = peerID;
-        this.peerStub = peerStub;
+        this.peerLowerCoordinate = peerLowerCoordinate;
     }
 
-    public Peer getPeerStub() {
-        return this.peerStub;
+    public Coordinate<E> getPeerCoordinate() {
+        return this.peerLowerCoordinate;
     }
 
 }

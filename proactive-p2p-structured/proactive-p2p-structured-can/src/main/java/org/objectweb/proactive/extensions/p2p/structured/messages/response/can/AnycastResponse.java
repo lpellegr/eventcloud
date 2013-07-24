@@ -26,6 +26,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.AnycastResponseRouter;
+import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 /**
  * Response associated to {@link AnycastRequest}. This kind of response will use
@@ -42,7 +44,8 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
 
     private static final long serialVersionUID = 150L;
 
-    private AnycastRoutingList anycastRoutingList = new AnycastRoutingList();
+    private AnycastRoutingList<E> anycastRoutingList =
+            new AnycastRoutingList<E>();
 
     public AnycastResponse() {
         super();
@@ -56,9 +59,15 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
+        AnycastRequest<E> anycastRequest = (AnycastRequest<E>) request;
+
         this.anycastRoutingList =
                 ((AnycastRequest<E>) request).getAnycastRoutingList();
-        this.constraintsValidator = request.getConstraintsValidator();
+        this.constraintsValidator =
+                new UnicastConstraintsValidator<E>(
+                        anycastRequest.getAnycastRoutingList()
+                                .removeLast()
+                                .getPeerCoordinate());
     }
 
     /**
@@ -90,7 +99,7 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
      *         {@link AnycastRoutingEntry} to use in order to route the
      *         response.
      */
-    public AnycastRoutingList getAnycastRoutingList() {
+    public AnycastRoutingList<E> getAnycastRoutingList() {
         return this.anycastRoutingList;
     }
 
@@ -141,6 +150,10 @@ public class AnycastResponse<E extends Element> extends Response<Coordinate<E>> 
             localResponse.mergeAttributes(responseReceived);
             return localResponse;
         }
+    }
+
+    public void setConstraintsValidator(ConstraintsValidator<Coordinate<E>> constraintsValidator) {
+        super.constraintsValidator = constraintsValidator;
     }
 
 }

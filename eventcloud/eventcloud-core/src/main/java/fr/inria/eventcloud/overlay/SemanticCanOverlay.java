@@ -516,6 +516,14 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
+    public SemanticRequestResponseManager getRequestResponseManager() {
+        return (SemanticRequestResponseManager) super.getRequestResponseManager();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public SemanticPeer getStub() {
         return (SemanticPeer) super.getStub();
     }

@@ -16,14 +16,19 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.router.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.AnycastRoutingEntry;
+import org.objectweb.proactive.core.ProActiveRuntimeException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.AnycastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
+import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Element>
         extends Router<AnycastResponse<E>, Coordinate<E>> {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(AnycastResponseRouter.class);
 
     /**
@@ -57,45 +62,55 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
     @Override
     public void makeDecision(StructuredOverlay overlay,
                              AnycastResponse<E> response) {
-        ResponseEntry entry =
-                overlay.getRequestResponseManager().getResponseEntry(
-                        response.getId());
 
-        // ensure that only one thread at a time can access the response entry
-        // when we receive two responses related to a same initial request
-        synchronized (entry) {
-            @SuppressWarnings("unchecked")
-            AnycastResponse<E> localResponse =
-                    (AnycastResponse<E>) entry.getResponse();
-            localResponse = AnycastResponse.merge(localResponse, response);
-            entry.setResponse(localResponse);
-            entry.incrementResponsesCount(1);
+        if (response.validatesKeyConstraints(overlay)) {
+            ResponseEntry entry =
+                    overlay.getRequestResponseManager().getResponseEntry(
+                            response.getId());
 
-            // we are on a synchronization point and all responses are received,
-            // we must ensure that operations performed in background are
-            // terminated before to send back the response.
-            if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
-                localResponse.beforeSendingBackResponse(overlay);
+            // ensure that only one thread at a time can access the response
+            // entry when we receive two responses related to a same initial
+            // request
+            synchronized (entry) {
+                @SuppressWarnings("unchecked")
+                AnycastResponse<E> localResponse =
+                        (AnycastResponse<E>) entry.getResponse();
+                localResponse = AnycastResponse.merge(localResponse, response);
+                entry.setResponse(localResponse);
+                entry.incrementResponsesCount(1);
 
-                // we are on the initiator of the query we need to wake up its
-                // thread in order to remove the synchronization point
-                if (localResponse.getAnycastRoutingList().size() == 0) {
-                    this.handle(overlay, localResponse);
-                } else {
-                    logger.debug(
-                            "All subreplies received on {} for request {}",
-                            overlay, response.getId());
-                    // the synchronization point is on a peer in the sub-tree.
-                    // we call the route method in order to know where to sent
-                    // back the response.
-                    this.route(overlay, localResponse);
+                // we are on a synchronization point and all responses are
+                // received, we must ensure that operations performed in
+                // background are terminated before to send back the response.
+                if (entry.getStatus() == ResponseEntry.Status.RECEIPT_COMPLETED) {
+                    localResponse.beforeSendingBackResponse(overlay);
 
-                    // the response has been handled and sent back so we can
-                    // remove it from the table.
-                    overlay.getRequestResponseManager().removeResponseEntry(
-                            localResponse.getId());
+                    // we are on the initiator of the query we need to wake up
+                    // its thread in order to remove the synchronization point
+                    if (localResponse.getAnycastRoutingList().size() == 0) {
+                        this.handle(overlay, localResponse);
+                    } else {
+                        log.debug(
+                                "All subreplies received on {} for request {}",
+                                overlay, response.getId());
+
+                        // the response has been handled and sent back so we can
+                        // remove it from the table.
+                        localResponse.setConstraintsValidator(new UnicastConstraintsValidator<E>(
+                                localResponse.getAnycastRoutingList()
+                                        .removeLast()
+                                        .getPeerCoordinate()));
+
+                        // the synchronization point is on a peer in the
+                        // sub-tree. we call the route method in order to know
+                        // where to sent back the response.
+                        this.route(overlay, localResponse);
+
+                    }
                 }
             }
+        } else {
+            this.route(overlay, response);
         }
     }
 
@@ -118,15 +133,64 @@ public class AnycastResponseRouter<T extends AnycastResponse<E>, E extends Eleme
      */
     @Override
     protected void route(StructuredOverlay overlay, AnycastResponse<E> response) {
-        AnycastRoutingEntry entry =
-                response.getAnycastRoutingList().removeLast();
+        @SuppressWarnings("unchecked")
+        CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Routing response " + response.getId() + " from "
-                    + overlay + " to " + entry.getPeerStub());
+        byte dimension = 0;
+        byte direction = NeighborTable.DIRECTION_ANY;
+
+        // finds the dimension on which the key to reach is not contained
+        for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            direction =
+                    canOverlay.getZone().contains(
+                            dimension, response.getKey().getElement(dimension));
+
+            if (direction == -1) {
+                direction = NeighborTable.DIRECTION_INFERIOR;
+                break;
+            } else if (direction == 1) {
+                direction = NeighborTable.DIRECTION_SUPERIOR;
+                break;
+            }
         }
 
-        ((PeerInternal) entry.getPeerStub()).forward(response);
+        if (dimension == P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
+            dimension =
+                    (byte) (P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1);
+        }
+
+        // selects one neighbor in the dimension and the direction previously
+        // affected
+        NeighborEntry<E> neighborChosen =
+                canOverlay.nearestNeighbor(
+                        response.getKey(), dimension, direction);
+
+        if (neighborChosen == null) {
+            log.error(
+                    "Trying to route a {} response but the key {} used "
+                            + "is managed by no peer. You are probably using a key with "
+                            + "values that are not between the minimum and the upper "
+                            + "bound managed by the network.", this.getClass()
+                            .getSimpleName(), response.getKey());
+            return;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Request routed to a neighbor because the current peer "
+                    + "managing " + overlay
+                    + " does not contains the key to reach ("
+                    + response.getKey()
+                    + "). Neighbor is selected from dimension " + dimension
+                    + " and direction " + direction + ": " + neighborChosen);
+        }
+
+        try {
+            ((PeerInternal) neighborChosen.getStub()).forward(response);
+        } catch (ProActiveRuntimeException e) {
+            log.error("Error while forwarding a message to the neighbor managing "
+                    + neighborChosen.getZone());
+            e.printStackTrace();
+        }
     }
 
 }

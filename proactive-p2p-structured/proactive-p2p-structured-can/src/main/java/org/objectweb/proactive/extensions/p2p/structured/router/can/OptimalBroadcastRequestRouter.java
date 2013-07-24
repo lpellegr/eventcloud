@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extends Element>
         extends Router<OptimalBroadcastRequest<E>, Coordinate<E>> {
 
-    private static final Logger logger =
+    private static final Logger log =
             LoggerFactory.getLogger(OptimalBroadcastRequestRouter.class);
 
     public OptimalBroadcastRequestRouter() {
@@ -90,14 +90,15 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                              OptimalBroadcastRequest<E> request) {
         CanOverlay<E> canOverlay = ((CanOverlay<E>) overlay);
         CanRequestResponseManager messagingManager =
-                (CanRequestResponseManager) canOverlay.getRequestResponseManager();
+                canOverlay.getRequestResponseManager();
+
         // retrieves the hostname for debugging purpose
         String hostname = "";
         if (JobLogger.getBcastDebug()) {
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                logger.error("Cannot log broadcast algorithm : "
+                log.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
@@ -105,7 +106,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
 
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            logger.debug(
+            log.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
@@ -119,22 +120,22 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                         + canOverlay.getNeighborTable().size()
                         + JobLogger.getLineSeparator());
             }
+
             if (request.getResponseProvider() != null) {
-                // send back an empty response
-                ((PeerInternal) request.getAnycastRoutingList()
-                        .removeLast()
-                        .getPeerStub()).forward(request.getResponseProvider()
-                        .get(request, overlay));
+                // sends back an empty response
+                canOverlay.getStub().route(
+                        request.getResponseProvider().get(request, overlay));
             }
         } else {
             // the current overlay validates the constraints
             // log "1" message
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Request " + request.getId() + " is on peer "
+                if (log.isDebugEnabled()) {
+                    log.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
+
                 if (JobLogger.getBcastDebug()) {
                     Date receiveTime = new Date();
                     String timestamp =
@@ -145,6 +146,7 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                             + canOverlay.getNeighborTable().size()
                             + JobLogger.getLineSeparator());
                 }
+
                 this.onPeerValidatingKeyConstraints(canOverlay, request);
             } else {
                 // The current overlay doesn't validate the constraints but
@@ -184,8 +186,6 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
             super.onDestinationReached(overlay, request);
 
             if (request.getResponseProvider() != null) {
-                overlay.getRequestResponseManager().putResponseEntry(
-                        request, new ResponseEntry(1));
                 AnycastResponse<E> response =
                         (AnycastResponse<E>) request.getResponseProvider().get(
                                 request, overlay);
@@ -205,8 +205,6 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                     AnycastResponse<E> response =
                             (AnycastResponse<E>) request.getResponseProvider()
                                     .get(request, overlay);
-                    overlay.getRequestResponseManager().putResponseEntry(
-                            request, new ResponseEntry(1));
                     response.route(overlay);
                 }
             }
@@ -214,8 +212,8 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
             // operations and the current peer must await for the number
             // of responses sent.
             else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Sending request " + request.getId() + " to "
+                if (log.isDebugEnabled()) {
+                    log.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -231,8 +229,9 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                     // constructs the routing list used by responses for routing
                     // back
                     request.getAnycastRoutingList().add(
-                            new AnycastRoutingEntry(
-                                    overlay.getId(), overlay.getStub()));
+                            new AnycastRoutingEntry<E>(
+                                    overlay.getId(), canOverlay.getZone()
+                                            .getLowerBound()));
                 }
 
                 for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -244,10 +243,10 @@ public class OptimalBroadcastRequestRouter<T extends AnycastRequest<E>, E extend
                             NeighborEntryWrapper<E> neighborEntry = it.next();
                             Peer p = neighborEntry.getNeighborEntry().getStub();
 
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Sending request "
-                                        + request.getId() + " from "
-                                        + overlay.getId() + " to " + p);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Sending request " + request.getId()
+                                        + " from " + overlay.getId() + " to "
+                                        + p);
                             }
 
                             request.setDirections(neighborEntry.getDirections());
