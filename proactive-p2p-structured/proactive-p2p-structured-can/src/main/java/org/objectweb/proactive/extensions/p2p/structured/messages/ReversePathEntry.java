@@ -51,4 +51,13 @@ public class ReversePathEntry<E extends Element> implements Serializable {
         return this.peerLowerCoordinate;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "[peerCoordinateHashCode="
+                + this.peerLowerCoordinate.hashCode() + "]";
+    }
+
 }

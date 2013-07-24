@@ -24,7 +24,13 @@ public class ResponseTable {
     }
 
     public ResponseEntry get(MessageId id) {
-        return this.entries.get(id).responseEntry;
+        Entry result = this.entries.get(id);
+
+        if (result != null) {
+            return result.responseEntry;
+        }
+
+        return null;
     }
 
     public ResponseEntry put(Request<?> request, ResponseEntry responseEntry) {
@@ -46,6 +52,10 @@ public class ResponseTable {
         // }
 
         return responseEntry;
+    }
+
+    public int size() {
+        return this.entries.size();
     }
 
     public Entry remove(MessageId id) {

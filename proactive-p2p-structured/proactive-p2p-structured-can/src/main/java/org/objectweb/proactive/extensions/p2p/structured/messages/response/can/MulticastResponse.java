@@ -46,7 +46,9 @@ public class MulticastResponse<E extends Element> extends
 
     private static final long serialVersionUID = 150L;
 
-    private ReversePathStack<E> reversePathStack = new ReversePathStack<E>();
+    private ReversePathStack<E> reversePathStack;
+
+    private boolean isEmpty = false;
 
     public MulticastResponse() {
         super();
@@ -88,6 +90,10 @@ public class MulticastResponse<E extends Element> extends
      */
     public void beforeSendingBackResponse(StructuredOverlay overlay) {
         // to be overriden if necessary
+    }
+
+    public boolean isEmpty() {
+        return this.isEmpty;
     }
 
     /**
@@ -153,6 +159,10 @@ public class MulticastResponse<E extends Element> extends
 
     public void setConstraintsValidator(ConstraintsValidator<Coordinate<E>> constraintsValidator) {
         super.constraintsValidator = constraintsValidator;
+    }
+
+    public void setIsEmpty(boolean value) {
+        this.isEmpty = value;
     }
 
 }

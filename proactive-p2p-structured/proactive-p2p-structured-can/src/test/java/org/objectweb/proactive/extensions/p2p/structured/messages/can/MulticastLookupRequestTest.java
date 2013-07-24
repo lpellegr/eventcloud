@@ -74,7 +74,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     @Test
-    public void testAnycastRequestWithResponse() {
+    public void testMulticastRequestWithResponse() {
         StringElement elt =
                 new StringElement(
                         new String(
@@ -97,7 +97,8 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     }
 
     @Test
-    public void testAnycastRequestWithoutResponse() throws InterruptedException {
+    public void testMulticastRequestWithoutResponse()
+            throws InterruptedException {
         super.getProxy().sendv(new SetValuesRequest());
 
         // sleep because the previous call is supposed to be asynchronous
