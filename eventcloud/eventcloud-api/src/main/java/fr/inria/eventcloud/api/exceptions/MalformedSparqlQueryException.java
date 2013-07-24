@@ -23,7 +23,7 @@ package fr.inria.eventcloud.api.exceptions;
  */
 public class MalformedSparqlQueryException extends Exception {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final String sparqlQuery;
 

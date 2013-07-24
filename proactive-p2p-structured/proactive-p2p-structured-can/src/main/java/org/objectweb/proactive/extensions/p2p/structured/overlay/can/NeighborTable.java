@@ -42,7 +42,7 @@ import com.google.common.collect.ImmutableList.Builder;
  */
 public class NeighborTable<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Any direction : inferior or superior.

@@ -42,7 +42,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
  */
 public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private static final Logger log =
             LoggerFactory.getLogger(IndexSubscriptionRequest.class);

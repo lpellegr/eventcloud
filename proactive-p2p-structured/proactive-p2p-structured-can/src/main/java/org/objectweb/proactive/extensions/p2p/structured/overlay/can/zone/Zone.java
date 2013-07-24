@@ -46,7 +46,7 @@ import com.google.common.math.DoubleMath;
  */
 public abstract class Zone<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     protected final Coordinate<E> lowerBound;
 

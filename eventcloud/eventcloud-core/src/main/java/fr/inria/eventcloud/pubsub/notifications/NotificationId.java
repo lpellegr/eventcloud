@@ -38,7 +38,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public final class NotificationId implements Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     public static final NotificationIdExternalizer SERIALIZER =
             new NotificationIdExternalizer();
@@ -110,7 +110,7 @@ public final class NotificationId implements Serializable {
     public static class NotificationIdExternalizer implements
             AdvancedExternalizer<NotificationId> {
 
-        private static final long serialVersionUID = 150L;
+        private static final long serialVersionUID = 160L;
 
         @Override
         public void writeObject(ObjectOutput output,

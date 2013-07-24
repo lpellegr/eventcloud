@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
 public class PeerImpl extends AbstractComponent implements PeerInterface,
         PeerAttributeController, ComponentEndActive, Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * ADL name of the peer component.

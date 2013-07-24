@@ -41,7 +41,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 public class WsnCompoundEventNotificationListener extends
         CompoundEventNotificationListener {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private static final Logger log =
             LoggerFactory.getLogger(WsnCompoundEventNotificationListener.class);

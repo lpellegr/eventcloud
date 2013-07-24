@@ -23,7 +23,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations;
  */
 public class GenericResponseOperation<T> implements ResponseOperation {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private T value;
 

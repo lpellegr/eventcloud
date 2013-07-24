@@ -42,7 +42,7 @@ package fr.inria.eventcloud.messages.request;
 //
 //    private final static Logger logger = LoggerFactory.getLogger(RangeQueryRequest.class);
 //
-//    private static final long serialVersionUID = 150L;
+//    private static final long serialVersionUID = 160L;
 //
 //    private List<RangeQueryCondition> conditions;
 //

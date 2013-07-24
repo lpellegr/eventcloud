@@ -51,7 +51,7 @@ import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 public class IndexEphemeralSubscriptionRequest extends
         StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final SerializedValue<SubscriptionId> subscriptionId;
 
