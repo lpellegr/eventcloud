@@ -5,12 +5,12 @@
 	<parent>
 		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>1.5.0-SNAPSHOT</version>
+		<version>1.5.0</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>eventcloud-adapters</artifactId>
-	<version>1.5.0-SNAPSHOT</version>
+	<version>1.5.0</version>
 	<name>eventcloud-adapters</name>
 	<packaging>pom</packaging>
 
