@@ -46,6 +46,7 @@ public class PeerServingPolicy extends DefaultServingPolicy {
         Collection<Request> executingRequests =
                 compatibility.getExecutingRequests();
 
+        @SuppressWarnings("unused")
         Request requestOfInterest;
 
         // check if executing requests contain a join request

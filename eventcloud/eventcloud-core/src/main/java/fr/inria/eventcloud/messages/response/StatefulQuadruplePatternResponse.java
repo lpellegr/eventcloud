@@ -84,7 +84,7 @@ public abstract class StatefulQuadruplePatternResponse<T> extends
      */
     @Override
     public void beforeSendingBackResponse(StructuredOverlay overlay) {
-        if (this.validatesKeyConstraints(overlay)) {
+        if (this.validatesRequestKeyConstraints(overlay)) {
             @SuppressWarnings("unchecked")
             Future<StatefulRequestAction<T>> result =
                     (Future<StatefulRequestAction<T>>) ((SemanticRequestResponseManager) overlay.getRequestResponseManager()).getPendingResults()
