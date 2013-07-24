@@ -29,7 +29,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class QuadruplePatternResponseProvider extends
         ResponseProvider<QuadruplePatternResponse, Coordinate<SemanticElement>> {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * {@inheritDoc}

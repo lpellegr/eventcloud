@@ -32,7 +32,7 @@ import com.google.common.base.Objects.ToStringHelper;
  */
 public class SplitEntry implements Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final byte dimension;
 

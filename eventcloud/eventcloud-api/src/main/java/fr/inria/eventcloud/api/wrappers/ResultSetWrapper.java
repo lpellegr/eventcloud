@@ -38,7 +38,7 @@ import fr.inria.eventcloud.utils.SparqlResultSerializer;
 public class ResultSetWrapper extends SparqlResultWrapper<ResultSet> implements
         ResultSet {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Constructs a wrapper for the specified {@code resultSet}.

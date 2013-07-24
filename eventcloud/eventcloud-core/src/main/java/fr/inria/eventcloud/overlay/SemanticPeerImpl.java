@@ -61,7 +61,7 @@ import fr.inria.eventcloud.pubsub.Subscription;
 public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * ADL name of the semantic peer component.

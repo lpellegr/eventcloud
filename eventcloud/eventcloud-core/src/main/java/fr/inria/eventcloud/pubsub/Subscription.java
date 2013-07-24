@@ -93,7 +93,7 @@ import fr.inria.eventcloud.reasoner.SparqlDecomposer;
  */
 public class Subscription implements Quadruplable, Serializable {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     public static final LoadingCache<String, SubscribeProxy> SUBSCRIBE_PROXIES_CACHE;
 

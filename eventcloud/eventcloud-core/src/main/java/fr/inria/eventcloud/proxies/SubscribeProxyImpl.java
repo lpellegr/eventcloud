@@ -100,7 +100,7 @@ import fr.inria.eventcloud.pubsub.solutions.QuadruplesSolution;
 public class SubscribeProxyImpl extends EventCloudProxy implements
         ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * ADL name of the subscribe proxy component.

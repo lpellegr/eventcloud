@@ -27,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public class RicartAgrawalaRequest extends MutualExclusionOperation {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final Peer source;
 

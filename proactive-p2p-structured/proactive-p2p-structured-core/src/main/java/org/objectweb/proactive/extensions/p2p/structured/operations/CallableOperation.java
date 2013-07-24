@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public abstract class CallableOperation implements Operation {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Handles the operation by using the specified {@code overlay}

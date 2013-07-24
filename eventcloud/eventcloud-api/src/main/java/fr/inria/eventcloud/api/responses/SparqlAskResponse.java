@@ -23,7 +23,7 @@ package fr.inria.eventcloud.api.responses;
  */
 public class SparqlAskResponse extends SparqlResponse<Boolean> {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     public SparqlAskResponse(long inboundHopCount, long outboundHopCount,
             long latency, long queryDatastoreTime, Boolean result) {

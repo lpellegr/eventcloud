@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroa
 public class BroadcastConstraintsValidator<E extends StringElement> extends
         MulticastConstraintsValidator<E> {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Creates a new {@code DefaultAnycastConstraintsValidator} with the

@@ -35,7 +35,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class DeleteQuadrupleRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final static Logger logger =
             LoggerFactory.getLogger(DeleteQuadrupleRequest.class);

@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOper
  */
 public abstract class MutualExclusionOperation extends RunnableOperation {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * {@inheritDoc}

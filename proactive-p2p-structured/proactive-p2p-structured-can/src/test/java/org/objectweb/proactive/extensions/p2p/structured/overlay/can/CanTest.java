@@ -434,7 +434,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     private static class CustomOverlayProvider extends
             SerializableProvider<StringCanOverlay> {
-        private static final long serialVersionUID = 150L;
+        private static final long serialVersionUID = 160L;
 
         @Override
         public StringCanOverlay get() {

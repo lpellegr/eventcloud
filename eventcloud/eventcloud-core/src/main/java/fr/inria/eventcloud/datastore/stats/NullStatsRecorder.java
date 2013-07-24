@@ -30,7 +30,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class NullStatsRecorder implements StatsRecorder {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private static class Singleton {
 

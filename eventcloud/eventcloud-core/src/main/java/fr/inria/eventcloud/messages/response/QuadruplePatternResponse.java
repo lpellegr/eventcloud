@@ -32,7 +32,7 @@ import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 public class QuadruplePatternResponse extends
         StatefulQuadruplePatternResponse<List<Quadruple>> {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     public QuadruplePatternResponse() {
         super();

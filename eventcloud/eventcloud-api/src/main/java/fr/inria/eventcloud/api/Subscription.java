@@ -35,7 +35,7 @@ public final class Subscription implements Serializable {
     public static final String ACCEPT_ALL =
             "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p ?o } }";
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     private final SubscriptionId id;
 

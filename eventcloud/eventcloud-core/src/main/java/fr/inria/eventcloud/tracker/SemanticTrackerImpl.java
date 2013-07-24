@@ -32,7 +32,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  */
 public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * ADL name of the semantic tracker component.
@@ -65,7 +65,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
         return (SemanticPeer) super.getRandomPeer();
     }
 
-    // private static final long serialVersionUID = 150L;
+    // private static final long serialVersionUID = 160L;
     //
     // private static final Logger logger =
     // LoggerFactory.getLogger(SemanticTracker.class);
@@ -277,7 +277,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     //
     // public static class CharacterFrequency implements Serializable {
     //
-    // private static final long serialVersionUID = 150L;
+    // private static final long serialVersionUID = 160L;
     //
     // private long occurencesCount;
     //
@@ -303,7 +303,7 @@ public class SemanticTrackerImpl extends TrackerImpl implements SemanticTracker 
     //
     // public static class SemanticFrequencies implements Serializable {
     //
-    // private static final long serialVersionUID = 150L;
+    // private static final long serialVersionUID = 160L;
     //
     // public enum Type {
     // GRAPH, SUBJECT, PREDICATE, OBJECT,

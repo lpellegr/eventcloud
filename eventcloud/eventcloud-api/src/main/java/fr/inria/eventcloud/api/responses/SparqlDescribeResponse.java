@@ -26,7 +26,7 @@ import fr.inria.eventcloud.api.wrappers.ModelWrapper;
  */
 public class SparqlDescribeResponse extends SparqlResponse<ModelWrapper> {
 
-    private static final long serialVersionUID = 150L;
+    private static final long serialVersionUID = 160L;
 
     public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
             long latency, long queryDatastoreTime, ModelWrapper result) {
