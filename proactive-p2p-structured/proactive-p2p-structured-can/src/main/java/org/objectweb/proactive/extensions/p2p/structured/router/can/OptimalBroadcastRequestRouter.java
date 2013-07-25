@@ -373,12 +373,15 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                                 if (!this.containsCoordinate(
                                         neighbor.getNeighborEntry().getZone(),
                                         plane[coordinate], coordinate)
-                                        ||
-                                        // The constraint has already been
-                                        // reached
-                                        // previously so forwarding again is
-                                        // useless
-                                        (request.getConstraintReached() && !request.validatesKeyConstraints(overlay))) {
+                                // TODO fix or remove it, see issue #101
+                                // ||
+                                // The constraint has already been
+                                // reached
+                                // previously so forwarding again is
+                                // useless
+                                // (request.getConstraintReached() &&
+                                // !request.validatesKeyConstraints(overlay))
+                                ) {
                                     contains = false;
                                 }
                             }
