@@ -5,19 +5,19 @@
 	<parent>
 		<artifactId>eventcloud</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>1.5.1</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>eventcloud-configuration</artifactId>
-	<version>1.5.1</version>
+	<version>1.6.0-SNAPSHOT</version>
 	<name>eventcloud-configuration</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-configuration</artifactId>
-			<version>1.5.1</version>
+			<version>1.6.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
