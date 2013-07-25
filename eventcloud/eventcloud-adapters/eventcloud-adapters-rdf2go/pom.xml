@@ -5,12 +5,12 @@
 	<parent>
 		<artifactId>eventcloud-adapters</artifactId>
 		<groupId>fr.inria.eventcloud</groupId>
-		<version>1.5.1</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>fr.inria.eventcloud</groupId>
 	<artifactId>eventcloud-adapters-rdf2go</artifactId>
-	<version>1.5.1</version>
+	<version>1.6.0-SNAPSHOT</version>
 	<name>eventcloud-adapters-rdf2go</name>
 
 	<repositories>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>fr.inria.eventcloud</groupId>
 			<artifactId>eventcloud-core</artifactId>
-			<version>1.5.1</version>
+			<version>1.6.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
