@@ -39,7 +39,7 @@ import com.google.common.collect.ImmutableMap;
 public class LeaveUpdateNeighborsOperation<E extends Element> extends
         LeaveNeighborsManagementOperation {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final OverlayId peerIdToRemove;
 

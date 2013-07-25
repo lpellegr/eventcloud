@@ -38,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDe
 public final class Coordinate<E extends Element> implements Cloneable,
         Comparable<Coordinate<E>>, Iterable<E>, Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * The set of elements constituting the coordinate.

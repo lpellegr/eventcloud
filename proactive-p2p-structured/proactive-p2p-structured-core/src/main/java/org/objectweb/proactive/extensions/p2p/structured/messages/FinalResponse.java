@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
  */
 public class FinalResponse implements Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final long creationTime;
 

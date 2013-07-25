@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
 public class UnicastConstraintsValidator<E extends Element> extends
         ConstraintsValidator<Coordinate<E>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     public UnicastConstraintsValidator(Coordinate<E> key) {
         super(key);

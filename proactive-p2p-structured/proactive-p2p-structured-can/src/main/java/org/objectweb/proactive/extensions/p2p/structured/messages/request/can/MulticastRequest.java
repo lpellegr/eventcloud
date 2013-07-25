@@ -40,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
  */
 public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     protected final ReversePathStack<E> reversePathStack;
 

@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class NeighborEntryWrapper<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private NeighborEntry<E> neighborEntry;
     // The directions on which the peer needs to forward the broadcast request.

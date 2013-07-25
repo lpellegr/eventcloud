@@ -41,7 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  */
 public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /*
      * The zone which is managed by the sender. It is used in order to send the
@@ -52,7 +52,7 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
     public ForwardRequest(Coordinate<E> coordinateToReach) {
         super(new UnicastConstraintsValidator<E>(coordinateToReach),
                 new ResponseProvider<ForwardResponse<E>, Coordinate<E>>() {
-                    private static final long serialVersionUID = 160L;
+                    private static final long serialVersionUID = 151L;
 
                     @Override
                     public ForwardResponse<E> get() {

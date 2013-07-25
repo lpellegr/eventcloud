@@ -66,7 +66,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         super(
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<StringCanOverlay>() {
-                            private static final long serialVersionUID = 160L;
+                            private static final long serialVersionUID = 151L;
 
                             @Override
                             public StringCanOverlay get() {
@@ -179,7 +179,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class SetValuesFloodingRequest extends
             MulticastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public SetValuesFloodingRequest() {
             super(new BroadcastConstraintsValidator<StringElement>(
@@ -203,7 +203,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class SetValuesEfficientRequest extends
             EfficientBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public SetValuesEfficientRequest() {
             super(new BroadcastConstraintsValidator<StringElement>(
@@ -227,7 +227,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class SetValuesOptimalRequest extends
             OptimalBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public SetValuesOptimalRequest() {
             super(new BroadcastConstraintsValidator<StringElement>(
@@ -251,14 +251,14 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetValuesFloodingRequest extends
             MulticastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetValuesFloodingRequest() {
             super(
                     new BroadcastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -277,14 +277,14 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetValuesEfficientRequest extends
             EfficientBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetValuesEfficientRequest() {
             super(
                     new BroadcastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -303,14 +303,14 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetValuesOptimalRequest extends
             OptimalBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetValuesOptimalRequest() {
             super(
                     new BroadcastConstraintsValidator<StringElement>(
                             CoordinateFactory.newStringCoordinate()),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -329,7 +329,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetValuesResponse extends
             MulticastResponse<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         private List<Boolean> result = new ArrayList<Boolean>();
 
@@ -354,7 +354,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsFloodingRequest extends
             MulticastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetZonesValidatingConstraintsFloodingRequest(
                 Coordinate<StringElement> coordinatesToReach) {
@@ -362,7 +362,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     new BroadcastConstraintsValidator<StringElement>(
                             coordinatesToReach),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -381,7 +381,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsEfficientRequest extends
             EfficientBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetZonesValidatingConstraintsEfficientRequest(
                 Coordinate<StringElement> coordinatesToReach) {
@@ -389,7 +389,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     new BroadcastConstraintsValidator<StringElement>(
                             coordinatesToReach),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -408,7 +408,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsOptimalRequest extends
             OptimalBroadcastRequest<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         public GetZonesValidatingConstraintsOptimalRequest(
                 Coordinate<StringElement> coordinatesToReach) {
@@ -416,7 +416,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
                     new BroadcastConstraintsValidator<StringElement>(
                             coordinatesToReach),
                     new ResponseProvider<MulticastResponse<StringElement>, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 160L;
+                        private static final long serialVersionUID = 151L;
 
                         @Override
                         public MulticastResponse<StringElement> get() {
@@ -435,7 +435,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
     private static class GetZonesValidatingConstraintsResponse extends
             MulticastResponse<StringElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         private List<Zone<StringElement>> zonesValidatingConstraints =
                 new ArrayList<Zone<StringElement>>();

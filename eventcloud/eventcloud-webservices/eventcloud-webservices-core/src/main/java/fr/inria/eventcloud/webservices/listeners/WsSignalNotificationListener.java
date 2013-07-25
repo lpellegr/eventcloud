@@ -33,7 +33,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  */
 public class WsSignalNotificationListener extends SignalNotificationListener {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private static final Logger log =
             LoggerFactory.getLogger(WsSignalNotificationListener.class);

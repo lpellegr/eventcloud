@@ -27,7 +27,7 @@ import org.objectweb.proactive.core.UniqueID;
  */
 public final class MessageId implements Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final UniqueID producerId;
 

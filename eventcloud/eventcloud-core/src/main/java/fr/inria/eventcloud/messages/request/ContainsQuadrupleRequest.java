@@ -38,18 +38,18 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class ContainsQuadrupleRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     public ContainsQuadrupleRequest(final Quadruple quad) {
         super(
                 quad,
                 new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
-                    private static final long serialVersionUID = 160L;
+                    private static final long serialVersionUID = 151L;
 
                     @Override
                     public ForwardResponse<SemanticElement> get() {
                         return new BooleanForwardResponse() {
-                            private static final long serialVersionUID = 160L;
+                            private static final long serialVersionUID = 151L;
 
                             @Override
                             public void setAttributes(Request<Coordinate<SemanticElement>> request,

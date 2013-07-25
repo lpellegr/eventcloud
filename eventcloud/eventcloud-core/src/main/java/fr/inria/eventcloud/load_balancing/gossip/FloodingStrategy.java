@@ -46,7 +46,7 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
     public static class FloodingLoadRequest extends
             OptimalBroadcastRequest<SemanticElement> {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         private final SerializedValue<LoadReport> loadReport;
 

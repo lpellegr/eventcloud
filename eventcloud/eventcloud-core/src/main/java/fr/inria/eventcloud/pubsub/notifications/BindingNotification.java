@@ -28,7 +28,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
  */
 public class BindingNotification extends Notification<Binding> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     public BindingNotification(SubscriptionId subscriptionId, Node eventId,
             String source, Binding binding) {

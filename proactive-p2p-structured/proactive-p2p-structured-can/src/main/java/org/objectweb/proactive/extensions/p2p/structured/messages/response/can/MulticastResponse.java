@@ -44,7 +44,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
 public class MulticastResponse<E extends Element> extends
         Response<Coordinate<E>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private ReversePathStack<E> reversePathStack;
 

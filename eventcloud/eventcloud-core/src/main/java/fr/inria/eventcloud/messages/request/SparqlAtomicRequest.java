@@ -52,7 +52,7 @@ import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
 public class SparqlAtomicRequest extends
         StatefulQuadruplePatternRequest<List<Quadruple>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final AtomicQuery atomicQuery;
 

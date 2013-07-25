@@ -34,7 +34,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  */
 public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Constructs a new zone by using the specified {@code lowerBound} and

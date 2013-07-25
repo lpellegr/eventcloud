@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class ReversePathStack<E extends Element> extends
         LinkedList<ReversePathEntry<E>> {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Search the specified {@link UUID} which is associated to a {@link Peer}
