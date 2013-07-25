@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
@@ -51,6 +52,7 @@ import com.google.common.collect.Lists;
  * 
  * @author lpellegr
  */
+@Ignore
 public class CanTest extends JunitByClassCanNetworkDeployer {
 
     private static final Logger log = LoggerFactory.getLogger(CanTest.class);
