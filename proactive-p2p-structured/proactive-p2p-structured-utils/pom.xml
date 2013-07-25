@@ -5,19 +5,19 @@
 	<parent>
 		<artifactId>proactive-p2p-structured</artifactId>
 		<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
-		<version>1.6.0-SNAPSHOT</version>
+		<version>1.5.1</version>
 	</parent>
 
 	<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 	<artifactId>proactive-p2p-structured-utils</artifactId>
-	<version>1.6.0-SNAPSHOT</version>
+	<version>1.5.1</version>
 	<name>proactive-p2p-structured-utils</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
 			<artifactId>proactive-p2p-structured-configuration</artifactId>
-			<version>1.6.0-SNAPSHOT</version>
+			<version>1.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.objectweb.proactive</groupId>
