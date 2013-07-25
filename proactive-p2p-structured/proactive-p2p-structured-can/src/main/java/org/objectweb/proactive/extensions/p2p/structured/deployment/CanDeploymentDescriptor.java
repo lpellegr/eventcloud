@@ -32,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 public class CanDeploymentDescriptor<E extends Element> extends
         DeploymentDescriptor {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Creates a new {@link CanDeploymentDescriptor} with the specified

@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
  */
 public final class CanNetworkDeployer extends NetworkDeployer {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     public CanNetworkDeployer(DeploymentDescriptor deploymentDescriptor) {
         super(deploymentDescriptor);

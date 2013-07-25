@@ -47,7 +47,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public abstract class AbstractStatsRecorder implements StatsRecorder {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private static final Logger log =
             LoggerFactory.getLogger(AbstractStatsRecorder.class);
@@ -163,7 +163,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
     private class SameThreadRecorder implements Recorder {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         @Override
         public void register(final Node g, final Node s, final Node p,
@@ -195,7 +195,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
     private class BackgroundRecorder extends SameThreadRecorder {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         private transient ListeningExecutorService threadPool;
 

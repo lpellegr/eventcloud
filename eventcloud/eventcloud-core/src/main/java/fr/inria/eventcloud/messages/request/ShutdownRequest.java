@@ -32,7 +32,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class ShutdownRequest extends StatelessQuadruplePatternRequest {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     public ShutdownRequest() {
         super(QuadruplePattern.ANY);

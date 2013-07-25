@@ -29,7 +29,7 @@ import fr.inria.eventcloud.api.EventCloudId;
  */
 public class JunitEventCloudDeployer extends EventCloudDeployer {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Creates a new {@link JunitEventCloudDeployer} by using the specified

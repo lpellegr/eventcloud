@@ -29,7 +29,7 @@ import java.io.Serializable;
  */
 public abstract class SparqlResultWrapper<T> implements Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     protected transient T object;
 

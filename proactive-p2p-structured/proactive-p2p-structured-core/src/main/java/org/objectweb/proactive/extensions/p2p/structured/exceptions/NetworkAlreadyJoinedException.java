@@ -27,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public class NetworkAlreadyJoinedException extends StructuredP2PException {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Constructs a {@code NetworkAlreadyJoinedException} with no specified

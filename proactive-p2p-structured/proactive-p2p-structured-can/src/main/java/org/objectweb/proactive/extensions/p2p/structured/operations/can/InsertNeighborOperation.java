@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class InsertNeighborOperation<E extends Element> extends
         JoinNeighborsManagementOperation {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * The neighbor peer to remove.

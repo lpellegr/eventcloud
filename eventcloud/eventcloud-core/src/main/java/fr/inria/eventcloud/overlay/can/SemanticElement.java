@@ -33,9 +33,9 @@ import com.hp.hpl.jena.graph.Node;
  */
 public class SemanticElement extends StringElement {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
-    // \u00A2 -> ¢, CENT SIGN
+    // \u00A2 -> ??, CENT SIGN
     protected static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";
 
     /**

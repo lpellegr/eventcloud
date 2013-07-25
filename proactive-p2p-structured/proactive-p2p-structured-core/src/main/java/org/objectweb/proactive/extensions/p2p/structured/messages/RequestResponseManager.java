@@ -26,7 +26,7 @@ import java.io.Serializable;
  */
 public abstract class RequestResponseManager implements Serializable {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final AggregationTable aggregationTable;
 

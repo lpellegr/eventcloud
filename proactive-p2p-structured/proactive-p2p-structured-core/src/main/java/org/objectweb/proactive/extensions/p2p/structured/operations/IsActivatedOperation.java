@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  */
 public class IsActivatedOperation extends CallableOperation {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * Returns a {@link BooleanResponseOperation} containing {@code true} value

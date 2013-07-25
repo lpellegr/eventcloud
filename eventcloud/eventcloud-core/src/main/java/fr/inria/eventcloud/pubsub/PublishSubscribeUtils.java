@@ -962,7 +962,7 @@ public final class PublishSubscribeUtils {
     public static final class BindingMap implements
             com.hp.hpl.jena.sparql.engine.binding.BindingMap, Serializable {
 
-        private static final long serialVersionUID = 160L;
+        private static final long serialVersionUID = 151L;
 
         private transient Map<Var, Node> content = new HashMap<Var, Node>();
 

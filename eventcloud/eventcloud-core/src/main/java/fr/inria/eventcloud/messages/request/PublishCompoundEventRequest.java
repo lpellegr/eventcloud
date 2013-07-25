@@ -35,7 +35,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class PublishCompoundEventRequest extends QuadrupleRequest {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private SerializedValue<CompoundEvent> compoundEvent;
 

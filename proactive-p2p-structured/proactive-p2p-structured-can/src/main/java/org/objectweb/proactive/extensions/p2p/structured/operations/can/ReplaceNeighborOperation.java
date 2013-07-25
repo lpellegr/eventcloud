@@ -38,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 public class ReplaceNeighborOperation<E extends Element> extends
         JoinNeighborsManagementOperation {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private final OverlayId peerIdToReplace;
 

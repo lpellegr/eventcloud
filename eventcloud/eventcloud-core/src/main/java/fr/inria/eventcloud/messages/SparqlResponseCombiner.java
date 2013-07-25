@@ -47,7 +47,7 @@ import fr.inria.eventcloud.overlay.SemanticRequestResponseManager;
  */
 public class SparqlResponseCombiner implements ResponseCombiner {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     /**
      * {@inheritDoc}

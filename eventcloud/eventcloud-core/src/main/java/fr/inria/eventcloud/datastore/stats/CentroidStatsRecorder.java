@@ -32,7 +32,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  */
 public class CentroidStatsRecorder extends AbstractStatsRecorder {
 
-    private static final long serialVersionUID = 160L;
+    private static final long serialVersionUID = 151L;
 
     private Apfloat gsum = Apfloat.ZERO;
 
