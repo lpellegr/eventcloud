@@ -81,7 +81,7 @@ public class Can2dVisualizer extends JFrame {
     private static final Logger log =
             LoggerFactory.getLogger(Can2dVisualizer.class);
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private static final int DEFAULT_CANVAS_HEIGHT = 800;
 
@@ -201,7 +201,7 @@ public class Can2dVisualizer extends JFrame {
 
     public class Canvas extends JComponent {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public Zone<StringElement> zoneClicked = null;
 
@@ -547,7 +547,7 @@ public class Can2dVisualizer extends JFrame {
     private static final class PrintSplitHistoryRequest extends
             MulticastRequest<StringElement> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public PrintSplitHistoryRequest() {
             super(new BroadcastConstraintsValidator<StringElement>(

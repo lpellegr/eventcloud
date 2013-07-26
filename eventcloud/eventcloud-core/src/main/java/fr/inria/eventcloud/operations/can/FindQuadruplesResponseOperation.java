@@ -29,7 +29,7 @@ import fr.inria.eventcloud.api.Quadruple;
  */
 public final class FindQuadruplesResponseOperation implements ResponseOperation {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final List<Quadruple> quadruples;
 

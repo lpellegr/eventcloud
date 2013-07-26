@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public class SparqlMessageContext implements Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final String query;
 

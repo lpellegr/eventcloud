@@ -1113,7 +1113,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private static final class SubscriptionNotFoundException extends Exception {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public SubscriptionNotFoundException(SubscriptionId id) {
             super("Subscription not found: " + id);

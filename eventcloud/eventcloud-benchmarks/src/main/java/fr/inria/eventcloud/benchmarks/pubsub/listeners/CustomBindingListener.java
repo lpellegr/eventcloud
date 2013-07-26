@@ -32,7 +32,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
  */
 public class CustomBindingListener extends BindingNotificationListener {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private NotificationManager<Binding> manager;
 
@@ -42,7 +42,7 @@ public class CustomBindingListener extends BindingNotificationListener {
 
         this.manager =
                 new NotificationManager<Binding>(collector, nbEventsExpected) {
-                    private static final long serialVersionUID = 151L;
+                    private static final long serialVersionUID = 160L;
 
                     @Override
                     public Node getEventId(Binding solution) {

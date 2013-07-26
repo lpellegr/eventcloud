@@ -40,7 +40,7 @@ import fr.inria.eventcloud.utils.UniqueId;
 @SerializeWith(SubscriptionId.SubscriptionIdExternalizer.class)
 public final class SubscriptionId extends UniqueId {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     public static final SubscriptionIdExternalizer SERIALIZER =
             new SubscriptionIdExternalizer();
@@ -72,7 +72,7 @@ public final class SubscriptionId extends UniqueId {
     public static class SubscriptionIdExternalizer implements
             AdvancedExternalizer<SubscriptionId> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         @Override
         public void writeObject(ObjectOutput output,

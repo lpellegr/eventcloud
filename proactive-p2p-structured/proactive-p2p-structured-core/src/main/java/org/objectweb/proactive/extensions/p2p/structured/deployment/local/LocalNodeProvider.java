@@ -33,7 +33,7 @@ import com.google.common.base.Preconditions;
  */
 public class LocalNodeProvider implements NodeProvider, Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private Node node;
 

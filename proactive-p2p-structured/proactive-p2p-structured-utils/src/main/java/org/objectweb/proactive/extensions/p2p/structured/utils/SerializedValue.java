@@ -43,7 +43,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.converters.Object
  */
 public class SerializedValue<T> implements Externalizable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private byte[] bytes;
 

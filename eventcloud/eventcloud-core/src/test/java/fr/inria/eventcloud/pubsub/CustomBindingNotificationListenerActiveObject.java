@@ -30,7 +30,7 @@ import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 public class CustomBindingNotificationListenerActiveObject extends
         BindingNotificationListener {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private static final Logger log =
             LoggerFactory.getLogger(CustomBindingNotificationListenerActiveObject.class);

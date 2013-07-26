@@ -32,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
 public class GetIdAndZoneResponseOperation<E extends Element> implements
         ResponseOperation {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final OverlayId peerIdentifier;
 

@@ -31,7 +31,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
 public class CustomCompoundEventListener extends
         CompoundEventNotificationListener {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private NotificationManager<CompoundEvent> manager;
 
@@ -42,7 +42,7 @@ public class CustomCompoundEventListener extends
         this.manager =
                 new NotificationManager<CompoundEvent>(
                         collector, nbEventsExpected) {
-                    private static final long serialVersionUID = 151L;
+                    private static final long serialVersionUID = 160L;
 
                     @Override
                     public Node getEventId(CompoundEvent solution) {

@@ -33,7 +33,7 @@ import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final String statsCollectorURL;
 

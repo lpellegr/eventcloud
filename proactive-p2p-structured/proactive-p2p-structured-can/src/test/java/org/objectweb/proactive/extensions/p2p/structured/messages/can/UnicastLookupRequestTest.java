@@ -52,7 +52,7 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         super(
                 new CanDeploymentDescriptor<StringElement>(
                         new SerializableProvider<CustomCanOverlay>() {
-                            private static final long serialVersionUID = 151L;
+                            private static final long serialVersionUID = 160L;
 
                             @Override
                             public CustomCanOverlay get() {
@@ -119,7 +119,7 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static class SetStateRequest extends ForwardRequest<StringElement> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public SetStateRequest(Coordinate<StringElement> coordinateToReach) {
             super(coordinateToReach, null);
@@ -140,7 +140,7 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static class GetStateRequest extends LookupRequest<StringElement> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         private boolean value;
 
@@ -148,7 +148,7 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
             super(
                     coordinateToReach,
                     new ResponseProvider<GetStateResponse, Coordinate<StringElement>>() {
-                        private static final long serialVersionUID = 151L;
+                        private static final long serialVersionUID = 160L;
 
                         @Override
                         public GetStateResponse get() {
@@ -172,7 +172,7 @@ public class UnicastLookupRequestTest extends JunitByClassCanNetworkDeployer {
 
     private static class GetStateResponse extends LookupResponse<StringElement> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         private boolean value;
 

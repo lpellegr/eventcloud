@@ -74,7 +74,7 @@ import org.objectweb.proactive.gcmdeployment.Topology;
  */
 @PublicAPI
 public class GCMVirtualNodeImpl implements GCMVirtualNode, Serializable {
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final UniqueID uniqueID;
 

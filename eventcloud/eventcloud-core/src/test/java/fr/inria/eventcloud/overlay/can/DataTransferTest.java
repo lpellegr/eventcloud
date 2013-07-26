@@ -345,7 +345,7 @@ public class DataTransferTest {
     private static class CustomNotificationListener extends
             BindingNotificationListener {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         /**
          * {@inheritDoc}
