@@ -24,7 +24,7 @@ package org.objectweb.proactive.extensions.p2p.structured.exceptions;
  */
 public class StructuredP2PException extends Exception {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Constructs a {@code StructuredP2PException} with no specified detail

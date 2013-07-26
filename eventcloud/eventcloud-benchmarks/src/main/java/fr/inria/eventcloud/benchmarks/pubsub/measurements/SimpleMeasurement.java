@@ -23,7 +23,7 @@ package fr.inria.eventcloud.benchmarks.pubsub.measurements;
  */
 public class SimpleMeasurement implements Measurement {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private long entryTime;
 

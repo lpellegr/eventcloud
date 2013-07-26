@@ -34,7 +34,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
  */
 public abstract class NotificationManager<T> implements Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final BenchmarkStatsCollector collector;
 

@@ -40,7 +40,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  */
 public class CountQuadruplesOperation extends CallableOperation {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final boolean useSubscriptionDatastore;
 

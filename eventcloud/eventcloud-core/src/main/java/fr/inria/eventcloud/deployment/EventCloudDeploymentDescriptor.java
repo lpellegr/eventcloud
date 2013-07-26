@@ -32,7 +32,7 @@ import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 public class EventCloudDeploymentDescriptor extends
         CanDeploymentDescriptor<SemanticElement> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Creates a new {@link EventCloudDeploymentDescriptor} by using an

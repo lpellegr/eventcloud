@@ -31,7 +31,7 @@ import fr.inria.eventcloud.messages.response.StatefulQuadruplePatternResponse;
 public class RetrieveStorageEndTimesResponse extends
         StatefulQuadruplePatternResponse<StorageTimes> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     public RetrieveStorageEndTimesResponse() {
         super();

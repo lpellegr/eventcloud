@@ -62,7 +62,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     public static DeploymentConfiguration createDeploymentConfiguration() {
         return new TestingDeploymentConfiguration() {
 
-            private static final long serialVersionUID = 151L;
+            private static final long serialVersionUID = 160L;
 
             @Override
             public void configure() {
@@ -123,13 +123,13 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     private static class GetLoadInformationRequest extends
             StatefulQuadruplePatternRequest<Map<OverlayId, LoadInformation>> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public GetLoadInformationRequest() {
             super(
                     QuadruplePattern.ANY,
                     new ResponseProvider<GetLoadInformationResponse, Coordinate<SemanticElement>>() {
-                        private static final long serialVersionUID = 151L;
+                        private static final long serialVersionUID = 160L;
 
                         @Override
                         public GetLoadInformationResponse get() {
@@ -162,7 +162,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
     private static class GetLoadInformationResponse extends
             StatefulQuadruplePatternResponse<Map<OverlayId, LoadInformation>> {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public GetLoadInformationResponse() {
             super();
@@ -192,7 +192,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
 
     private static class LoadInformation implements Serializable {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         public double localLoad;
 

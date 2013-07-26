@@ -39,7 +39,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
 public class EfficientBroadcastRequest<E extends Element> extends
         MulticastRequest<E> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     // The identifier of the broadcast request.
     private MessageId originalMessageId;

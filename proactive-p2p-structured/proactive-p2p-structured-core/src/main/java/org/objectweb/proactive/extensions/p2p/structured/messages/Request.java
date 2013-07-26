@@ -44,7 +44,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  */
 public abstract class Request<K> extends RequestResponseMessage<K> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Timestamp of the creation of the message.

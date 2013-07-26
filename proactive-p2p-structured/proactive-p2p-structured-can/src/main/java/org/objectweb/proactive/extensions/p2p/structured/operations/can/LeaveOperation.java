@@ -39,7 +39,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class LeaveOperation<E extends Element> extends CallableOperation {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final OverlayId peerLeavingId;
 

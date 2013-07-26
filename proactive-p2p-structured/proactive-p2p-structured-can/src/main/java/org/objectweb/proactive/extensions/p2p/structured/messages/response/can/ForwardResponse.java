@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  */
 public class ForwardResponse<E extends Element> extends Response<Coordinate<E>> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     public ForwardResponse() {
         super();

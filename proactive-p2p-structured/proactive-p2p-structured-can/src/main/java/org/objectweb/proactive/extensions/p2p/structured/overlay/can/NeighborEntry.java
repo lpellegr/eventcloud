@@ -36,7 +36,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  */
 public class NeighborEntry<E extends Element> implements Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     private final OverlayId neighborIdentifier;
 

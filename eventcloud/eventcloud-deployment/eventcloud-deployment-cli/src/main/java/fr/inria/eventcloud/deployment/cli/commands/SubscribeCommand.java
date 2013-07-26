@@ -53,7 +53,7 @@ public class SubscribeCommand extends Command<SubscribeProxy> {
         Subscription subscription = new Subscription(this.sparqlQuery);
 
         proxy.subscribe(subscription, new BindingNotificationListener() {
-            private static final long serialVersionUID = 151L;
+            private static final long serialVersionUID = 160L;
 
             @Override
             public void onNotification(SubscriptionId id, Binding solution) {

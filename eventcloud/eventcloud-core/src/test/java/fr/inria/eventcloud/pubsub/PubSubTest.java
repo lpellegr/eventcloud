@@ -654,7 +654,7 @@ public class PubSubTest {
     private static class CustomBindingNotificationListener extends
             BindingNotificationListener {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         /**
          * {@inheritDoc}
@@ -674,7 +674,7 @@ public class PubSubTest {
     private static class CustomCompoundEventNotificationListener extends
             CompoundEventNotificationListener {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         /**
          * {@inheritDoc}
@@ -693,7 +693,7 @@ public class PubSubTest {
     private static class CustomSignalNotificationListener extends
             SignalNotificationListener {
 
-        private static final long serialVersionUID = 151L;
+        private static final long serialVersionUID = 160L;
 
         /**
          * {@inheritDoc}

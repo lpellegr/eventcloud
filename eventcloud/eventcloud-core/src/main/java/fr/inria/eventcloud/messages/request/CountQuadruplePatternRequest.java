@@ -40,7 +40,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
 public class CountQuadruplePatternRequest extends
         StatefulQuadruplePatternRequest<Long> {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     public CountQuadruplePatternRequest(Node g, Node s, Node p, Node o) {
         this(new QuadruplePattern(g, s, p, o));
@@ -50,7 +50,7 @@ public class CountQuadruplePatternRequest extends
         super(
                 quadruplePattern,
                 new ResponseProvider<CountQuadruplePatternResponse, Coordinate<SemanticElement>>() {
-                    private static final long serialVersionUID = 151L;
+                    private static final long serialVersionUID = 160L;
 
                     @Override
                     public CountQuadruplePatternResponse get() {

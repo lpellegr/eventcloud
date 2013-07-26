@@ -31,7 +31,7 @@ import java.io.Serializable;
  */
 public class ResponseEntry implements Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     public enum Status {
         /**

@@ -28,7 +28,7 @@ import com.hp.hpl.jena.sparql.resultset.ResultSetMem;
  */
 public class ResultSetMemWrapper extends ResultSetWrapper {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * Constructs a wrapper for the specified {@code resultSet}.

@@ -35,7 +35,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
  */
 public abstract class ConstraintsValidator<K> implements Serializable {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * The key used in order to route the query over the network.

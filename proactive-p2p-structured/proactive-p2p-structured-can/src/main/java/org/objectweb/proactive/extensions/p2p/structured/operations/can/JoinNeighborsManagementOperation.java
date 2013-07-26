@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOper
 public abstract class JoinNeighborsManagementOperation extends
         CallableOperation {
 
-    private static final long serialVersionUID = 151L;
+    private static final long serialVersionUID = 160L;
 
     /**
      * {@inheritDoc}
