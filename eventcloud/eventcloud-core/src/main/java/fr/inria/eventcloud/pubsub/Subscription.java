@@ -435,23 +435,20 @@ public class Subscription implements Quadruplable, Serializable {
         return this.sparqlQuery;
     }
 
-    public synchronized Subsubscription[] getSubSubscriptions() {
+    public synchronized Subsubscription[] getSubSubscriptions()
+            throws DecompositionException {
         if (this.subSubscriptions == null) {
-            try {
-                List<AtomicQuery> atomicQueries =
-                        SparqlDecomposer.getInstance().decompose(
-                                this.sparqlQuery).getAtomicQueries();
+            List<AtomicQuery> atomicQueries =
+                    SparqlDecomposer.getInstance()
+                            .decompose(this.sparqlQuery)
+                            .getAtomicQueries();
 
-                this.subSubscriptions =
-                        new Subsubscription[atomicQueries.size()];
-                for (int i = 0; i < atomicQueries.size(); i++) {
-                    this.subSubscriptions[i] =
-                            new Subsubscription(
-                                    this.originalId, this.id,
-                                    atomicQueries.get(i), i);
-                }
-            } catch (DecompositionException e) {
-                throw new IllegalStateException(e);
+            this.subSubscriptions = new Subsubscription[atomicQueries.size()];
+            for (int i = 0; i < atomicQueries.size(); i++) {
+                this.subSubscriptions[i] =
+                        new Subsubscription(
+                                this.originalId, this.id, atomicQueries.get(i),
+                                i);
             }
         }
 
@@ -472,8 +469,13 @@ public class Subscription implements Quadruplable, Serializable {
 
     public synchronized Node getGraphNode() {
         if (this.graphNode == null) {
-            this.graphNode =
-                    this.getSubSubscriptions()[0].getAtomicQuery().getGraph();
+            try {
+                this.graphNode =
+                        this.getSubSubscriptions()[0].getAtomicQuery()
+                                .getGraph();
+            } catch (DecompositionException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         return this.graphNode;
@@ -554,10 +556,18 @@ public class Subscription implements Quadruplable, Serializable {
                     false, false));
         }
 
+        Subsubscription[] localSubSubscriptions;
+
+        try {
+            localSubSubscriptions = this.getSubSubscriptions();
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
+
         result.add(new Quadruple(
                 subscriptionOriginalURI, subscriptionURI,
                 SUBSCRIPTION_INDEXED_WITH_NODE,
-                NodeFactory.createLiteral(this.getSubSubscriptions()[0].getId()
+                NodeFactory.createLiteral(localSubSubscriptions[0].getId()
                         .toString()), false, false));
 
         if (this.intermediatePeerReferences != null) {
@@ -569,7 +579,7 @@ public class Subscription implements Quadruplable, Serializable {
                     false, false));
         }
 
-        for (Subsubscription ssubscription : this.getSubSubscriptions()) {
+        for (Subsubscription ssubscription : localSubSubscriptions) {
             result.add(new Quadruple(
                     subscriptionOriginalURI,
                     subscriptionURI,

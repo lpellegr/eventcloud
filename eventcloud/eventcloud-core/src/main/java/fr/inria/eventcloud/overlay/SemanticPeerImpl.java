@@ -29,6 +29,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.objectweb.proactive.multiactivity.priority.PriorityConstraint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
 import fr.inria.eventcloud.api.CompoundEvent;
@@ -36,6 +38,7 @@ import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
@@ -62,6 +65,9 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         BindingController {
 
     private static final long serialVersionUID = 160L;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(SemanticPeerImpl.class);
 
     /**
      * ADL name of the semantic peer component.
@@ -199,7 +205,12 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public void subscribe(Subscription subscription) {
         subscription.setIndexationTime();
 
-        super.route(new IndexSubscriptionRequest(subscription));
+        try {
+            super.route(new IndexSubscriptionRequest(subscription));
+        } catch (DecompositionException e) {
+            log.error("Illegal subscription syntax: "
+                    + subscription.getSparqlQuery(), e);
+        }
     }
 
     /**

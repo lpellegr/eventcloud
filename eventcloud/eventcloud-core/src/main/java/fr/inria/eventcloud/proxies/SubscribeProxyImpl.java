@@ -70,6 +70,7 @@ import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.formatters.QuadruplesFormatter;
 import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
@@ -352,12 +353,16 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
         Subscription subscription = subscriptionEntry.subscription;
 
         // updates the network to stop sending notifications
-        for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-            super.send(new UnsubscribeRequest(
-                    subscription.getOriginalId(),
-                    subSubscription.getAtomicQuery(),
-                    subscription.getType() == NotificationListenerType.BINDING,
-                    false));
+        try {
+            for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
+                super.send(new UnsubscribeRequest(
+                        subscription.getOriginalId(),
+                        subSubscription.getAtomicQuery(),
+                        subscription.getType() == NotificationListenerType.BINDING,
+                        false));
+            }
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
         }
 
         this.eventsDeliveredCache.removeEntriesFor(sid);

@@ -29,6 +29,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -85,7 +86,13 @@ public class IndexSubscriptionRequestOperator extends
     }
 
     private void fireQuadrupleMatching(Subscription s) {
-        Subsubscription firstSubsubscription = s.getSubSubscriptions()[0];
+        Subsubscription firstSubsubscription;
+
+        try {
+            firstSubsubscription = s.getSubSubscriptions()[0];
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
 
         // stores the quadruples into a list in order to avoid a concurrent
         // exception if a add operation (or more generally a write operation) is
