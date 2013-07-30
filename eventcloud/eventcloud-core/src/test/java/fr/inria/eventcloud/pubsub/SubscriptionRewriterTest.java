@@ -28,6 +28,7 @@ import com.hp.hpl.jena.sparql.engine.binding.BindingMap;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -53,7 +54,8 @@ public class SubscriptionRewriterTest {
     }
 
     @Test
-    public void testRewriteWithQuadrupleAndBoundVariables() {
+    public void testRewriteWithQuadrupleAndBoundVariables()
+            throws DecompositionException {
         String sparqlQuery =
                 "SELECT ?s ?a1 WHERE { GRAPH ?g { ?s <http://v1> <http://v2> . ?s <http://v3> ?a1 . ?s <http://v4> ?a2 } }";
 
@@ -96,7 +98,8 @@ public class SubscriptionRewriterTest {
     }
 
     @Test
-    public void testRewriteWithQuadrupleFreeVariables() {
+    public void testRewriteWithQuadrupleFreeVariables()
+            throws DecompositionException {
         Node v3 = NodeFactory.createURI("http://v3");
         Node v4 = NodeFactory.createURI("http://v4");
 
@@ -138,7 +141,8 @@ public class SubscriptionRewriterTest {
     }
 
     @Test
-    public void testRewriteWithBindingAndBoundVariables() {
+    public void testRewriteWithBindingAndBoundVariables()
+            throws DecompositionException {
         Node id = NodeFactory.createURI("http://www.inria.fr/member/6609");
 
         String sparqlQuery =
@@ -178,7 +182,8 @@ public class SubscriptionRewriterTest {
     }
 
     @Test
-    public void testRewriteWithBindingAndFreeVariables() {
+    public void testRewriteWithBindingAndFreeVariables()
+            throws DecompositionException {
         String sparqlQuery =
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?mail WHERE { GRAPH ?g { ?id1 foaf:name ?name . ?id2 foaf:email ?email } }";
 

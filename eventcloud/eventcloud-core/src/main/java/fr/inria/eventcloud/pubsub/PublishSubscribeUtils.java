@@ -75,6 +75,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.UnsubscribeRequest;
@@ -119,8 +120,14 @@ public final class PublishSubscribeUtils {
      */
     public static final Quadruple createIntermediateQuadrupleResult(Subscription subscription,
                                                                     Quadruple quadruple) {
-        Subsubscription firstSubSubscription =
-                subscription.getSubSubscriptions()[0];
+        Subsubscription firstSubSubscription;
+
+        try {
+            firstSubSubscription = subscription.getSubSubscriptions()[0];
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
+
         AtomicQuery atomicQuery = firstSubSubscription.getAtomicQuery();
 
         StringBuilder objectValue = new StringBuilder();
@@ -496,16 +503,20 @@ public final class PublishSubscribeUtils {
     public static void rewriteSubscriptionOrNotifySender(final SemanticCanOverlay semanticOverlay,
                                                          final Subscription subscription,
                                                          final Quadruple quadruple) {
-        if (subscription.getSubSubscriptions().length == 1) {
-            log.debug(
-                    "{} matches a subscription which cannot be rewritten, a notification will be delivered",
-                    quadruple);
+        try {
+            if (subscription.getSubSubscriptions().length == 1) {
+                log.debug(
+                        "{} matches a subscription which cannot be rewritten, a notification will be delivered",
+                        quadruple);
 
-            PublishSubscribeUtils.notifySubscriberAboutSolution(
-                    semanticOverlay, subscription, quadruple);
-        } else {
-            PublishSubscribeUtils.rewriteAndIndexSubscription(
-                    semanticOverlay, subscription, quadruple);
+                PublishSubscribeUtils.notifySubscriberAboutSolution(
+                        semanticOverlay, subscription, quadruple);
+            } else {
+                PublishSubscribeUtils.rewriteAndIndexSubscription(
+                        semanticOverlay, subscription, quadruple);
+            }
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -660,22 +671,26 @@ public final class PublishSubscribeUtils {
             // attempts due to connection failure information that are stored by
             // using soft references.
             if (subscriberConnectionFailure.getNbAttempts() == EventCloudProperties.PROXY_MAX_LOOKUP_ATTEMPTS.getValue()) {
-                for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-                    semanticCanOverlay.getStub()
-                            .route(
-                                    new UnsubscribeRequest(
-                                            subscription.getOriginalId(),
-                                            subSubscription.getAtomicQuery(),
-                                            subscription.getType() == NotificationListenerType.BINDING,
-                                            true));
+                try {
+                    for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
+                        semanticCanOverlay.getStub()
+                                .route(
+                                        new UnsubscribeRequest(
+                                                subscription.getOriginalId(),
+                                                subSubscription.getAtomicQuery(),
+                                                subscription.getType() == NotificationListenerType.BINDING,
+                                                true));
 
-                    semanticCanOverlay.getSubscriberConnectionFailures()
-                            .remove(subscription.getOriginalId());
+                        semanticCanOverlay.getSubscriberConnectionFailures()
+                                .remove(subscription.getOriginalId());
 
-                    log.info(
-                            "Removed subscription {} due to subscriber which is not reachable under URL {}",
-                            subscription.getId(),
-                            subscription.getSubscriberUrl());
+                        log.info(
+                                "Removed subscription {} due to subscriber which is not reachable under URL {}",
+                                subscription.getId(),
+                                subscription.getSubscriberUrl());
+                    }
+                } catch (DecompositionException e) {
+                    throw new IllegalStateException(e);
                 }
             }
         }
@@ -718,9 +733,13 @@ public final class PublishSubscribeUtils {
         // only the solutions for the result variables from the
         // original SPARQL query have to be returned to the
         // subscriber
-        return PublishSubscribeUtils.filter(
-                quadruple, subscription.getResultVars(),
-                subscription.getSubSubscriptions()[0].getAtomicQuery());
+        try {
+            return PublishSubscribeUtils.filter(
+                    quadruple, subscription.getResultVars(),
+                    subscription.getSubSubscriptions()[0].getAtomicQuery());
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -788,8 +807,12 @@ public final class PublishSubscribeUtils {
                     + rewrittenSubscription.getSparqlQuery());
         }
 
-        overlay.getStub().route(
-                new IndexSubscriptionRequest(rewrittenSubscription));
+        try {
+            overlay.getStub().route(
+                    new IndexSubscriptionRequest(rewrittenSubscription));
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -809,7 +832,14 @@ public final class PublishSubscribeUtils {
      */
     public static final Pair<Binding, Integer> matches(CompoundEvent compoundEvent,
                                                        Subscription subscription) {
-        if (compoundEvent.size() < subscription.getSubSubscriptions().length) {
+        Subsubscription[] subSubscriptions;
+        try {
+            subSubscriptions = subscription.getSubSubscriptions();
+        } catch (DecompositionException e) {
+            throw new IllegalStateException(e);
+        }
+
+        if (compoundEvent.size() < subSubscriptions.length) {
             return null;
         }
 
@@ -817,13 +847,12 @@ public final class PublishSubscribeUtils {
 
         // number of sub-subscriptions contained initially by the subscription
         // we are trying to satisfy
-        int nbSubSubscriptions = subscription.getSubSubscriptions().length;
+        int nbSubSubscriptions = subSubscriptions.length;
 
         int indexFirstQuadrupleMatching = -1;
 
         for (int i = 0; i < nbSubSubscriptions; i++) {
-            AtomicQuery aq =
-                    subscription.getSubSubscriptions()[0].getAtomicQuery();
+            AtomicQuery aq = subSubscriptions[0].getAtomicQuery();
 
             for (int j = 0; j < compoundEvent.size(); j++) {
                 BindingMap tmpBinding;

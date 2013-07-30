@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.pubsub.Subscription;
@@ -55,8 +56,10 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
      * 
      * @param subscription
      *            the rewritten subscription to index.
+     * @throws DecompositionException
      */
-    public IndexSubscriptionRequest(Subscription subscription) {
+    public IndexSubscriptionRequest(Subscription subscription)
+            throws DecompositionException {
         super(subscription.getSubSubscriptions()[0].getAtomicQuery()
                 .getQuadruplePattern(), null);
 
