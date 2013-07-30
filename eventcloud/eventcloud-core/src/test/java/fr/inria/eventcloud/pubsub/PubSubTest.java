@@ -741,6 +741,11 @@ public class PubSubTest {
         signals.setValue(0);
         bindings.clear();
         events.clear();
+
+        this.deployer = null;
+        this.eventCloudId = null;
+        this.publishProxy = null;
+        this.subscribeProxy = null;
     }
 
     private static class CustomBindingNotificationListener extends
