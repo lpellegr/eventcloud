@@ -54,6 +54,7 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.generators.UuidGenerator;
 import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
 import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -109,6 +110,97 @@ public class PubSubTest {
                 ProxyFactory.newPublishProxy(
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
+    }
+
+    @Test(timeout = 60000)
+    public void testBlankSubscription() throws InterruptedException {
+        Subscription subscription = new Subscription("");
+
+        this.subscribeProxy.subscribe(
+                subscription, new CustomSignalNotificationListener());
+
+        Thread.sleep(1000);
+
+        this.publishProxy.publish(new CompoundEvent(new Quadruple(
+                NodeFactory.createURI("urn:g"), NodeFactory.createURI("urn:s"),
+                NodeFactory.createURI("urn:p"),
+                NodeFactory.createLiteral("not_matching"))));
+
+        Thread.sleep(1000);
+
+        // Once the event is published an error should occurs on a peer because
+        // the subscription is not legal and the syntax checking is performed at
+        // this level. However the subscriber cannot be warned since calls are
+        // asynchronous. Consequently, the only assertion we can perform is
+        // about the number of notifications received by the subscriber that
+        // should be zero
+        Assert.assertEquals(0, signals.getValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNonMatchingBindingSubscription()
+            throws InterruptedException {
+        this.testNonMatchingSubscription(NotificationListenerType.BINDING, 10);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonMatchingCompoundEventSubscription()
+            throws InterruptedException {
+        this.testNonMatchingSubscription(
+                NotificationListenerType.COMPOUND_EVENT, 10);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonMatchingSignalSubscription() throws InterruptedException {
+        this.testNonMatchingSubscription(NotificationListenerType.SIGNAL, 10);
+    }
+
+    private void testNonMatchingSubscription(NotificationListenerType listenerType,
+                                             int nbPublications)
+            throws InterruptedException {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s ?p <urn:o> } }");
+
+        switch (listenerType) {
+            case BINDING:
+                this.subscribeProxy.subscribe(
+                        subscription, new CustomBindingNotificationListener());
+                break;
+            case COMPOUND_EVENT:
+                this.subscribeProxy.subscribe(
+                        subscription,
+                        new CustomCompoundEventNotificationListener());
+                break;
+            case SIGNAL:
+                this.subscribeProxy.subscribe(
+                        subscription, new CustomSignalNotificationListener());
+                break;
+        }
+
+        Thread.sleep(1000);
+
+        for (int i = 0; i < nbPublications; i++) {
+            this.publishProxy.publish(new CompoundEvent(new Quadruple(
+                    NodeFactory.createURI("urn:g"),
+                    NodeFactory.createURI("urn:s"),
+                    NodeFactory.createURI("urn:p"),
+                    NodeFactory.createLiteral("not_matching" + i))));
+        }
+
+        Thread.sleep(2000);
+
+        switch (listenerType) {
+            case BINDING:
+                Assert.assertTrue(bindings.size() == 0);
+                break;
+            case COMPOUND_EVENT:
+                Assert.assertTrue(events.size() == 0);
+                break;
+            case SIGNAL:
+                Assert.assertTrue(signals.getValue() == 0);
+                break;
+        }
     }
 
     /**
