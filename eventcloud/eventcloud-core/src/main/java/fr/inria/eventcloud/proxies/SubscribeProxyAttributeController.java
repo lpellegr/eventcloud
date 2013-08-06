@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.proxies;
 
 import org.objectweb.fractal.api.control.AttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
 
 import fr.inria.eventcloud.api.properties.AlterableElaProperty;
 
@@ -25,7 +26,8 @@ import fr.inria.eventcloud.api.properties.AlterableElaProperty;
  * 
  * @author bsauvan
  */
-public interface SubscribeProxyAttributeController extends AttributeController {
+public interface SubscribeProxyAttributeController extends
+        CommonAttributeController {
 
     /**
      * Sets the attributes of the subscribe proxy.

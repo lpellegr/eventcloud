@@ -17,13 +17,15 @@
 package fr.inria.eventcloud.proxies;
 
 import org.objectweb.fractal.api.control.AttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
 
 /**
  * {@link AttributeController} for {@link PublishProxy} components.
  * 
  * @author bsauvan
  */
-public interface PublishProxyAttributeController extends AttributeController {
+public interface PublishProxyAttributeController extends
+        CommonAttributeController {
 
     /**
      * Sets the attributes of the publish proxy.

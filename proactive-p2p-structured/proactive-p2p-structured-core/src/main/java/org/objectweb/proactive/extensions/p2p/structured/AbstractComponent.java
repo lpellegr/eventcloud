@@ -38,6 +38,7 @@ import org.objectweb.proactive.extensions.dataspaces.exceptions.FileSystemExcept
 import org.objectweb.proactive.extensions.dataspaces.exceptions.NotConfiguredException;
 import org.objectweb.proactive.extensions.dataspaces.exceptions.SpaceNotFoundException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
  * @author bsauvan
  */
 public abstract class AbstractComponent implements ComponentInitActive,
-        ComponentRunActive {
+        ComponentRunActive, CommonAttributeController {
 
     public static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
 
@@ -70,6 +71,8 @@ public abstract class AbstractComponent implements ComponentInitActive,
             "proactive.p2p.structured.configuration";
 
     protected Class<?> propertiesClass = P2PStructuredProperties.class;
+
+    protected DeploymentConfiguration deploymentConfiguration;
 
     /**
      * {@inheritDoc}
@@ -239,6 +242,18 @@ public abstract class AbstractComponent implements ComponentInitActive,
             throw new IllegalStateException(ce);
         } catch (IOException ioe) {
             throw new IllegalStateException(ioe);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setDeploymentConfiguration(DeploymentConfiguration deploymentConfiguration) {
+        if (this.deploymentConfiguration == null) {
+            this.deploymentConfiguration = deploymentConfiguration;
+
+            this.deploymentConfiguration.configure();
         }
     }
 
