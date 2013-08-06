@@ -17,13 +17,14 @@
 package org.objectweb.proactive.extensions.p2p.structured.tracker;
 
 import org.objectweb.fractal.api.control.AttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
 
 /**
  * {@link AttributeController} for {@link Tracker} components.
  * 
  * @author bsauvan
  */
-public interface TrackerAttributeController extends AttributeController {
+public interface TrackerAttributeController extends CommonAttributeController {
 
     /**
      * Sets the attributes of the tracker.
