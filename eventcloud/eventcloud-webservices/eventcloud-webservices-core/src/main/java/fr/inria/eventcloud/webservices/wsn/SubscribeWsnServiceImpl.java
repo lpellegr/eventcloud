@@ -29,6 +29,7 @@ import org.oasis_open.docs.wsn.b_2.Subscribe;
 import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
 import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,9 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      * @param nodeProvider
      *            the node provider to be used for the deployment of the
      *            underlying subscribe proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the underlying subscribe proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying subscribe proxy.
@@ -75,8 +79,9 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      *            underlying subscribe proxy must be connected.
      */
     public SubscribeWsnServiceImpl(NodeProvider nodeProvider,
+            DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
-        super(nodeProvider, registryUrl, streamUrl);
+        super(nodeProvider, deploymentConfiguration, registryUrl, streamUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
     }
 
@@ -89,8 +94,8 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
             return super.proxy;
         } else {
             return ProxyFactory.newSubscribeProxy(
-                    super.nodeProvider, super.registryUrl, new EventCloudId(
-                            super.streamUrl));
+                    super.nodeProvider, super.deploymentConfiguration,
+                    super.registryUrl, new EventCloudId(super.streamUrl));
         }
     }
 

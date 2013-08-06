@@ -396,12 +396,12 @@ public class PublishSubscribeBenchmark {
 
                         this.publishProxies =
                                 PublishSubscribeBenchmark.this.createPublishProxies(
-                                        registryURL, eventCloudId,
-                                        this.nodeProvider);
+                                        this.nodeProvider, registryURL,
+                                        eventCloudId);
                         this.subscribeProxies =
                                 PublishSubscribeBenchmark.this.createSubscribeProxies(
-                                        registryURL, eventCloudId,
-                                        this.nodeProvider);
+                                        this.nodeProvider, registryURL,
+                                        eventCloudId);
 
                         // init custom publish proxies
                         for (CustomPublishProxy proxy : this.publishProxies) {
@@ -1150,9 +1150,9 @@ public class PublishSubscribeBenchmark {
                 statsCollectorURL, inMemory, this.measureStorageTime);
     }
 
-    private List<CustomPublishProxy> createPublishProxies(String registryUrl,
-                                                          EventCloudId id,
-                                                          NodeProvider nodeProvider)
+    private List<CustomPublishProxy> createPublishProxies(NodeProvider nodeProvider,
+                                                          String registryUrl,
+                                                          EventCloudId id)
             throws EventCloudIdNotManaged {
         List<CustomPublishProxy> result =
                 new ArrayList<CustomPublishProxy>(this.nbPublishers);
@@ -1176,9 +1176,9 @@ public class PublishSubscribeBenchmark {
         return result;
     }
 
-    private List<SubscribeApi> createSubscribeProxies(String registryUrl,
-                                                      EventCloudId id,
-                                                      NodeProvider nodeProvider)
+    private List<SubscribeApi> createSubscribeProxies(NodeProvider nodeProvider,
+                                                      String registryUrl,
+                                                      EventCloudId id)
             throws EventCloudIdNotManaged {
         List<SubscribeApi> result =
                 new ArrayList<SubscribeApi>(this.nbSubscribers);

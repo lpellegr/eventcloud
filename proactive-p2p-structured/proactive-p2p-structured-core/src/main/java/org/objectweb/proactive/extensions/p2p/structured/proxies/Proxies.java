@@ -110,7 +110,7 @@ public class Proxies extends AbstractFactory {
      */
     public static Proxy newProxy(NodeProvider nodeProvider,
                                  List<Tracker> trackers) {
-        return createProxy(getContextFromNodeProvider(
+        return createProxy(AbstractFactory.getContextFromNodeProvider(
                 nodeProvider, ProxyImpl.PROXY_VN), trackers);
     }
 
