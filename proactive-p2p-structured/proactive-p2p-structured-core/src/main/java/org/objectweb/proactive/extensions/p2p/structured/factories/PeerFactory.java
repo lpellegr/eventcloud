@@ -23,6 +23,7 @@ import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
@@ -52,7 +53,7 @@ public final class PeerFactory extends AbstractFactory {
 
     /**
      * Creates a new peer component deployed on the local JVM by using the
-     * specified overlay abstraction.
+     * specified {@code overlay} abstraction.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
@@ -62,66 +63,154 @@ public final class PeerFactory extends AbstractFactory {
      */
     public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider) {
         return PeerFactory.createPeer(
-                overlayProvider, new HashMap<String, Object>());
+                new HashMap<String, Object>(), null, overlayProvider);
+    }
+
+    /**
+     * Creates a new peer component deployed on the local JVM by using the
+     * specified deployment configuration and the specified {@code overlay}
+     * abstraction.
+     * 
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(DeploymentConfiguration deploymentConfiguration,
+                                                             SerializableProvider<T> overlayProvider) {
+        return PeerFactory.createPeer(
+                new HashMap<String, Object>(), deploymentConfiguration,
+                overlayProvider);
     }
 
     /**
      * Creates a new peer component deployed on the specified {@code node} by
-     * using the given {@code overlay} abstraction.
+     * using the specified {@code overlay} abstraction.
      * 
-     * @param overlayProvider
-     *            the overlay provider to use.
      * @param node
      *            the node to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link Peer} interface of the new peer
      *         component created.
      */
-    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             Node node) {
+    public static <T extends StructuredOverlay> Peer newPeer(Node node,
+                                                             SerializableProvider<T> overlayProvider) {
+        return PeerFactory.newPeer(node, null, overlayProvider);
+    }
+
+    /**
+     * Creates a new peer component deployed on the specified {@code node} by
+     * using the specified deployment configuration and the specified
+     * {@code overlay} abstraction.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(Node node,
+                                                             DeploymentConfiguration deploymentConfiguration,
+                                                             SerializableProvider<T> overlayProvider) {
         return PeerFactory.createPeer(
-                overlayProvider, ComponentUtils.createContext(node));
+                ComponentUtils.createContext(node), deploymentConfiguration,
+                overlayProvider);
     }
 
     /**
      * Creates a new peer component deployed on the specified
-     * {@code GCM virtual node} by using the given {@code overlay} abstraction.
+     * {@code GCM virtual node} by using the specified {@code overlay}
+     * abstraction.
      * 
-     * @param overlayProvider
-     *            the overlay provider to use.
      * @param vn
      *            the GCM virtual node to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link Peer} interface of the new peer
      *         component created.
      */
-    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             GCMVirtualNode vn) {
+    public static <T extends StructuredOverlay> Peer newPeer(GCMVirtualNode vn,
+                                                             SerializableProvider<T> overlayProvider) {
+        return PeerFactory.newPeer(vn, null, overlayProvider);
+    }
+
+    /**
+     * Creates a new peer component deployed on the specified
+     * {@code GCM virtual node} by using the specified deployment configuration
+     * and the specified {@code overlay} abstraction.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(GCMVirtualNode vn,
+                                                             DeploymentConfiguration deploymentConfiguration,
+                                                             SerializableProvider<T> overlayProvider) {
         return PeerFactory.createPeer(
-                overlayProvider, ComponentUtils.createContext(vn));
+                ComponentUtils.createContext(vn), deploymentConfiguration,
+                overlayProvider);
     }
 
     /**
      * Creates a new peer component deployed on a node provided by the specified
-     * {@code node provider} by using the given {@code overlay} abstraction.
+     * {@code node provider} by using the specified {@code overlay} abstraction.
      * 
-     * @param overlayProvider
-     *            the overlay provider to use.
      * @param nodeProvider
      *            the node provider to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link Peer} interface of the new peer
      *         component created.
      */
-    public static <T extends StructuredOverlay> Peer newPeer(SerializableProvider<T> overlayProvider,
-                                                             NodeProvider nodeProvider) {
-        return PeerFactory.createPeer(
-                overlayProvider, getContextFromNodeProvider(
-                        nodeProvider, PeerImpl.PEER_VN));
+    public static <T extends StructuredOverlay> Peer newPeer(NodeProvider nodeProvider,
+                                                             SerializableProvider<T> overlayProvider) {
+        return PeerFactory.newPeer(nodeProvider, null, overlayProvider);
     }
 
-    private static <T extends StructuredOverlay> Peer createPeer(SerializableProvider<T> overlayProvider,
-                                                                 Map<String, Object> context) {
+    /**
+     * Creates a new peer component deployed on a node provided by the specified
+     * {@code node provider} by using the specified deployment configuration and
+     * the specified {@code overlay} abstraction.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link Peer} interface of the new peer
+     *         component created.
+     */
+    public static <T extends StructuredOverlay> Peer newPeer(NodeProvider nodeProvider,
+                                                             DeploymentConfiguration deploymentConfiguration,
+                                                             SerializableProvider<T> overlayProvider) {
+        return PeerFactory.createPeer(
+                AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, PeerImpl.PEER_VN),
+                deploymentConfiguration, overlayProvider);
+    }
+
+    private static <T extends StructuredOverlay> Peer createPeer(Map<String, Object> context,
+                                                                 DeploymentConfiguration deploymentConfiguration,
+                                                                 SerializableProvider<T> overlayProvider) {
         try {
             Peer peer =
                     ComponentUtils.createComponentAndGetInterface(
@@ -129,8 +218,12 @@ public final class PeerFactory extends AbstractFactory {
                             PeerImpl.PEER_SERVICES_ITF, PeerInterface.class,
                             true);
 
-            ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
-                    peer, overlayProvider);
+            PeerAttributeController peerAttributeController =
+                    (PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner());
+            if (deploymentConfiguration != null) {
+                peerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
+            }
+            peerAttributeController.setAttributes(peer, overlayProvider);
 
             log.info("Peer {} created", peer.getId());
 

@@ -101,7 +101,7 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
      */
     public static ProxyMonitoringManager newProxyMonitoringManager(NodeProvider nodeProvider,
                                                                    String vnName) {
-        return ProxyMonitoringManagerFactory.createProxyMonitoringManager(getContextFromNodeProvider(
+        return ProxyMonitoringManagerFactory.createProxyMonitoringManager(AbstractFactory.getContextFromNodeProvider(
                 nodeProvider, vnName));
     }
 

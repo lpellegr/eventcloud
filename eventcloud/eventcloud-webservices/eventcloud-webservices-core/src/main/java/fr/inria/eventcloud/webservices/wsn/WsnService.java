@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -54,6 +55,8 @@ public abstract class WsnService<T> {
 
     protected final NodeProvider nodeProvider;
 
+    protected final DeploymentConfiguration deploymentConfiguration;
+
     protected final String registryUrl;
 
     protected final String streamUrl;
@@ -68,6 +71,9 @@ public abstract class WsnService<T> {
      * @param nodeProvider
      *            the node provider to be used for the deployment of the
      *            underlying proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the underlying proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying proxy.
@@ -75,9 +81,11 @@ public abstract class WsnService<T> {
      *            the URL which identifies the EventCloud on which the
      *            underlying proxy must be connected.
      */
-    public WsnService(NodeProvider nodeProvider, String registryUrl,
-            String streamUrl) {
+    public WsnService(NodeProvider nodeProvider,
+            DeploymentConfiguration deploymentConfiguration,
+            String registryUrl, String streamUrl) {
         this.nodeProvider = nodeProvider;
+        this.deploymentConfiguration = deploymentConfiguration;
         this.registryUrl = registryUrl;
         this.streamUrl = streamUrl;
         int index = this.streamUrl.lastIndexOf('/');

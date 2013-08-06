@@ -26,6 +26,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.ProActiveInet;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
@@ -108,8 +109,42 @@ public class WsDeployer {
                                                          String streamUrl,
                                                          String urlSuffix,
                                                          int port) {
+        return deployPublishWsnService(
+                nodeProvider, null, registryUrl, streamUrl, urlSuffix, port);
+    }
+
+    /**
+     * Deploys a new {@link PublishWsnApi publish WS-Notification service}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            underlying publish proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the underlying publish proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry to connect to in order to
+     *            create the underlying publish proxy.
+     * @param streamUrl
+     *            the URL which identifies an EventCloud which is running.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            web service to be deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return the WsnServiceInfo instance of the web service.
+     */
+    public static WsnServiceInfo deployPublishWsnService(NodeProvider nodeProvider,
+                                                         DeploymentConfiguration deploymentConfiguration,
+                                                         String registryUrl,
+                                                         String streamUrl,
+                                                         String urlSuffix,
+                                                         int port) {
         PublishWsnServiceImpl publishWsnService =
-                new PublishWsnServiceImpl(nodeProvider, registryUrl, streamUrl);
+                new PublishWsnServiceImpl(
+                        nodeProvider, deploymentConfiguration, registryUrl,
+                        streamUrl);
 
         Server publishWsnServer =
                 deployWebService(
@@ -143,9 +178,42 @@ public class WsDeployer {
                                                            String streamUrl,
                                                            String urlSuffix,
                                                            int port) {
+        return deploySubscribeWsnService(
+                nodeProvider, null, registryUrl, streamUrl, urlSuffix, port);
+    }
+
+    /**
+     * Deploys a new {@link SubscribeWsnApi subscribe service}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            underlying subscribe proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the underlying subcribe proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry to connect to in order to
+     *            create the underlying subscribe proxy.
+     * @param streamUrl
+     *            the URL which identifies an EventCloud which is running.
+     * @param urlSuffix
+     *            the suffix appended to the end of the URL associated to the
+     *            web service to be deployed.
+     * @param port
+     *            the port used to deploy the web service.
+     * 
+     * @return the WsnServiceInfo instance of the web service.
+     */
+    public static WsnServiceInfo deploySubscribeWsnService(NodeProvider nodeProvider,
+                                                           DeploymentConfiguration deploymentConfiguration,
+                                                           String registryUrl,
+                                                           String streamUrl,
+                                                           String urlSuffix,
+                                                           int port) {
         SubscribeWsnServiceImpl subscribeWsnService =
                 new SubscribeWsnServiceImpl(
-                        nodeProvider, registryUrl, streamUrl);
+                        nodeProvider, deploymentConfiguration, registryUrl,
+                        streamUrl);
 
         Server subscribeWsnServer =
                 deployWebService(
@@ -242,11 +310,41 @@ public class WsDeployer {
                                                    String registryUrl,
                                                    String streamUrl,
                                                    String proxyName) {
+        return deployPublishWsProxy(
+                nodeProvider, null, registryUrl, streamUrl, proxyName);
+    }
+
+    /**
+     * Deploys a new {@link PublishWsApi publish web service proxy}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the publish
+     *            web service proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the publish web service proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry to connect to in order to
+     *            create the publish web service proxy.
+     * @param streamUrl
+     *            the URL which identifies an EventCloud which is running.
+     * @param proxyName
+     *            the name of the publish web service proxy which will be used
+     *            as part of the URL associated to the web service to be
+     *            deployed.
+     * 
+     * @return the WsProxyInfo instance of the web service.
+     */
+    public static WsProxyInfo deployPublishWsProxy(NodeProvider nodeProvider,
+                                                   DeploymentConfiguration deploymentConfiguration,
+                                                   String registryUrl,
+                                                   String streamUrl,
+                                                   String proxyName) {
         try {
             PublishApi publishProxy =
                     WsProxyFactory.newPublishProxy(
-                            nodeProvider, registryUrl, new EventCloudId(
-                                    streamUrl));
+                            nodeProvider, deploymentConfiguration, registryUrl,
+                            new EventCloudId(streamUrl));
 
             String endpointUrl =
                     exposePublishWebService(publishProxy, proxyName);
@@ -281,11 +379,41 @@ public class WsDeployer {
                                                      String registryUrl,
                                                      String streamUrl,
                                                      String proxyName) {
+        return deploySubscribeWsProxy(
+                nodeProvider, null, registryUrl, streamUrl, proxyName);
+    }
+
+    /**
+     * Deploys a new {@link SubscribeWsApi subscribe web service proxy}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the
+     *            subscribe web service proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the subscribe web service proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry to connect to in order to
+     *            create the subscribe web service proxy.
+     * @param streamUrl
+     *            the URL which identifies an EventCloud which is running.
+     * @param proxyName
+     *            the name of the subscribe web service proxy which will be used
+     *            as part of the URL associated to the web service to be
+     *            deployed.
+     * 
+     * @return the WsProxyInfo instance of the web service.
+     */
+    public static WsProxyInfo deploySubscribeWsProxy(NodeProvider nodeProvider,
+                                                     DeploymentConfiguration deploymentConfiguration,
+                                                     String registryUrl,
+                                                     String streamUrl,
+                                                     String proxyName) {
         try {
             SubscribeApi subscribeProxy =
                     WsProxyFactory.newSubscribeProxy(
-                            nodeProvider, registryUrl, new EventCloudId(
-                                    streamUrl));
+                            nodeProvider, deploymentConfiguration, registryUrl,
+                            new EventCloudId(streamUrl));
 
             String endpointUrl =
                     exposeSubscribeWebService(subscribeProxy, proxyName);
@@ -321,11 +449,41 @@ public class WsDeployer {
                                                   String registryUrl,
                                                   String streamUrl,
                                                   String proxyName) {
+        return deployPutGetWsProxy(
+                nodeProvider, null, registryUrl, streamUrl, proxyName);
+    }
+
+    /**
+     * Deploys a new {@link PutGetWsApi put/get web service proxy}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for the deployment of the put/get
+     *            web service proxy.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment of
+     *            the put/get web service proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry to connect to in order to
+     *            create the put/get web service proxy.
+     * @param streamUrl
+     *            the URL which identifies an EventCloud which is running.
+     * @param proxyName
+     *            the name of the put/get web service proxy which will be used
+     *            as part of the URL associated to the web service to be
+     *            deployed.
+     * 
+     * @return the WsProxyInfo instance of the web service.
+     */
+    public static WsProxyInfo deployPutGetWsProxy(NodeProvider nodeProvider,
+                                                  DeploymentConfiguration deploymentConfiguration,
+                                                  String registryUrl,
+                                                  String streamUrl,
+                                                  String proxyName) {
         try {
             PutGetApi putgetProxy =
                     WsProxyFactory.newPutGetProxy(
-                            nodeProvider, registryUrl, new EventCloudId(
-                                    streamUrl));
+                            nodeProvider, deploymentConfiguration, registryUrl,
+                            new EventCloudId(streamUrl));
 
             String endpointUrl = exposePutGetWebService(putgetProxy, proxyName);
 

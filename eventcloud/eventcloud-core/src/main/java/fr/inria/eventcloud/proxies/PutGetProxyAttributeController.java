@@ -17,13 +17,15 @@
 package fr.inria.eventcloud.proxies;
 
 import org.objectweb.fractal.api.control.AttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
 
 /**
  * {@link AttributeController} for {@link PutGetProxy} components.
  * 
  * @author bsauvan
  */
-public interface PutGetProxyAttributeController extends AttributeController {
+public interface PutGetProxyAttributeController extends
+        CommonAttributeController {
 
     /**
      * Sets the attributes of the put/get proxy.
