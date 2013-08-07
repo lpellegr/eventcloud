@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -61,7 +60,7 @@ public class CanRequestResponseManager extends RequestResponseManager {
      * @return {@code true} if the current peer has already received the
      *         request, {@code false} otherwise.
      */
-    public boolean hasReceivedRequest(UUID requestId) {
+    public boolean hasReceivedRequest(MessageId requestId) {
         return this.requestsAlreadyReceived.contains(requestId);
     }
 
