@@ -70,7 +70,7 @@ public class NeighborEntry<E extends Element> implements Serializable {
         return this.neighborStub;
     }
 
-    public Zone<E> getZone() {
+    public synchronized Zone<E> getZone() {
         return this.neighborZone;
     }
 
