@@ -24,7 +24,6 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.ProActiveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,6 @@ import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.deployment.JunitByClassEventCloudDeployer;
-import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 
 /**
@@ -303,9 +301,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
     }
 
     @Test
-    public void testExecuteSparqlSelect3()
-            throws MalformedSparqlQueryException, ProActiveException,
-            EventCloudIdNotManaged {
+    public void testExecuteSparqlSelect3() throws MalformedSparqlQueryException {
         for (int i = 0; i < 10; i++) {
             super.getPublishProxy().publish(QuadrupleGenerator.random());
         }
