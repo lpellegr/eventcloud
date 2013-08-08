@@ -34,6 +34,6 @@ public interface SemanticTracker extends Tracker {
      * 
      * @return a random and valid semantic peer.
      */
-    public SemanticPeer getRandomSemanticPeer();
+    SemanticPeer getRandomSemanticPeer();
 
 }

@@ -37,7 +37,7 @@ public interface PublishApi {
      *            the quadruple to publish.
      */
     // TODO: should be removed or refactored to prevent bad uses
-    public void publish(Quadruple quad);
+    void publish(Quadruple quad);
 
     /**
      * Publishes the specified compound event.
@@ -45,7 +45,7 @@ public interface PublishApi {
      * @param event
      *            the compound event to publish.
      */
-    public void publish(CompoundEvent event);
+    void publish(CompoundEvent event);
 
     /**
      * Publishes the specified collection of {@link CompoundEvent}s.
@@ -53,7 +53,7 @@ public interface PublishApi {
      * @param events
      *            the compound events to publish.
      */
-    public void publish(Collection<CompoundEvent> events);
+    void publish(Collection<CompoundEvent> events);
 
     /**
      * Publishes the quadruples that are read from an input stream opened from
@@ -68,6 +68,6 @@ public interface PublishApi {
      *            the format that is used to read the data from the input
      *            stream.
      */
-    public void publish(URL url, SerializationFormat format);
+    void publish(URL url, SerializationFormat format);
 
 }

@@ -32,7 +32,7 @@ public interface EnumConverter<E extends Enum<E> & EnumConverter<E>> {
      * 
      * @return an ordinal representation.
      */
-    public short convert();
+    short convert();
 
     /**
      * Converts an ordinal representation to the original enum type.
@@ -42,6 +42,6 @@ public interface EnumConverter<E extends Enum<E> & EnumConverter<E>> {
      * 
      * @return an ordinal representation to the original enum type.
      */
-    public E convert(short val);
+    E convert(short val);
 
 }

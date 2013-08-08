@@ -46,8 +46,8 @@ public interface SubscribeWsApi {
      * @return the subscription identifier.
      */
     @WebMethod(operationName = "subscribeSignal")
-    public String subscribeSignal(@WebParam(name = "sparqlQuery") String sparqlQuery,
-                                  @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+    String subscribeSignal(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                           @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
@@ -63,8 +63,8 @@ public interface SubscribeWsApi {
      * @return the subscription identifier.
      */
     @WebMethod(operationName = "subscribeBinding")
-    public String subscribeBinding(@WebParam(name = "sparqlQuery") String sparqlQuery,
-                                   @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+    String subscribeBinding(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                            @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
@@ -80,8 +80,8 @@ public interface SubscribeWsApi {
      * @return the subscription identifier.
      */
     @WebMethod(operationName = "subscribeCompoundEvent")
-    public String subscribeCompoundEvent(@WebParam(name = "sparqlQuery") String sparqlQuery,
-                                         @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
+    String subscribeCompoundEvent(@WebParam(name = "sparqlQuery") String sparqlQuery,
+                                  @WebParam(name = "subscriberWsEndpointUrl") String subscriberWsEndpointUrl);
 
     /**
      * Unsubscribes by using the specified subscription identifier.
@@ -90,6 +90,6 @@ public interface SubscribeWsApi {
      *            the subscription identifier.
      */
     @WebMethod(operationName = "unsubscribe")
-    public void unsubscribe(@WebParam(name = "id") String id);
+    void unsubscribe(@WebParam(name = "id") String id);
 
 }

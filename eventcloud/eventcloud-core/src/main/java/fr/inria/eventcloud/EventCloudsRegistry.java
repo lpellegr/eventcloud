@@ -53,7 +53,7 @@ public interface EventCloudsRegistry {
      * @throws ProActiveException
      *             if a problem occurs while the registry is registered.
      */
-    public String register(String bindingName) throws ProActiveException;
+    String register(String bindingName) throws ProActiveException;
 
     /**
      * Unregisters the registry.
@@ -61,7 +61,7 @@ public interface EventCloudsRegistry {
      * @throws IOException
      *             if a problem occurs while the registry is unregistered.
      */
-    public void unregister() throws IOException;
+    void unregister() throws IOException;
 
     /**
      * Registers the given {@link EventCloudDeployer} into the registry.
@@ -72,7 +72,7 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the registration has succeed or {@code false} if
      *         the EventCloud is already registered into the registry.
      */
-    public boolean register(EventCloudDeployer eventCloudDeployer);
+    boolean register(EventCloudDeployer eventCloudDeployer);
 
     /**
      * Returns a list that contains the identifier of the EventClouds which are
@@ -81,7 +81,7 @@ public interface EventCloudsRegistry {
      * @return a list that contains the identifier of the EventClouds which are
      *         managed by the registry.
      */
-    public Set<EventCloudId> listEventClouds();
+    Set<EventCloudId> listEventClouds();
 
     /**
      * Returns a boolean which indicates if the EventCloud identified by the
@@ -93,7 +93,7 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the EventCloud identifier is already managed,
      *         {@code false} otherwise.
      */
-    public boolean contains(EventCloudId id);
+    boolean contains(EventCloudId id);
 
     /**
      * Returns the {@link EventCloudDescription} object associated to the
@@ -106,7 +106,7 @@ public interface EventCloudsRegistry {
      *         specified {@code id} if it is managed by the registry or
      *         {@code null}.
      */
-    public EventCloudDeployer find(EventCloudId id);
+    EventCloudDeployer find(EventCloudId id);
 
     /**
      * Returns the trackers associated to the specified {@link EventCloudId} if
@@ -118,7 +118,7 @@ public interface EventCloudsRegistry {
      * @return the trackers associated to the EventCloud identified by the
      *         specified {@link EventCloudId} or {@code null}.
      */
-    public List<Tracker> findTrackers(EventCloudId id);
+    List<Tracker> findTrackers(EventCloudId id);
 
     /**
      * Registers a publish proxy to the list of proxies associated to the Event
@@ -130,7 +130,7 @@ public interface EventCloudsRegistry {
      * @param proxy
      *            the publish proxy to register.
      */
-    public void registerProxy(EventCloudId id, PublishProxy proxy);
+    void registerProxy(EventCloudId id, PublishProxy proxy);
 
     /**
      * Registers a putget proxy to the list of proxies associated to the Event
@@ -142,7 +142,7 @@ public interface EventCloudsRegistry {
      * @param proxy
      *            the putget proxy to register.
      */
-    public void registerProxy(EventCloudId id, PutGetProxy proxy);
+    void registerProxy(EventCloudId id, PutGetProxy proxy);
 
     /**
      * Registers a subscribe proxy to the list of proxies associated to the
@@ -154,7 +154,7 @@ public interface EventCloudsRegistry {
      * @param proxy
      *            the subscribe proxy to register.
      */
-    public void registerProxy(EventCloudId id, SubscribeProxy proxy);
+    void registerProxy(EventCloudId id, SubscribeProxy proxy);
 
     /**
      * Returns the publish proxies which are running for the specified
@@ -166,7 +166,7 @@ public interface EventCloudsRegistry {
      * @return the publish proxies which are running for the specified
      *         {@link EventCloudId}.
      */
-    public List<PublishProxy> getPublishProxies(EventCloudId id);
+    List<PublishProxy> getPublishProxies(EventCloudId id);
 
     /**
      * Returns the putget proxies which are running for the specified
@@ -178,7 +178,7 @@ public interface EventCloudsRegistry {
      * @return the putget proxies which are running for the specified
      *         {@link EventCloudId}.
      */
-    public List<PutGetProxy> getPutGetProxies(EventCloudId id);
+    List<PutGetProxy> getPutGetProxies(EventCloudId id);
 
     /**
      * Returns the subscribe proxies which are running for the specified
@@ -190,7 +190,7 @@ public interface EventCloudsRegistry {
      * @return the subscribe proxies which are running for the specified
      *         {@link EventCloudId}.
      */
-    public List<SubscribeProxy> getSubscribeProxies(EventCloudId id);
+    List<SubscribeProxy> getSubscribeProxies(EventCloudId id);
 
     /**
      * Unregisters a publish proxy from the list of publish proxies associated
@@ -205,7 +205,7 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the publish proxy has been successfully
      *         unregistered, {@code false} otherwise.
      */
-    public boolean unregisterProxy(EventCloudId id, PublishProxy proxy);
+    boolean unregisterProxy(EventCloudId id, PublishProxy proxy);
 
     /**
      * Unregisters a putget proxy from the list of putget proxies associated to
@@ -220,7 +220,7 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the putget proxy has been successfully
      *         unregistered, {@code false} otherwise.
      */
-    public boolean unregisterProxy(EventCloudId id, PutGetProxy proxy);
+    boolean unregisterProxy(EventCloudId id, PutGetProxy proxy);
 
     /**
      * Unregisters a subscribe proxy from the list of subscribe proxies
@@ -236,7 +236,7 @@ public interface EventCloudsRegistry {
      * @return {@code true} if the subscribe proxy has been successfully
      *         unregistered, {@code false} otherwise.
      */
-    public boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy);
+    boolean unregisterProxy(EventCloudId id, SubscribeProxy proxy);
 
     /**
      * Undeploys the EventCloud identified with the specified {@code id}.

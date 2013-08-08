@@ -31,6 +31,6 @@ public interface Quadruplable {
      * 
      * @return a set of quadruples.
      */
-    public List<Quadruple> toQuadruples();
+    List<Quadruple> toQuadruples();
 
 }

@@ -77,7 +77,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * 
      * @return {@code true} if the operation suceeded, {@code false} otherwise.
      */
-    public boolean clear();
+    boolean clear();
 
     /**
      * Searches the {@link Subscription} associated to the specified
@@ -91,7 +91,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      *         is contained into the list of the subscription identifiers that
      *         have been register from this proxy, {@code false} otherwise.
      */
-    public Subscription find(SubscriptionId id);
+    Subscription find(SubscriptionId id);
 
     /**
      * Reconstructs a {@link CompoundEvent} from the specified {@code eventId}.
@@ -112,9 +112,9 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * 
      * @return the event which has been reconstructed.
      */
-    public CompoundEvent reconstructCompoundEvent(NotificationId notificationId,
-                                                  SubscriptionId subscriptionId,
-                                                  Node eventId);
+    CompoundEvent reconstructCompoundEvent(NotificationId notificationId,
+                                           SubscriptionId subscriptionId,
+                                           Node eventId);
 
     /**
      * Used internally to send back a {@link BindingNotification} with SBCE1 or
@@ -123,7 +123,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce1Or2(BindingNotification notification);
+    void receiveSbce1Or2(BindingNotification notification);
 
     /**
      * Used internally to send back a {@link BindingNotification} with SBCE3.
@@ -131,7 +131,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce3(BindingNotification notification);
+    void receiveSbce3(BindingNotification notification);
 
     /**
      * Used internally to send back a {@link QuadruplesNotification} with SBCE1
@@ -140,7 +140,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce2(QuadruplesNotification notification);
+    void receiveSbce2(QuadruplesNotification notification);
 
     /**
      * Used internally to send back a {@link CompoundEvent} with SBCE3.
@@ -148,7 +148,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce3(QuadruplesNotification notification);
+    void receiveSbce3(QuadruplesNotification notification);
 
     /**
      * Used internally to send back a {@link SignalNotification} with SBCE1 or
@@ -157,7 +157,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce1Or2(SignalNotification notification);
+    void receiveSbce1Or2(SignalNotification notification);
 
     /**
      * Used internally to send back a {@link SignalNotification} with SBCE3.
@@ -165,7 +165,7 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce3(SignalNotification notification);
+    void receiveSbce3(SignalNotification notification);
 
     /**
      * Used internally to send back a {@link PollingSignalNotification}.
@@ -173,6 +173,6 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      * @param notification
      *            the notification that is received.
      */
-    public void receiveSbce1(PollingSignalNotification notification);
+    void receiveSbce1(PollingSignalNotification notification);
 
 }

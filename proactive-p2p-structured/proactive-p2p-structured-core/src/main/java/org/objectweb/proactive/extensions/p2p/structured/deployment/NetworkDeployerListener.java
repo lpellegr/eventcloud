@@ -24,20 +24,20 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
  */
 public interface NetworkDeployerListener {
 
-    public void deploymentStarted();
+    void deploymentStarted();
 
-    public void deployingTrackers();
+    void deployingTrackers();
 
-    public void trackersDeployed();
+    void trackersDeployed();
 
-    public void injectingPeers();
+    void injectingPeers();
 
-    public void peersInjected();
+    void peersInjected();
 
-    public void deploymentEnded();
+    void deploymentEnded();
 
-    public void undeploymentStarted();
+    void undeploymentStarted();
 
-    public void undeploymentEnded();
+    void undeploymentEnded();
 
 }

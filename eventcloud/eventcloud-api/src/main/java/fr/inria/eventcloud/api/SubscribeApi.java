@@ -38,8 +38,8 @@ public interface SubscribeApi {
      *            the listener that defines the type of notifications and the
      *            action to execute when a notification is received.
      */
-    public void subscribe(Subscription subscription,
-                          BindingNotificationListener listener);
+    void subscribe(Subscription subscription,
+                   BindingNotificationListener listener);
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
@@ -52,8 +52,8 @@ public interface SubscribeApi {
      *            the listener that defines the type of notifications and the
      *            action to execute when a notification is received.
      */
-    public void subscribe(Subscription subscription,
-                          CompoundEventNotificationListener listener);
+    void subscribe(Subscription subscription,
+                   CompoundEventNotificationListener listener);
 
     /**
      * Subscribes to interest with the specified SPARQL query and the given
@@ -66,8 +66,8 @@ public interface SubscribeApi {
      *            the listener that defines the type of notifications and the
      *            action to execute when a notification is received.
      */
-    public void subscribe(Subscription subscription,
-                          SignalNotificationListener listener);
+    void subscribe(Subscription subscription,
+                   SignalNotificationListener listener);
 
     /**
      * Unsubscribes by using the specified subscription identifier.
@@ -75,6 +75,6 @@ public interface SubscribeApi {
      * @param id
      *            the subscription identifier.
      */
-    public void unsubscribe(SubscriptionId id);
+    void unsubscribe(SubscriptionId id);
 
 }

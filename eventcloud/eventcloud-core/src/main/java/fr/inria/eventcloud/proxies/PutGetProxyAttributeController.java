@@ -33,6 +33,6 @@ public interface PutGetProxyAttributeController extends
      * @param proxy
      *            the EventCloud proxy instance to set to the put/get proxy.
      */
-    public void setAttributes(EventCloudCache proxy);
+    void setAttributes(EventCloudCache proxy);
 
 }

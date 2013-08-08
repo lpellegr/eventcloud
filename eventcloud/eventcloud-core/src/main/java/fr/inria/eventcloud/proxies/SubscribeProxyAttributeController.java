@@ -40,7 +40,7 @@ public interface SubscribeProxyAttributeController extends
      *            a set of {@link AlterableElaProperty} properties to use for
      *            initializing the {@link SubscribeProxy}.
      */
-    public void setAttributes(EventCloudCache proxy, String componentUri,
-                              AlterableElaProperty[] properties);
+    void setAttributes(EventCloudCache proxy, String componentUri,
+                       AlterableElaProperty[] properties);
 
 }

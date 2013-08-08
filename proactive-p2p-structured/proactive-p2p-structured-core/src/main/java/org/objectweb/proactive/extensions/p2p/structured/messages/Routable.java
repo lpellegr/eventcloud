@@ -37,7 +37,7 @@ public interface Routable<K> {
      * 
      * @return the {@link Router} to use in order to route the message.
      */
-    public abstract Router<? extends RequestResponseMessage<K>, K> getRouter();
+    Router<? extends RequestResponseMessage<K>, K> getRouter();
 
     /**
      * Route the {@link RequestResponseMessage} to the correct {@link Peer}. If
@@ -47,6 +47,6 @@ public interface Routable<K> {
      * @param overlay
      *            the overlay used in order to route the request.
      */
-    public abstract void route(StructuredOverlay overlay);
+    void route(StructuredOverlay overlay);
 
 }

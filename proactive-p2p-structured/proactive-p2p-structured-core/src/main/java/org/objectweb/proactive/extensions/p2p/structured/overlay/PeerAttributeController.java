@@ -36,7 +36,7 @@ public interface PeerAttributeController extends CommonAttributeController {
      *            the provider to use for getting the {@link StructuredOverlay}
      *            embedded by the peer.
      */
-    public void setAttributes(Peer stub,
-                              SerializableProvider<? extends StructuredOverlay> overlayProvider);
+    void setAttributes(Peer stub,
+                       SerializableProvider<? extends StructuredOverlay> overlayProvider);
 
 }

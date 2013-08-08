@@ -31,6 +31,6 @@ public interface Callback<I> {
      * 
      * @param input
      */
-    public void execute(I input);
+    void execute(I input);
 
 }

@@ -47,7 +47,7 @@ public interface PutGetApi {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    public boolean add(Quadruple quad);
+    boolean add(Quadruple quad);
 
     /**
      * Loads the specified collection of quadruples into the EventCloud in
@@ -59,7 +59,7 @@ public interface PutGetApi {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    public boolean add(Collection<Quadruple> quads);
+    boolean add(Collection<Quadruple> quads);
 
     /**
      * Publishes the quadruples that are read from an input stream opened from
@@ -75,7 +75,7 @@ public interface PutGetApi {
      *            stream.
      * @throws IOException
      */
-    public void add(URL url, SerializationFormat format) throws IOException;
+    void add(URL url, SerializationFormat format) throws IOException;
 
     /**
      * Indicates whether the specified quadruples is contained by the
@@ -87,7 +87,7 @@ public interface PutGetApi {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    public boolean contains(Quadruple quad);
+    boolean contains(Quadruple quad);
 
     /**
      * Deletes the specified quadruple from the EventCloud.
@@ -98,7 +98,7 @@ public interface PutGetApi {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    public boolean delete(Quadruple quad);
+    boolean delete(Quadruple quad);
 
     /**
      * Deletes the specified quadruples from the EventCloud.
@@ -109,7 +109,7 @@ public interface PutGetApi {
      * @return {@code true} if the operation has succeeded, {@code false}
      *         otherwise.
      */
-    public boolean delete(Collection<Quadruple> quads);
+    boolean delete(Collection<Quadruple> quads);
 
     /**
      * Deletes from the EventCloud the quadruples that match the specified
@@ -121,7 +121,7 @@ public interface PutGetApi {
      * @return the quadruples which have been removed from the EventCloud
      *         according to the quadruple pattern.
      */
-    public List<Quadruple> delete(QuadruplePattern quadPattern);
+    List<Quadruple> delete(QuadruplePattern quadPattern);
 
     /**
      * Returns the number of quadruples that match the specified
@@ -133,7 +133,7 @@ public interface PutGetApi {
      * @return the number of quadruples that match the specified
      *         {@code quadPattern}.
      */
-    public long count(QuadruplePattern quadPattern);
+    long count(QuadruplePattern quadPattern);
 
     /**
      * Returns the number of solutions for the specified {@code sparqlQuery}.
@@ -143,7 +143,7 @@ public interface PutGetApi {
      * 
      * @return the number of solutions for the specified {@code sparqlQuery}.
      */
-    public long count(String sparqlQuery) throws MalformedSparqlQueryException;
+    long count(String sparqlQuery) throws MalformedSparqlQueryException;
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -154,7 +154,7 @@ public interface PutGetApi {
      * @return the quadruples that match the quadruple pattern that has been
      *         specified.
      */
-    public List<Quadruple> find(QuadruplePattern quadPattern);
+    List<Quadruple> find(QuadruplePattern quadPattern);
 
     /**
      * Executes on the EventCloud the specified SPARQL query. This SPARQL query
@@ -165,7 +165,7 @@ public interface PutGetApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
+    SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -177,7 +177,7 @@ public interface PutGetApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
+    SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -189,7 +189,7 @@ public interface PutGetApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
+    SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -201,7 +201,7 @@ public interface PutGetApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
+    SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -213,7 +213,7 @@ public interface PutGetApi {
      * 
      * @return a response according the query form that has been executed.
      */
-    public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
+    SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
             throws MalformedSparqlQueryException;
 
 }

@@ -36,6 +36,6 @@ public interface Rdf2goNotificationListener<T> {
      * @param solution
      *            the solution received.
      */
-    public void handle(SubscriptionId id, T solution);
+    void handle(SubscriptionId id, T solution);
 
 }
