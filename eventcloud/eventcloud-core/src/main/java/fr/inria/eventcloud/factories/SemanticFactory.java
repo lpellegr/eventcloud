@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Provider;
-
 import org.etsi.uri.gcm.util.GCM;
 import org.objectweb.fractal.api.Component;
 import org.objectweb.fractal.api.Interface;
@@ -31,6 +29,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.objectweb.proactive.core.node.Node;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerAttributeController;
@@ -75,7 +74,24 @@ public final class SemanticFactory extends AbstractFactory {
      */
     public static SemanticTracker newSemanticTracker() {
         return SemanticFactory.createSemanticTracker(
-                "default", new HashMap<String, Object>());
+                new HashMap<String, Object>(), null, "default");
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the local JVM, by
+     * using the specified deployment configuration and associates it to the
+     * network named "default".
+     * 
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(DeploymentConfiguration deploymentConfiguration) {
+        return SemanticFactory.createSemanticTracker(
+                new HashMap<String, Object>(), deploymentConfiguration,
+                "default");
     }
 
     /**
@@ -90,7 +106,27 @@ public final class SemanticFactory extends AbstractFactory {
      */
     public static SemanticTracker newSemanticTracker(String networkName) {
         return SemanticFactory.createSemanticTracker(
-                networkName, new HashMap<String, Object>());
+                new HashMap<String, Object>(), null, networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the local JVM, by
+     * using the specified deployment configuration and associates it to the
+     * specified {@code networkName}.
+     * 
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(DeploymentConfiguration deploymentConfiguration,
+                                                     String networkName) {
+        return SemanticFactory.createSemanticTracker(
+                new HashMap<String, Object>(), deploymentConfiguration,
+                networkName);
     }
 
     /**
@@ -104,7 +140,26 @@ public final class SemanticFactory extends AbstractFactory {
      *         semantic tracker component created.
      */
     public static SemanticTracker newSemanticTracker(Node node) {
-        return SemanticFactory.newSemanticTracker("default", node);
+        return SemanticFactory.newSemanticTracker(node, null, "default");
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code node}, by using the specified deployment configuration and
+     * associates it to the network named "default".
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(Node node,
+                                                     DeploymentConfiguration deploymentConfiguration) {
+        return SemanticFactory.newSemanticTracker(
+                node, deploymentConfiguration, "default");
     }
 
     /**
@@ -119,7 +174,26 @@ public final class SemanticFactory extends AbstractFactory {
      *         semantic tracker component created.
      */
     public static SemanticTracker newSemanticTracker(GCMVirtualNode vn) {
-        return SemanticFactory.newSemanticTracker("default", vn);
+        return SemanticFactory.newSemanticTracker(vn, null, "default");
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code GCM virtual node}, by using the specified deployment configuration
+     * and associates it to the network named "default".
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(GCMVirtualNode vn,
+                                                     DeploymentConfiguration deploymentConfiguration) {
+        return SemanticFactory.newSemanticTracker(
+                vn, deploymentConfiguration, "default");
     }
 
     /**
@@ -134,68 +208,155 @@ public final class SemanticFactory extends AbstractFactory {
      *         semantic tracker component created.
      */
     public static SemanticTracker newSemanticTracker(NodeProvider nodeProvider) {
-        return SemanticFactory.newSemanticTracker("default", nodeProvider);
-    }
-
-    /**
-     * Creates a new semantic tracker component deployed on the specified
-     * {@code node} and associates it to the given {@code networkName}.
-     * 
-     * @param networkName
-     *            the network name managed by the tracker.
-     * @param node
-     *            the node to be used for deployment.
-     * 
-     * @return the reference on the {@link SemanticTracker} interface of the new
-     *         semantic tracker component created.
-     */
-    public static SemanticTracker newSemanticTracker(String networkName,
-                                                     Node node) {
-        return SemanticFactory.createSemanticTracker(
-                networkName, ComponentUtils.createContext(node));
-    }
-
-    /**
-     * Creates a new semantic tracker component deployed on the specified
-     * {@code GCM virtual node} and associates it to the given
-     * {@code networkName}.
-     * 
-     * @param networkName
-     *            the network name managed by the tracker.
-     * @param vn
-     *            the GCM virtual node to be used for deployment.
-     * 
-     * @return the reference on the {@link SemanticTracker} interface of the new
-     *         semantic tracker component created.
-     */
-    public static SemanticTracker newSemanticTracker(String networkName,
-                                                     GCMVirtualNode vn) {
-        return SemanticFactory.createSemanticTracker(
-                networkName, ComponentUtils.createContext(vn));
+        return SemanticFactory.newSemanticTracker(nodeProvider, null, "default");
     }
 
     /**
      * Creates a new semantic tracker component deployed on a node provided by
-     * the specified {@code node provider} and associates it to the given
-     * {@code networkName}.
+     * the specified {@code node provider}, by using the specified deployment
+     * configuration and associates it to the network named "default".
      * 
-     * @param networkName
-     *            the network name managed by the tracker.
      * @param nodeProvider
      *            the node provider to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
      * 
      * @return the reference on the {@link SemanticTracker} interface of the new
      *         semantic tracker component created.
      */
-    public static SemanticTracker newSemanticTracker(String networkName,
-                                                     NodeProvider nodeProvider) {
-        return SemanticFactory.createSemanticTracker(
-                networkName, getContextFromNodeProvider(
-                        nodeProvider, SemanticTrackerImpl.TRACKER_VN));
+    public static SemanticTracker newSemanticTracker(NodeProvider nodeProvider,
+                                                     DeploymentConfiguration deploymentConfiguration) {
+        return SemanticFactory.newSemanticTracker(
+                nodeProvider, deploymentConfiguration, "default");
     }
 
-    private static SemanticTracker createSemanticTracker(String networkName,
-                                                         Map<String, Object> context) {
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code node} and associates it to the specified {@code networkName}.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(Node node,
+                                                     String networkName) {
+        return SemanticFactory.newSemanticTracker(node, null, networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code node}, by using the specified deployment configuration and
+     * associates it to the specified {@code networkName}.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(Node node,
+                                                     DeploymentConfiguration deploymentConfiguration,
+                                                     String networkName) {
+        return SemanticFactory.createSemanticTracker(
+                ComponentUtils.createContext(node), deploymentConfiguration,
+                networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code GCM virtual node} and associates it to the specified
+     * {@code networkName}.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(GCMVirtualNode vn,
+                                                     String networkName) {
+        return SemanticFactory.newSemanticTracker(vn, null, networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on the specified
+     * {@code GCM virtual node}, by using the specified deployment configuration
+     * and associates it to the specified {@code networkName}.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(GCMVirtualNode vn,
+                                                     DeploymentConfiguration deploymentConfiguration,
+                                                     String networkName) {
+        return SemanticFactory.createSemanticTracker(
+                ComponentUtils.createContext(vn), deploymentConfiguration,
+                networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on a node provided by
+     * the specified {@code node provider} and associates it to the specified
+     * {@code networkName}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(NodeProvider nodeProvider,
+                                                     String networkName) {
+        return SemanticFactory.newSemanticTracker(
+                nodeProvider, null, networkName);
+    }
+
+    /**
+     * Creates a new semantic tracker component deployed on a node provided by
+     * the specified {@code node provider}, by using the specified deployment
+     * configuration and associates it to the specified {@code networkName}.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param networkName
+     *            the network name managed by the tracker.
+     * 
+     * @return the reference on the {@link SemanticTracker} interface of the new
+     *         semantic tracker component created.
+     */
+    public static SemanticTracker newSemanticTracker(NodeProvider nodeProvider,
+                                                     DeploymentConfiguration deploymentConfiguration,
+                                                     String networkName) {
+        return SemanticFactory.createSemanticTracker(
+                AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, SemanticTrackerImpl.TRACKER_VN),
+                deploymentConfiguration, networkName);
+    }
+
+    private static SemanticTracker createSemanticTracker(Map<String, Object> context,
+                                                         DeploymentConfiguration deploymentConfiguration,
+                                                         String networkName) {
         try {
             SemanticTracker tracker =
                     ComponentUtils.createComponentAndGetInterface(
@@ -203,8 +364,12 @@ public final class SemanticFactory extends AbstractFactory {
                             TrackerImpl.TRACKER_SERVICES_ITF,
                             SemanticTracker.class, true);
 
-            ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setAttributes(
-                    tracker, networkName);
+            TrackerAttributeController trackerAttributeController =
+                    (TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner());
+            if (deploymentConfiguration != null) {
+                trackerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
+            }
+            trackerAttributeController.setAttributes(tracker, networkName);
 
             log.info(
                     "SemanticTracker {} associated to network named '{}' created",
@@ -217,8 +382,8 @@ public final class SemanticFactory extends AbstractFactory {
     }
 
     /**
-     * Creates a new semantic peer component deployed on the local JVM with the
-     * specified overlay {@link Provider}.
+     * Creates a new semantic peer component deployed on the local JVM by using
+     * the specified {@code overlay} abstraction.
      * 
      * @param overlayProvider
      *            the overlay provider to use.
@@ -228,66 +393,156 @@ public final class SemanticFactory extends AbstractFactory {
      */
     public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                overlayProvider, new HashMap<String, Object>());
+                new HashMap<String, Object>(), null, overlayProvider);
+    }
+
+    /**
+     * Creates a new semantic peer component deployed on the local JVM by using
+     * the specified deployment configuration and the specified {@code overlay}
+     * abstraction.
+     * 
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         semantic peer component created.
+     */
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(DeploymentConfiguration deploymentConfiguration,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.createSemanticPeer(
+                new HashMap<String, Object>(), deploymentConfiguration,
+                overlayProvider);
     }
 
     /**
      * Creates a new semantic peer component deployed on the specified
-     * {@code node}.
+     * {@code node}by using the specified {@code overlay} abstraction.
      * 
-     * @param overlayProvider
-     *            the overlay provider to use.
      * @param node
      *            the node to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         semantic peer component created.
      */
-    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                             Node node) {
-        return SemanticFactory.createSemanticPeer(
-                overlayProvider, ComponentUtils.createContext(node));
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(Node node,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.newSemanticPeer(node, null, overlayProvider);
     }
 
     /**
      * Creates a new semantic peer component deployed on the specified
-     * {@code GCM virtual node}.
+     * {@code node} by using the specified deployment configuration and the
+     * specified {@code overlay} abstraction.
      * 
+     * @param node
+     *            the node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
      * @param overlayProvider
      *            the overlay provider to use.
-     * @param vn
-     *            the GCM virtual node to be used for deployment.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         semantic peer component created.
      */
-    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                             GCMVirtualNode vn) {
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(Node node,
+                                                                             DeploymentConfiguration deploymentConfiguration,
+                                                                             SerializableProvider<T> overlayProvider) {
         return SemanticFactory.createSemanticPeer(
-                overlayProvider, ComponentUtils.createContext(vn));
+                ComponentUtils.createContext(node), deploymentConfiguration,
+                overlayProvider);
+    }
+
+    /**
+     * Creates a new semantic peer component deployed on the specified
+     * {@code GCM virtual node} by using the specified {@code overlay}
+     * abstraction.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         semantic peer component created.
+     */
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(GCMVirtualNode vn,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.newSemanticPeer(vn, null, overlayProvider);
+    }
+
+    /**
+     * Creates a new semantic peer component deployed on the specified
+     * {@code GCM virtual node} by using the specified deployment configuration
+     * and the specified {@code overlay} abstraction.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         semantic peer component created.
+     */
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(GCMVirtualNode vn,
+                                                                             DeploymentConfiguration deploymentConfiguration,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.createSemanticPeer(
+                ComponentUtils.createContext(vn), deploymentConfiguration,
+                overlayProvider);
     }
 
     /**
      * Creates a new semantic peer component deployed on a node provided by the
-     * specified {@code node provider}.
+     * specified {@code node provider} by using the specified {@code overlay}
+     * abstraction.
      * 
-     * @param overlayProvider
-     *            the overlay provider to use.
      * @param nodeProvider
      *            the node provider to be used for deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
      * 
      * @return the reference on the {@link SemanticPeer} interface of the new
      *         semantic peer component created.
      */
-    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                             NodeProvider nodeProvider) {
-        return SemanticFactory.createSemanticPeer(
-                overlayProvider, getContextFromNodeProvider(
-                        nodeProvider, SemanticPeerImpl.PEER_VN));
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(NodeProvider nodeProvider,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.newSemanticPeer(
+                nodeProvider, null, overlayProvider);
     }
 
-    private synchronized static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(SerializableProvider<T> overlayProvider,
-                                                                                              Map<String, Object> context) {
+    /**
+     * Creates a new semantic peer component deployed on a node provided by the
+     * specified {@code node provider} by using the specified deployment
+     * configuration and the specified {@code overlay} abstraction.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * @param deploymentConfiguration
+     *            the deployment configuration to use during the deployment.
+     * @param overlayProvider
+     *            the overlay provider to use.
+     * 
+     * @return the reference on the {@link SemanticPeer} interface of the new
+     *         semantic peer component created.
+     */
+    public static <T extends StructuredOverlay> SemanticPeer newSemanticPeer(NodeProvider nodeProvider,
+                                                                             DeploymentConfiguration deploymentConfiguration,
+                                                                             SerializableProvider<T> overlayProvider) {
+        return SemanticFactory.createSemanticPeer(
+                AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, SemanticPeerImpl.PEER_VN),
+                deploymentConfiguration, overlayProvider);
+    }
+
+    private synchronized static <T extends StructuredOverlay> SemanticPeer createSemanticPeer(Map<String, Object> context,
+                                                                                              DeploymentConfiguration deploymentConfiguration,
+                                                                                              SerializableProvider<T> overlayProvider) {
         try {
             SemanticPeer peer =
                     ComponentUtils.createComponentAndGetInterface(
@@ -295,8 +550,12 @@ public final class SemanticFactory extends AbstractFactory {
                             PeerImpl.PEER_SERVICES_ITF, SemanticPeer.class,
                             true);
 
-            ((PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner())).setAttributes(
-                    peer, overlayProvider);
+            PeerAttributeController peerAttributeController =
+                    (PeerAttributeController) GCM.getAttributeController(((Interface) peer).getFcItfOwner());
+            if (deploymentConfiguration != null) {
+                peerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
+            }
+            peerAttributeController.setAttributes(peer, overlayProvider);
 
             if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
                 Component peerComponent = ((Interface) peer).getFcItfOwner();
@@ -346,7 +605,7 @@ public final class SemanticFactory extends AbstractFactory {
     public static <T extends StructuredOverlay> SemanticPeer[] newSemanticPeersInParallel(SerializableProvider<T> overlayProvider,
                                                                                           int number) {
         return SemanticFactory.newSemanticPeersInParallel(
-                overlayProvider, new Node[number]);
+                new Node[number], overlayProvider);
     }
 
     /**
@@ -364,14 +623,14 @@ public final class SemanticFactory extends AbstractFactory {
     /*
      * TODO better implementation of newComponentInParallel
      */
-    public static <T extends StructuredOverlay> SemanticPeer[] newSemanticPeersInParallel(SerializableProvider<T> overlayProvider,
-                                                                                          Node[] nodes) {
+    public static <T extends StructuredOverlay> SemanticPeer[] newSemanticPeersInParallel(Node[] nodes,
+                                                                                          SerializableProvider<T> overlayProvider) {
         checkNotNull(nodes);
 
         SemanticPeer[] peers = new SemanticPeer[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             peers[i] =
-                    SemanticFactory.newSemanticPeer(overlayProvider, nodes[i]);
+                    SemanticFactory.newSemanticPeer(nodes[i], overlayProvider);
         }
         return peers;
     }

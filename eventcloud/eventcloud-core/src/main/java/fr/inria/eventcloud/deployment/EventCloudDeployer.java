@@ -80,8 +80,9 @@ public class EventCloudDeployer extends NetworkDeployer {
     @Override
     protected synchronized Peer createPeer() {
         return SemanticFactory.newSemanticPeer(
-                super.descriptor.getOverlayProvider(),
-                super.descriptor.getNodeProvider());
+                super.descriptor.getNodeProvider(),
+                super.descriptor.getDeploymentConfiguration(),
+                super.descriptor.getOverlayProvider());
     }
 
     /**
@@ -90,7 +91,8 @@ public class EventCloudDeployer extends NetworkDeployer {
     @Override
     protected synchronized Tracker createTracker(String networkName) {
         return SemanticFactory.newSemanticTracker(
-                networkName, super.descriptor.getNodeProvider());
+                super.descriptor.getNodeProvider(),
+                super.descriptor.getDeploymentConfiguration(), networkName);
     }
 
     /**
