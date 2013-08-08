@@ -38,7 +38,7 @@ public class CustomProxyFactory extends ProxyFactory {
             throws EventCloudIdNotManaged {
         return (CustomPublishProxy) ProxyFactory.createPublishProxy(
                 CustomPublishProxyImpl.PUBLISH_PROXY_ADL,
-                CustomPublishProxy.class, new HashMap<String, Object>(),
+                CustomPublishProxy.class, new HashMap<String, Object>(), null,
                 registryUrl, id);
     }
 
@@ -50,7 +50,7 @@ public class CustomProxyFactory extends ProxyFactory {
                 CustomPublishProxyImpl.PUBLISH_PROXY_ADL,
                 CustomPublishProxy.class,
                 AbstractFactory.getContextFromNodeProvider(
-                        nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN),
+                        nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN), null,
                 registryUrl, id);
     }
 

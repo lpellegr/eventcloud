@@ -14,29 +14,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.overlay;
+package org.objectweb.proactive.extensions.p2p.structured;
 
 import org.objectweb.fractal.api.control.AttributeController;
-import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
-import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 
 /**
- * {@link AttributeController} for {@link Peer} components.
+ * Common {@link AttributeController} for components.
  * 
  * @author bsauvan
  */
-public interface PeerAttributeController extends CommonAttributeController {
+public interface CommonAttributeController extends AttributeController {
 
     /**
-     * Sets the attributes of the peer.
+     * Sets the {@link DeploymentConfiguration} of the component.
      * 
-     * @param stub
-     *            the remote peer reference.
-     * @param overlayProvider
-     *            the provider to use for getting the {@link StructuredOverlay}
-     *            embedded by the peer.
+     * @param deploymentConfiguration
+     *            the {@link DeploymentConfiguration} of the component.
      */
-    public void setAttributes(Peer stub,
-                              SerializableProvider<? extends StructuredOverlay> overlayProvider);
+    void setDeploymentConfiguration(DeploymentConfiguration deploymentConfiguration);
 
 }
