@@ -38,7 +38,7 @@ public interface DataHandler {
      *            the data that are received when a peer joins a network from a
      *            landmark node.
      */
-    public abstract void assignDataReceived(Serializable dataReceived);
+    void assignDataReceived(Serializable dataReceived);
 
     /**
      * Returns a copy of all the data managed by the current peer. This is
@@ -46,7 +46,7 @@ public interface DataHandler {
      * 
      * @return all the data managed by the current peer.
      */
-    public abstract Serializable retrieveAllData();
+    Serializable retrieveAllData();
 
     /**
      * Returns a copy of all the data which are contained in the specified
@@ -61,7 +61,7 @@ public interface DataHandler {
      * 
      * @return the data which are contained in the specified {@code interval}.
      */
-    public abstract Serializable retrieveDataIn(Object interval);
+    Serializable retrieveDataIn(Object interval);
 
     /**
      * Removes and returns all the data which are in the given {@code interval}.
@@ -77,6 +77,6 @@ public interface DataHandler {
      * @return all the data which have been removed from the given
      *         {@code interval}.
      */
-    public abstract Serializable removeDataIn(Object interval);
+    Serializable removeDataIn(Object interval);
 
 }

@@ -61,7 +61,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadruple")
-    public boolean add(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    boolean add(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Loads the specified collection of quadruples into the EventCloud in
@@ -74,7 +74,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "addQuadrupleCollection")
-    public boolean add(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    boolean add(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Indicates whether the specified quadruples is contained by the
@@ -87,7 +87,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "containsQuadruple")
-    public boolean contains(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    boolean contains(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruple from the EventCloud.
@@ -99,7 +99,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadruple")
-    public boolean delete(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
+    boolean delete(@WebParam(name = "quad") @XmlJavaTypeAdapter(QuadrupleAdapter.class) Quadruple quad);
 
     /**
      * Deletes the specified quadruples from the EventCloud.
@@ -111,7 +111,7 @@ public interface PutGetWsApi {
      *         otherwise.
      */
     @WebMethod(operationName = "deleteQuadrupleCollection")
-    public boolean delete(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
+    boolean delete(@WebParam(name = "quads") @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class) Collection<Quadruple> quads);
 
     /**
      * Deletes from the EventCloud the quadruples that match the specified
@@ -125,7 +125,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "deleteQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> delete(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    List<Quadruple> delete(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Finds all the quadruples that match the specified quadruple pattern.
@@ -138,7 +138,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "findQuadruplePattern")
     @XmlJavaTypeAdapter(QuadrupleCollectionAdapter.class)
-    public List<Quadruple> find(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
+    List<Quadruple> find(@WebParam(name = "quadPattern") @XmlJavaTypeAdapter(QuadruplePatternAdapter.class) QuadruplePattern quadPattern);
 
     /**
      * Executes on the EventCloud the specified SPARQL query. This SPARQL query
@@ -151,7 +151,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "executeSparqlQuery")
     @XmlJavaTypeAdapter(SparqlResponseAdapter.class)
-    public SparqlResponse<?> executeSparqlQuery(@WebParam(name = "sparqlQuery") String sparqlQuery)
+    SparqlResponse<?> executeSparqlQuery(@WebParam(name = "sparqlQuery") String sparqlQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -165,7 +165,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "executeSparqlAsk")
     @XmlJavaTypeAdapter(SparqlAskResponseAdapter.class)
-    public SparqlAskResponse executeSparqlAsk(@WebParam(name = "sparqlAskQuery") String sparqlAskQuery)
+    SparqlAskResponse executeSparqlAsk(@WebParam(name = "sparqlAskQuery") String sparqlAskQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -179,7 +179,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "executeSparqlConstruct")
     @XmlJavaTypeAdapter(SparqlConstructResponseAdapter.class)
-    public SparqlConstructResponse executeSparqlConstruct(@WebParam(name = "sparqlConstructQuery") String sparqlConstructQuery)
+    SparqlConstructResponse executeSparqlConstruct(@WebParam(name = "sparqlConstructQuery") String sparqlConstructQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -193,7 +193,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "executeSparqlDescribe")
     @XmlJavaTypeAdapter(SparqlDescribeResponseAdapter.class)
-    public SparqlDescribeResponse executeSparqlDescribe(@WebParam(name = "sparqlDescribeQuery") String sparqlDescribeQuery)
+    SparqlDescribeResponse executeSparqlDescribe(@WebParam(name = "sparqlDescribeQuery") String sparqlDescribeQuery)
             throws MalformedSparqlQueryException;
 
     /**
@@ -207,7 +207,7 @@ public interface PutGetWsApi {
      */
     @WebMethod(operationName = "executeSparqlSelect")
     @XmlJavaTypeAdapter(SparqlSelectResponseAdapter.class)
-    public SparqlSelectResponse executeSparqlSelect(@WebParam(name = "sparqlSelectQuery") String sparqlSelectQuery)
+    SparqlSelectResponse executeSparqlSelect(@WebParam(name = "sparqlSelectQuery") String sparqlSelectQuery)
             throws MalformedSparqlQueryException;
 
 }

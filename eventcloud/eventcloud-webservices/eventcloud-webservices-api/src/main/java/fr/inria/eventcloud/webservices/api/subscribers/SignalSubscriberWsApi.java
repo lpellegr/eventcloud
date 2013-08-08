@@ -37,6 +37,6 @@ public interface SignalSubscriberWsApi {
      *            the subscription identifier which has been matched.
      */
     @WebMethod(operationName = "notifySignal")
-    public void notifySignal(@WebParam(name = "id") String subscriptionId);
+    void notifySignal(@WebParam(name = "id") String subscriptionId);
 
 }

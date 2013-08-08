@@ -31,21 +31,21 @@ public interface NodeProvider {
     /**
      * Starts the deployment of the ProActive nodes.
      */
-    public void start();
+    void start();
 
     /**
      * Indicates whether the deployment has been started or not.
      * 
      * @return true if the deployment has been started, false otherwise.
      */
-    public boolean isStarted();
+    boolean isStarted();
 
     /**
      * Returns a ProActive node.
      * 
      * @return a ProActive node.
      */
-    public Node getANode();
+    Node getANode();
 
     /**
      * Returns the GCMVirtualNode with the specified name.
@@ -54,11 +54,11 @@ public interface NodeProvider {
      *            the name of the GCMVirtualNode.
      * @return the GCMVirtualNode with the specified name.
      */
-    public GCMVirtualNode getGcmVirtualNode(String virtualNodeName);
+    GCMVirtualNode getGcmVirtualNode(String virtualNodeName);
 
     /**
      * Terminates the deployment of the ProActive nodes, ie. releases them.
      */
-    public void terminate();
+    void terminate();
 
 }

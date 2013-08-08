@@ -26,6 +26,6 @@ import java.io.Serializable;
  */
 public interface DeploymentConfiguration extends Serializable {
 
-    public void configure();
+    void configure();
 
 }

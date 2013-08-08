@@ -45,9 +45,9 @@ public interface BindingSubscriberWsApi {
      *            a binding that matches the subscription.
      */
     @WebMethod(operationName = "notifyBinding")
-    public void notifyBinding(@WebParam(name = "id") String subscriptionId,
+    void notifyBinding(@WebParam(name = "id") String subscriptionId,
     // Here, we have to use BindingWrapper and not Binding because
     // jaxb does not allow interface
-                              @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingWrapperAdapter.class) BindingWrapper binding);
+                       @WebParam(name = "binding") @XmlJavaTypeAdapter(BindingWrapperAdapter.class) BindingWrapper binding);
 
 }

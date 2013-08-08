@@ -44,7 +44,7 @@ public interface CompoundEventSubscriberWsApi {
      *            a compound event that matches the subscription.
      */
     @WebMethod(operationName = "notifyCompoundEvent")
-    public void notifyCompoundEvent(@WebParam(name = "id") String subscriptionId,
-                                    @WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent compoundEvent);
+    void notifyCompoundEvent(@WebParam(name = "id") String subscriptionId,
+                             @WebParam(name = "event") @XmlJavaTypeAdapter(CompoundEventAdapter.class) CompoundEvent compoundEvent);
 
 }

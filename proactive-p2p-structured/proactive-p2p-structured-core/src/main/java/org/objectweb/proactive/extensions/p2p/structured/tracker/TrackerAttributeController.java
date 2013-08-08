@@ -34,6 +34,6 @@ public interface TrackerAttributeController extends CommonAttributeController {
      * @param networkName
      *            the network name to use.
      */
-    public void setAttributes(Tracker stub, String networkName);
+    void setAttributes(Tracker stub, String networkName);
 
 }

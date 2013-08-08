@@ -34,6 +34,6 @@ public interface ProxyAttributeController extends AttributeController {
      * @param trackers
      *            trackers used to get entry points to the P2P network.
      */
-    public void setAttributes(List<Tracker> trackers);
+    void setAttributes(List<Tracker> trackers);
 
 }
