@@ -66,7 +66,7 @@ public class TrackerFactory extends AbstractFactory {
      * "default".
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
@@ -98,7 +98,7 @@ public class TrackerFactory extends AbstractFactory {
      * {@code networkName}.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param networkName
      *            the name of the network the tracker manages.
      * 
@@ -134,7 +134,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
@@ -167,7 +167,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
@@ -200,7 +200,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link Tracker} interface of the new tracker
      *         component created.
@@ -235,7 +235,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param networkName
      *            the name of the network the tracker manages.
      * 
@@ -275,7 +275,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param networkName
      *            the name of the network the tracker manages.
      * 
@@ -316,7 +316,7 @@ public class TrackerFactory extends AbstractFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param networkName
      *            the name of the network the tracker manages.
      * 

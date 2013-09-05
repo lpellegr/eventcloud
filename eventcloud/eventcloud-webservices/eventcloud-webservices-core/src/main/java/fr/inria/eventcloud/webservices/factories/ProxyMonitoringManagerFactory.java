@@ -106,7 +106,7 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
     }
 
     private static ProxyMonitoringManager createProxyMonitoringManager(Map<String, Object> context) {
-        ProxyMonitoringManager registry =
+        ProxyMonitoringManager proxyMonitoringManager =
                 ComponentUtils.createNfComponentAndGetInterface(
                         ProxyMonitoringManagerImpl.PROXY_MONITORING_MANAGER_ADL,
                         context,
@@ -115,7 +115,7 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
 
         log.info("ProxyMonitoringManager created");
 
-        return registry;
+        return proxyMonitoringManager;
     }
 
 }

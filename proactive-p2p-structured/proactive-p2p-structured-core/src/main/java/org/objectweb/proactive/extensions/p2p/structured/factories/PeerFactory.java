@@ -72,7 +72,7 @@ public final class PeerFactory extends AbstractFactory {
      * abstraction.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use.
      * 
@@ -111,7 +111,7 @@ public final class PeerFactory extends AbstractFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use.
      * 
@@ -152,7 +152,7 @@ public final class PeerFactory extends AbstractFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use.
      * 
@@ -192,7 +192,7 @@ public final class PeerFactory extends AbstractFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param overlayProvider
      *            the overlay provider to use.
      * 

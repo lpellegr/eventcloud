@@ -67,7 +67,7 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      * and by using the specified deployment configuration.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link EventCloudsRegistry} interface of the
      *         new EventClouds registry component created.
@@ -98,7 +98,7 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link EventCloudsRegistry} interface of the
      *         new EventClouds registry component created.
@@ -131,7 +131,7 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link EventCloudsRegistry} interface of the
      *         new EventClouds registry component created.
@@ -165,7 +165,7 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * 
      * @return the reference on the {@link EventCloudsRegistry} interface of the
      *         new EventClouds registry component created.

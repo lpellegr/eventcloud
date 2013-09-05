@@ -58,10 +58,10 @@ public class DeploymentDescriptor implements Serializable {
     }
 
     /**
-     * Sets the deployment configuration to use during the deployment.
+     * Sets the deployment configuration to use.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      */
     public DeploymentDescriptor setDeploymentConfiguration(DeploymentConfiguration deploymentConfiguration) {
         Preconditions.checkState(

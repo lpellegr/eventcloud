@@ -55,6 +55,68 @@ public final class WsProxyFactory extends ProxyFactory {
     }
 
     /**
+     * Creates a new generic publish web service proxy component deployed on the
+     * local JVM. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the new
+     *         generic publish web service proxy component created.
+     */
+    public static PublishApi newGenericPublishProxy() {
+        return ProxyFactory.createGenericPublishProxy(
+                publishProxyAdl, new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new generic publish web service proxy component deployed on the
+     * specified {@code node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the new
+     *         generic web service publish proxy component created.
+     */
+    public static PublishApi newGenericPublishProxy(Node node) {
+        return WsProxyFactory.createGenericPublishProxy(
+                publishProxyAdl, ComponentUtils.createContext(node));
+    }
+
+    /**
+     * Creates a new generic publish web service proxy component deployed on the
+     * specified {@code GCM virtual node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the new
+     *         generic publish web service proxy component created.
+     */
+    public static PublishApi newGenericPublishProxy(GCMVirtualNode vn) {
+        return WsProxyFactory.createGenericPublishProxy(
+                publishProxyAdl, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new generic publish web service proxy component deployed on a
+     * node provided by the specified {@code node provider}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link PublishApi} interface of the new
+     *         generic publish web service proxy component created.
+     */
+    public static PublishApi newGenericPublishProxy(NodeProvider nodeProvider) {
+        return WsProxyFactory.createGenericPublishProxy(
+                publishProxyAdl, AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN));
+    }
+
+    /**
      * Creates a new publish web service proxy component deployed on the local
      * JVM.
      * 
@@ -81,7 +143,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * JVM by using the specified deployment configuration.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -131,7 +193,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -183,7 +245,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -236,7 +298,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -256,6 +318,68 @@ public final class WsProxyFactory extends ProxyFactory {
                 publishProxyAdl, AbstractFactory.getContextFromNodeProvider(
                         nodeProvider, PublishProxyImpl.PUBLISH_PROXY_VN),
                 deploymentConfiguration, registryUrl, id);
+    }
+
+    /**
+     * Creates a new generic subscribe web service proxy component deployed on
+     * the local JVM. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the new
+     *         generic subscribe web service proxy component created.
+     */
+    public static SubscribeApi newGenericSubscribeProxy() {
+        return ProxyFactory.createGenericSubscribeProxy(
+                subscribeProxyAdl, new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new generic subscribe web service proxy component deployed on
+     * the specified {@code node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the new
+     *         generic subscribe web service proxy component created.
+     */
+    public static SubscribeApi newGenericSubscribeProxy(Node node) {
+        return WsProxyFactory.createGenericSubscribeProxy(
+                subscribeProxyAdl, ComponentUtils.createContext(node));
+    }
+
+    /**
+     * Creates a new generic subscribe web service proxy component deployed on
+     * the specified {@code GCM virtual node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the new
+     *         generic subscribe web service proxy component created.
+     */
+    public static SubscribeApi newGenericSubscribeProxy(GCMVirtualNode vn) {
+        return WsProxyFactory.createGenericSubscribeProxy(
+                subscribeProxyAdl, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new generic subscribe web service proxy component deployed on a
+     * node provided by the specified {@code node provider}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link SubscribeApi} interface of the new
+     *         generic subscribe web service proxy component created.
+     */
+    public static SubscribeApi newGenericSubscribeProxy(NodeProvider nodeProvider) {
+        return WsProxyFactory.createGenericSubscribeProxy(
+                subscribeProxyAdl, AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, SubscribeProxyImpl.SUBSCRIBE_PROXY_VN));
     }
 
     /**
@@ -292,7 +416,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * notification.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -354,7 +478,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -417,7 +541,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -481,7 +605,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -505,6 +629,68 @@ public final class WsProxyFactory extends ProxyFactory {
                 subscribeProxyAdl, AbstractFactory.getContextFromNodeProvider(
                         nodeProvider, SubscribeProxyImpl.SUBSCRIBE_PROXY_VN),
                 deploymentConfiguration, registryUrl, id, properties);
+    }
+
+    /**
+     * Creates a new generic put/get web service proxy component deployed on the
+     * local JVM. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the new
+     *         generic put/get web service proxy component created.
+     */
+    public static PutGetApi newGenericPutGetProxy() {
+        return ProxyFactory.createGenericPutGetProxy(
+                putgetProxyAdl, new HashMap<String, Object>());
+    }
+
+    /**
+     * Creates a new generic put/get web service proxy component deployed on the
+     * specified {@code node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param node
+     *            the node to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the new
+     *         generic put/get web service proxy component created.
+     */
+    public static PutGetApi newGenericPutGetProxy(Node node) {
+        return WsProxyFactory.createGenericPutGetProxy(
+                putgetProxyAdl, ComponentUtils.createContext(node));
+    }
+
+    /**
+     * Creates a new generic put/get web service proxy component deployed on the
+     * specified {@code GCM virtual node}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param vn
+     *            the GCM virtual node to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the new
+     *         generic put/get web service proxy component created.
+     */
+    public static PutGetApi newGenericPutGetProxy(GCMVirtualNode vn) {
+        return WsProxyFactory.createGenericPutGetProxy(
+                putgetProxyAdl, ComponentUtils.createContext(vn));
+    }
+
+    /**
+     * Creates a new generic put/get web service proxy component deployed on a
+     * node provided by the specified {@code node provider}. <br>
+     * The proxy is not initialized and not started.
+     * 
+     * @param nodeProvider
+     *            the node provider to be used for deployment.
+     * 
+     * @return the reference on the {@link PutGetApi} interface of the new
+     *         generic put/get web service proxy component created.
+     */
+    public static PutGetApi newGenericPutGetProxy(NodeProvider nodeProvider) {
+        return WsProxyFactory.createGenericPutGetProxy(
+                putgetProxyAdl, AbstractFactory.getContextFromNodeProvider(
+                        nodeProvider, PutGetProxyImpl.PUTGET_PROXY_VN));
     }
 
     /**
@@ -534,7 +720,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * JVM by using the specified deployment configuration.
      * 
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -584,7 +770,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param node
      *            the node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -636,7 +822,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
@@ -689,7 +875,7 @@ public final class WsProxyFactory extends ProxyFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * @param deploymentConfiguration
-     *            the deployment configuration to use during the deployment.
+     *            the deployment configuration to use.
      * @param registryUrl
      *            the EventClouds registry URL.
      * @param id
