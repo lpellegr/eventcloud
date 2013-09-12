@@ -59,12 +59,15 @@ import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
 import com.hp.hpl.jena.sparql.algebra.TransformBase;
 import com.hp.hpl.jena.sparql.algebra.Transformer;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.QueryIterator;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 import com.hp.hpl.jena.sparql.syntax.ElementVisitorBase;
 import com.hp.hpl.jena.sparql.syntax.ElementWalker;
 import com.hp.hpl.jena.sparql.util.FmtUtils;
+import com.hp.hpl.jena.tdb.TDBFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.PublishSubscribeConstants;
@@ -848,11 +851,12 @@ public final class PublishSubscribeUtils {
         // number of sub-subscriptions contained initially by the subscription
         // we are trying to satisfy
         int nbSubSubscriptions = subSubscriptions.length;
+        int nbSubSubscriptionSatisfied = 0;
 
         int indexFirstQuadrupleMatching = -1;
 
         for (int i = 0; i < nbSubSubscriptions; i++) {
-            AtomicQuery aq = subSubscriptions[0].getAtomicQuery();
+            AtomicQuery aq = subSubscriptions[i].getAtomicQuery();
 
             for (int j = 0; j < compoundEvent.size(); j++) {
                 BindingMap tmpBinding;
@@ -865,6 +869,7 @@ public final class PublishSubscribeUtils {
                 }
 
                 binding.addAll(tmpBinding);
+                nbSubSubscriptionSatisfied++;
 
                 if (i < nbSubSubscriptions - 1) {
                     subscription =
@@ -884,7 +889,8 @@ public final class PublishSubscribeUtils {
             }
         }
 
-        if (binding.isEmpty()) {
+        if (binding.isEmpty()
+                || nbSubSubscriptionSatisfied != nbSubSubscriptions) {
             return null;
         }
 
@@ -907,54 +913,104 @@ public final class PublishSubscribeUtils {
      */
     public static final BindingMap matches(Quadruple quadruple,
                                            AtomicQuery atomicQuery) {
+        if (atomicQuery.isFilterEvaluationRequired()) {
+            return performMatchingQuadruplePatternWithFilter(
+                    quadruple, atomicQuery);
+        } else {
+            return performMatchingQuadruplePattern(quadruple, atomicQuery);
+        }
+    }
+
+    private static BindingMap performMatchingQuadruplePatternWithFilter(Quadruple quadruple,
+                                                                        AtomicQuery atomicQuery) {
+        DatasetGraph dataset = TDBFactory.createDatasetGraph();
+        dataset.add(
+                quadruple.getGraph(), quadruple.getSubject(),
+                quadruple.getPredicate(), quadruple.getObject());
+
+        QueryIterator it =
+                Algebra.exec(atomicQuery.getOpRepresentation(), dataset);
+
+        if (it.hasNext()) {
+            BindingMap result = new PublishSubscribeUtils.BindingMap();
+
+            while (it.hasNext()) {
+                Binding binding = it.next();
+                result.addAll(binding);
+            }
+
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    private static BindingMap performMatchingQuadruplePattern(Quadruple quadruple,
+                                                              AtomicQuery atomicQuery) {
         Node graph = atomicQuery.getGraph();
-        Node subject = atomicQuery.getSubject();
-        Node predicate = atomicQuery.getPredicate();
-        Node object = atomicQuery.getObject();
 
         boolean graphIsVar = graph.isVariable();
-        boolean subjectIsVar = subject.isVariable();
-        boolean predicateIsVar = predicate.isVariable();
-        boolean objectIsVar = object.isVariable();
-
         boolean graphVerified =
                 graphIsVar
                         || graph.getURI().startsWith(
                                 quadruple.getGraph().getURI());
-        boolean subjectVerified =
-                subjectIsVar || subject.equals(quadruple.getSubject());
-        boolean predicateVerified =
-                predicateIsVar || predicate.equals(quadruple.getPredicate());
-        boolean objectVerified =
-                objectIsVar || object.equals(quadruple.getObject());
 
-        if (graphVerified && subjectVerified && predicateVerified
-                && objectVerified) {
-            BindingMap binding = new PublishSubscribeUtils.BindingMap();
+        if (graphVerified) {
+            Node subject = atomicQuery.getSubject();
+            boolean subjectIsVar = subject.isVariable();
+            boolean subjectVerified =
+                    subjectIsVar || subject.equals(quadruple.getSubject());
 
-            if (graphIsVar) {
-                binding.add(Var.alloc(graph.getName()), quadruple.getGraph());
+            if (subjectVerified) {
+                Node predicate = atomicQuery.getPredicate();
+                boolean predicateIsVar = predicate.isVariable();
+                boolean predicateVerified =
+                        predicateIsVar
+                                || predicate.equals(quadruple.getPredicate());
+
+                if (predicateVerified) {
+                    Node object = atomicQuery.getObject();
+                    boolean objectIsVar = object.isVariable();
+                    boolean objectVerified =
+                            objectIsVar || object.equals(quadruple.getObject());
+
+                    if (objectVerified) {
+                        return extractBindings(
+                                graph, subject, predicate, object, graphIsVar,
+                                subjectIsVar, predicateIsVar, objectIsVar);
+                    }
+                }
             }
-
-            if (subjectIsVar) {
-                binding.add(
-                        Var.alloc(subject.getName()), quadruple.getSubject());
-            }
-
-            if (predicateIsVar) {
-                binding.add(
-                        Var.alloc(predicate.getName()),
-                        quadruple.getPredicate());
-            }
-
-            if (objectIsVar) {
-                binding.add(Var.alloc(object.getName()), quadruple.getObject());
-            }
-
-            return binding;
         }
 
         return null;
+    }
+
+    private static BindingMap extractBindings(Node graph, Node subject,
+                                              Node predicate, Node object,
+                                              boolean graphIsVar,
+                                              boolean subjectIsVar,
+                                              boolean predicateIsVar,
+                                              boolean objectIsVar) {
+        BindingMap binding = new PublishSubscribeUtils.BindingMap();
+
+        if (graphIsVar) {
+            binding.add(Var.alloc(graph.getName()), graph);
+        }
+
+        if (subjectIsVar) {
+            binding.add(Var.alloc(subject.getName()), subject);
+        }
+
+        if (predicateIsVar) {
+            binding.add(Var.alloc(predicate.getName()), predicate);
+        }
+
+        if (objectIsVar) {
+            binding.add(Var.alloc(object.getName()), object);
+        }
+
+        return binding;
     }
 
     /**

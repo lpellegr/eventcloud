@@ -61,10 +61,12 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
+import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
  * Delayer used to buffer write operations due to publications that are
@@ -346,7 +348,22 @@ public class PublishQuadrupleRequestOperator extends
                         && (this.matches(q.getGraph(), ssGraph) || q.getGraph()
                                 .getURI()
                                 .startsWith(ssGraph.getURI()))) {
-                    builder.add(new MatchingResult(subscription, q));
+
+                    AtomicQuery firstSSAQ = null;
+                    try {
+                        firstSSAQ =
+                                subscription.getSubSubscriptions()[0].getAtomicQuery();
+                    } catch (DecompositionException e) {
+                        throw new IllegalStateException(e);
+                    }
+
+                    if (firstSSAQ.isFilterEvaluationRequired()) {
+                        if (PublishSubscribeUtils.matches(q, firstSSAQ) != null) {
+                            builder.add(new MatchingResult(subscription, q));
+                        }
+                    } else {
+                        builder.add(new MatchingResult(subscription, q));
+                    }
                 }
             }
         }

@@ -16,12 +16,11 @@
  **/
 package fr.inria.eventcloud.delayers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -99,7 +98,7 @@ public class IndexSubscriptionRequestOperator extends
         // done on the datastore while we are iterating on the ResultSet.
         // Indeed, the result set does not contain the solutions but knows how
         // to retrieve a solution each time a call to next is performed.
-        List<Quadruple> matchingQuadruples = new ArrayList<Quadruple>();
+        Builder<Quadruple> matchingQuadruples = ImmutableList.builder();
 
         QuadruplePattern qp =
                 firstSubsubscription.getAtomicQuery().getQuadruplePattern();
@@ -119,7 +118,15 @@ public class IndexSubscriptionRequestOperator extends
                         && (qp.getGraph() == Node.ANY || q.getGraph()
                                 .getURI()
                                 .startsWith(qp.getGraph().getURI()))) {
-                    matchingQuadruples.add(q);
+                    if (firstSubsubscription.getAtomicQuery()
+                            .isFilterEvaluationRequired()) {
+                        if (PublishSubscribeUtils.matches(
+                                q, firstSubsubscription.getAtomicQuery()) != null) {
+                            matchingQuadruples.add(q);
+                        }
+                    } else {
+                        matchingQuadruples.add(q);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -129,7 +136,7 @@ public class IndexSubscriptionRequestOperator extends
             txnGraph.end();
         }
 
-        for (Quadruple quadrupleMatching : matchingQuadruples) {
+        for (Quadruple quadrupleMatching : matchingQuadruples.build()) {
             boolean mustIgnoreQuadrupleMatching =
                     quadrupleMatching.getPublicationTime() < s.getIndexationTime();
 
