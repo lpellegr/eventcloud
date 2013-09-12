@@ -936,18 +936,20 @@ public final class PublishSubscribeUtils {
         QueryIterator it =
                 Algebra.exec(atomicQuery.getOpRepresentation(), dataset);
 
+        BindingMap result = null;
+
         if (it.hasNext()) {
-            BindingMap result = new PublishSubscribeUtils.BindingMap();
+            result = new PublishSubscribeUtils.BindingMap();
 
             while (it.hasNext()) {
                 Binding binding = it.next();
                 result.addAll(binding);
             }
-
-            return result;
-        } else {
-            return null;
         }
+
+        TDBFactory.release(dataset);
+
+        return result;
     }
 
     private static BindingMap performMatchingQuadruplePattern(Quadruple quadruple,
