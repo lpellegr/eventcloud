@@ -852,7 +852,7 @@ public final class PublishSubscribeUtils {
         int indexFirstQuadrupleMatching = -1;
 
         for (int i = 0; i < nbSubSubscriptions; i++) {
-            AtomicQuery aq = subSubscriptions[0].getAtomicQuery();
+            AtomicQuery aq = subSubscriptions[i].getAtomicQuery();
 
             for (int j = 0; j < compoundEvent.size(); j++) {
                 BindingMap tmpBinding;
