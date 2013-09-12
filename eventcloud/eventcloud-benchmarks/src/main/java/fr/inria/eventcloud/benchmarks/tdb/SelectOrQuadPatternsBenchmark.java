@@ -122,7 +122,7 @@ public class SelectOrQuadPatternsBenchmark {
 
         List<Quadruple> result = new ArrayList<Quadruple>();
 
-        Stopwatch stopwatch = new Stopwatch();
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
         stopwatch.start();
 
         try {
@@ -153,7 +153,7 @@ public class SelectOrQuadPatternsBenchmark {
         // System.out.println("SPARQL QUERY=\n" + sparqlQuery);
         // System.out.println("EXECUTE SPARQL STARTED");
 
-        Stopwatch stopwatch = new Stopwatch();
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
         stopwatch.start();
 
         QueryExecution qexec =

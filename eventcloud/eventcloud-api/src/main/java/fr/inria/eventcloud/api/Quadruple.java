@@ -28,6 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentat
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -271,11 +272,11 @@ public class Quadruple implements Externalizable, Event {
         Hasher hasher = Hashing.murmur3_128().newHasher();
 
         for (int i = 0; i < this.nodes.length; i++) {
-            hasher.putString(this.nodes[i].toString());
+            hasher.putString(this.nodes[i].toString(), Charsets.UTF_8);
         }
 
         if (this.publicationSource != null) {
-            hasher.putString(this.publicationSource);
+            hasher.putUnencodedChars(this.publicationSource);
         }
         hasher.putLong(this.publicationTime);
 
