@@ -696,41 +696,9 @@ public final class SemanticFactory extends AbstractFactory {
     }
 
     private synchronized static <T extends StructuredOverlay> SemanticPeer createGenericSemanticPeer(Map<String, Object> context) {
-        try {
-            SemanticPeer peer =
-                    ComponentUtils.createComponentAndGetInterface(
-                            SemanticPeerImpl.SEMANTIC_PEER_ADL, context,
-                            PeerImpl.PEER_SERVICES_ITF, SemanticPeer.class,
-                            false);
-
-            if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
-                RelationshipStrengthEngineManager socialFilter =
-                        ComponentUtils.lookupFcInterface(
-                                EventCloudProperties.SOCIAL_FILTER_URL.getValue(),
-                                SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
-                                RelationshipStrengthEngineManager.class);
-
-                GCM.getBindingController(((Interface) peer).getFcItfOwner())
-                        .bindFc(
-                                SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
-                                socialFilter);
-
-                log.info(
-                        "SemanticPeer {} bound to social filter {}",
-                        peer.getId(),
-                        EventCloudProperties.SOCIAL_FILTER_URL.getValue());
-            }
-
-            return peer;
-        } catch (NoSuchInterfaceException e) {
-            throw new IllegalStateException(e);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalLifeCycleException e) {
-            throw new IllegalStateException(e);
-        } catch (IllegalBindingException e) {
-            throw new IllegalStateException(e);
-        }
+        return ComponentUtils.createComponentAndGetInterface(
+                SemanticPeerImpl.SEMANTIC_PEER_ADL, context,
+                PeerImpl.PEER_SERVICES_ITF, SemanticPeer.class, false);
     }
 
     /**
@@ -759,10 +727,31 @@ public final class SemanticFactory extends AbstractFactory {
             }
             peerAttributeController.setAttributes(peer, overlayProvider);
 
+            if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
+                RelationshipStrengthEngineManager socialFilter =
+                        ComponentUtils.lookupFcInterface(
+                                EventCloudProperties.SOCIAL_FILTER_URL.getValue(),
+                                SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
+                                RelationshipStrengthEngineManager.class);
+
+                GCM.getBindingController(((Interface) peer).getFcItfOwner())
+                        .bindFc(
+                                SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
+                                socialFilter);
+
+                log.info(
+                        "SemanticPeer bound to social filter {}",
+                        EventCloudProperties.SOCIAL_FILTER_URL.getValue());
+            }
+
             GCM.getGCMLifeCycleController(peerComponent).startFc();
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
+            throw new IllegalStateException(e);
+        } catch (IllegalBindingException e) {
             throw new IllegalStateException(e);
         }
     }
