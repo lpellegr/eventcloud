@@ -105,8 +105,8 @@ public class PublishSubscribeOperationsDelayer extends
             Stopwatch triggerActionStopwatch = null;
 
             if (log.isTraceEnabled()) {
-                flushBufferStopwatch = new Stopwatch();
-                triggerActionStopwatch = new Stopwatch();
+                flushBufferStopwatch = Stopwatch.createUnstarted();
+                triggerActionStopwatch = Stopwatch.createUnstarted();
                 flushBufferStopwatch.start();
             }
 

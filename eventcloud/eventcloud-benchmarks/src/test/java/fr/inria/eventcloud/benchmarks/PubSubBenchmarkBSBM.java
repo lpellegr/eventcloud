@@ -128,7 +128,7 @@ public class PubSubBenchmarkBSBM {
         this.supplier = supplier;
         this.notificationListenerType = notificationListenerType;
         this.datastoreType = type;
-        this.receiveExpectedEventsStopwatch = new Stopwatch();
+        this.receiveExpectedEventsStopwatch = Stopwatch.createUnstarted();
         this.threadPool =
                 Executors.newFixedThreadPool(
                         SystemUtils.getOptimalNumberOfThreads(),

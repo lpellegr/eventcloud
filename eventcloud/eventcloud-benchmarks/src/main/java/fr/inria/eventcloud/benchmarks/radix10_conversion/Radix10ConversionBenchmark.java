@@ -110,7 +110,7 @@ public class Radix10ConversionBenchmark {
                     new SummaryStatistics();
             SummaryStatistics statsWithPrefixRemoval = new SummaryStatistics();
 
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = Stopwatch.createUnstarted();
 
             int i = 1;
 

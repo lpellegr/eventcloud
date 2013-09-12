@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.mutable.MutableObject;
@@ -652,17 +653,21 @@ public final class PublishSubscribeUtils {
 
     private static void handleSubscriberConnectionFailure(final SemanticCanOverlay semanticCanOverlay,
                                                           final Subscription subscription) {
-        SubscriberConnectionFailure subscriberConnectionFailure =
-                new SubscriberConnectionFailure();
+        SubscriberConnectionFailure subscriberConnectionFailure;
 
-        SubscriberConnectionFailure oldValue =
-                semanticCanOverlay.getSubscriberConnectionFailures()
-                        .putIfAbsent(
-                                subscription.getOriginalId(),
-                                subscriberConnectionFailure);
-
-        if (oldValue != null) {
-            subscriberConnectionFailure = oldValue;
+        try {
+            subscriberConnectionFailure =
+                    semanticCanOverlay.getSubscriberConnectionFailures().get(
+                            subscription.getOriginalId(),
+                            new Callable<SubscriberConnectionFailure>() {
+                                @Override
+                                public SubscriberConnectionFailure call()
+                                        throws Exception {
+                                    return new SubscriberConnectionFailure();
+                                }
+                            });
+        } catch (ExecutionException e) {
+            throw new IllegalStateException(e);
         }
 
         synchronized (subscriberConnectionFailure) {
@@ -685,10 +690,10 @@ public final class PublishSubscribeUtils {
                                                 true));
 
                         semanticCanOverlay.getSubscriberConnectionFailures()
-                                .remove(subscription.getOriginalId());
+                                .invalidate(subscription.getOriginalId());
 
                         log.info(
-                                "Removed subscription {} due to subscriber which is not reachable under URL {}",
+                                "Removed subscription {} due to subscriber which is not reachable at {}",
                                 subscription.getId(),
                                 subscription.getSubscriberUrl());
                     }
