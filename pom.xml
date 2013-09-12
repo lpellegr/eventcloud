@@ -414,7 +414,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.4</version>
+					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-jar-plugin</artifactId>
@@ -456,7 +456,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.15</version>
+					<version>2.16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.objectweb.proactive</groupId>
@@ -487,7 +487,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<forkCount>1</forkCount>
-					<argLine>-server -Xmx4096m -XX:MaxPermSize=512M</argLine>
+					<argLine>-server -Xms256M -Xmx5G -XX:MaxPermSize=512M</argLine>
 					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>
