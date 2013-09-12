@@ -41,6 +41,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.tdb.TDBFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
@@ -811,6 +812,8 @@ public class PubSubTest {
         signals.setValue(0);
         bindings.clear();
         events.clear();
+
+        TDBFactory.reset();
 
         this.deployer = null;
         this.eventCloudId = null;
