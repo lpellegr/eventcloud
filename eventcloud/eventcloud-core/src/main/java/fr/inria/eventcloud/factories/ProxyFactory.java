@@ -828,9 +828,9 @@ public class ProxyFactory extends AbstractFactory {
             subscribeProxyAttributeController.setAttributes(
                     eventCloudProxy, componentUri, properties);
 
-            eventCloudProxy.getRegistry().registerProxy(id, subProxy);
-
             GCM.getGCMLifeCycleController(subComponent).startFc();
+
+            eventCloudProxy.getRegistry().registerProxy(id, subProxy);
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (ProActiveException e) {
@@ -1179,9 +1179,9 @@ public class ProxyFactory extends AbstractFactory {
                     new EventCloudCache(registryUrl, id);
             putGetProxyAttributeController.setAttributes(eventCloudProxy);
 
-            eventCloudProxy.getRegistry().registerProxy(id, putgetProxy);
-
             GCM.getGCMLifeCycleController(putgetComponent).startFc();
+
+            eventCloudProxy.getRegistry().registerProxy(id, putgetProxy);
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
