@@ -340,7 +340,7 @@ public final class AtomicQuery implements Serializable {
      * {@code false} otherwise.
      */
     public boolean isFilterEvaluationRequired() {
-        return this.filterConstraints != null;
+        return !this.filterConstraints.isEmpty();
     }
 
     public boolean isReduced() {
