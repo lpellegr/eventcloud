@@ -983,8 +983,9 @@ public final class PublishSubscribeUtils {
 
                     if (objectVerified) {
                         return extractBindings(
-                                graph, subject, predicate, object, graphIsVar,
-                                subjectIsVar, predicateIsVar, objectIsVar);
+                                quadruple, graph, subject, predicate, object,
+                                graphIsVar, subjectIsVar, predicateIsVar,
+                                objectIsVar);
                     }
                 }
             }
@@ -993,28 +994,29 @@ public final class PublishSubscribeUtils {
         return null;
     }
 
-    private static BindingMap extractBindings(Node graph, Node subject,
-                                              Node predicate, Node object,
-                                              boolean graphIsVar,
+    private static BindingMap extractBindings(Quadruple quadruple, Node graph,
+                                              Node subject, Node predicate,
+                                              Node object, boolean graphIsVar,
                                               boolean subjectIsVar,
                                               boolean predicateIsVar,
                                               boolean objectIsVar) {
         BindingMap binding = new PublishSubscribeUtils.BindingMap();
 
         if (graphIsVar) {
-            binding.add(Var.alloc(graph.getName()), graph);
+            binding.add(Var.alloc(graph.getName()), quadruple.getGraph());
         }
 
         if (subjectIsVar) {
-            binding.add(Var.alloc(subject.getName()), subject);
+            binding.add(Var.alloc(subject.getName()), quadruple.getSubject());
         }
 
         if (predicateIsVar) {
-            binding.add(Var.alloc(predicate.getName()), predicate);
+            binding.add(
+                    Var.alloc(predicate.getName()), quadruple.getPredicate());
         }
 
         if (objectIsVar) {
-            binding.add(Var.alloc(object.getName()), object);
+            binding.add(Var.alloc(object.getName()), quadruple.getObject());
         }
 
         return binding;
