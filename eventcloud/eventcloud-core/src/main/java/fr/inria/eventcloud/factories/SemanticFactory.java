@@ -417,10 +417,6 @@ public final class SemanticFactory extends AbstractFactory {
         SemanticFactory.initGenericSemanticTracker(
                 tracker, deploymentConfiguration, networkName);
 
-        log.info(
-                "SemanticTracker {} associated to network named '{}' created",
-                tracker.getId(), networkName);
-
         return tracker;
     }
 
@@ -457,6 +453,10 @@ public final class SemanticFactory extends AbstractFactory {
             trackerAttributeController.setAttributes(tracker, networkName);
 
             GCM.getGCMLifeCycleController(trackerComponent).startFc();
+
+            log.info(
+                    "SemanticTracker {} associated to network named '{}'",
+                    tracker.getId(), networkName);
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (IllegalLifeCycleException e) {
@@ -687,8 +687,6 @@ public final class SemanticFactory extends AbstractFactory {
         SemanticFactory.initGenericSemanticPeer(
                 peer, deploymentConfiguration, overlayProvider);
 
-        log.info("SemanticPeer {} created", peer.getId());
-
         return peer;
     }
 
@@ -742,6 +740,8 @@ public final class SemanticFactory extends AbstractFactory {
             }
 
             GCM.getGCMLifeCycleController(peerComponent).startFc();
+
+            log.info("SemanticPeer {} initialized", peer.getId());
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (IOException e) {
