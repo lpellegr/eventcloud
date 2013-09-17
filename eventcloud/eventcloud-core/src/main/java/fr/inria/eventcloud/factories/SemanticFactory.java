@@ -62,9 +62,6 @@ public final class SemanticFactory extends AbstractFactory {
     private static final Logger log =
             LoggerFactory.getLogger(SemanticFactory.class);
 
-    private SemanticFactory() {
-    }
-
     /**
      * Creates a new generic semantic tracker component deployed on the local
      * JVM. <br>

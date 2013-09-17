@@ -48,9 +48,6 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
     private static final Logger log =
             LoggerFactory.getLogger(EventCloudsRegistryFactory.class);
 
-    private EventCloudsRegistryFactory() {
-    }
-
     /**
      * Creates a new EventClouds registry component deployed on the local JVM.
      * 

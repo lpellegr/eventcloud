@@ -41,9 +41,6 @@ public class NotificationListenerFactory extends AbstractFactory {
     private static final Logger log =
             LoggerFactory.getLogger(NotificationListenerFactory.class);
 
-    private NotificationListenerFactory() {
-    }
-
     /**
      * Creates a new notification listener active object deployed on the local
      * JVM.
@@ -54,11 +51,12 @@ public class NotificationListenerFactory extends AbstractFactory {
      * @param constructorParameters
      *            the parameters of the constructor.
      * 
-     * @return the reference on new notification listener active object created.
+     * @return the reference on new the notification listener active object
+     *         created.
      */
     public static <T extends NotificationListener<?>> T newNotificationListener(Class<T> notificationListenerClass,
                                                                                 Object[] constructorParameters) {
-        return createNotificationListener(
+        return NotificationListenerFactory.createNotificationListener(
                 notificationListenerClass, constructorParameters, null);
     }
 
@@ -74,12 +72,13 @@ public class NotificationListenerFactory extends AbstractFactory {
      * @param node
      *            the node to be used for deployment.
      * 
-     * @return the reference on new notification listener active object created.
+     * @return the reference on new the notification listener active object
+     *         created.
      */
     public static <T extends NotificationListener<?>> T newNotificationListener(Class<T> notificationListenerClass,
                                                                                 Object[] constructorParameters,
                                                                                 Node node) {
-        return createNotificationListener(
+        return NotificationListenerFactory.createNotificationListener(
                 notificationListenerClass, constructorParameters, node);
     }
 
@@ -95,12 +94,13 @@ public class NotificationListenerFactory extends AbstractFactory {
      * @param vn
      *            the GCM virtual node to be used for deployment.
      * 
-     * @return the reference on new notification listener active object created.
+     * @return the reference on new the notification listener active object
+     *         created.
      */
     public static <T extends NotificationListener<?>> T newNotificationListener(Class<T> notificationListenerClass,
                                                                                 Object[] constructorParameters,
                                                                                 GCMVirtualNode vn) {
-        return createNotificationListener(
+        return NotificationListenerFactory.createNotificationListener(
                 notificationListenerClass, constructorParameters, vn.getANode());
     }
 
@@ -116,12 +116,13 @@ public class NotificationListenerFactory extends AbstractFactory {
      * @param nodeProvider
      *            the node provider to be used for deployment.
      * 
-     * @return the reference on new notification listener active object created.
+     * @return the reference on new the notification listener active object
+     *         created.
      */
     public static <T extends NotificationListener<?>> T newNotificationListener(Class<T> notificationListenerClass,
                                                                                 Object[] constructorParameters,
                                                                                 NodeProvider nodeProvider) {
-        return createNotificationListener(
+        return NotificationListenerFactory.createNotificationListener(
                 notificationListenerClass, constructorParameters,
                 nodeProvider.getANode());
     }
