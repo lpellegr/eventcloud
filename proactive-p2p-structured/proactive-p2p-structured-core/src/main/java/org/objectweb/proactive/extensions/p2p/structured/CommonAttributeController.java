@@ -34,4 +34,9 @@ public interface CommonAttributeController extends AttributeController {
      */
     void setDeploymentConfiguration(DeploymentConfiguration deploymentConfiguration);
 
+    /**
+     * Resets all the attributes of the component (ie. clears all its data).
+     */
+    void resetAttributes();
+
 }

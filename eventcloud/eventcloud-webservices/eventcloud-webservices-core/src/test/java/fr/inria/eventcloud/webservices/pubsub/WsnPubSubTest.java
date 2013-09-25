@@ -53,6 +53,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
@@ -252,20 +253,27 @@ public class WsnPubSubTest extends WsTest {
     private void initEventCloudEnvironmentAndClients() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
 
+        EventCloudDeploymentDescriptor deploymentDescriptor =
+                new EventCloudDeploymentDescriptor();
+        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
         this.id =
-                this.deployer.newEventCloud(new EventCloudDescription(
-                        "http://streams.event-processing.org/ids/TaxiUc"), 1, 1);
+                this.deployer.newEventCloud(
+                        new EventCloudDescription(
+                                "http://streams.event-processing.org/ids/TaxiUc"),
+                        deploymentDescriptor, 1, 1);
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
-                        LOCAL_NODE_PROVIDER,
+                        WsTest.COMPONENT_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.id.getStreamUrl(), "subscribe", WEBSERVICES_PORT);
+                        this.id.getStreamUrl(), "subscribe",
+                        WsTest.WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
-                        LOCAL_NODE_PROVIDER,
+                        WsTest.COMPONENT_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
-                        this.id.getStreamUrl(), "publish", WEBSERVICES_PORT);
+                        this.id.getStreamUrl(), "publish",
+                        WsTest.WEBSERVICES_PORT);
 
         this.subscribeWsnClient =
                 WsClientFactory.createWsClient(
@@ -283,7 +291,7 @@ public class WsnPubSubTest extends WsTest {
         this.notificationConsumerServer =
                 WsDeployer.deployWebService(
                         this.notificationConsumerService, "subscriber",
-                        WEBSERVICES_PORT);
+                        WsTest.WEBSERVICES_PORT);
         this.notificationConsumerEndpointUrl =
                 this.notificationConsumerServer.getEndpoint()
                         .getEndpointInfo()
@@ -310,21 +318,21 @@ public class WsnPubSubTest extends WsTest {
         return result.build();
     }
 
-    private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileURL)
+    private void replaceConsumerLoopbackIpInSocialFilterFile(URL fileUrl)
             throws URISyntaxException, IOException {
 
-        String content = Resources.toString(fileURL, Charsets.UTF_8);
+        String content = Resources.toString(fileUrl, Charsets.UTF_8);
 
         Files.write(
                 replaceConsumerLoopbackIp(content).getBytes(Charsets.UTF_8),
-                new File(fileURL.toURI()));
+                new File(fileUrl.toURI()));
     }
 
-    private static String replaceConsumerLoopbackIp(String URL) {
-        return URL.replaceAll(
+    private static String replaceConsumerLoopbackIp(String Url) {
+        return Url.replaceAll(
                 "127.0.0.1",
                 ProActiveInet.getInstance().getInetAddress().getHostAddress())
-                .replaceAll(":[0-9]{1,5}/", ":" + WEBSERVICES_PORT + "/");
+                .replaceAll(":[0-9]{1,5}/", ":" + WsTest.WEBSERVICES_PORT + "/");
     }
 
     @After
@@ -333,6 +341,7 @@ public class WsnPubSubTest extends WsTest {
         this.publishWsnServiceInfo.destroy();
         this.deployer.undeploy();
         this.notificationConsumerServer.destroy();
+        WsTest.COMPONENT_POOL_MANAGER.stop();
     }
 
 }

@@ -42,7 +42,7 @@ public final class PublishWsnServiceLauncher extends WsnServiceLauncher {
     @Override
     public String run() {
         return WsDeployer.deployPublishWsnService(
-                LOCAL_NODE_PROVIDER,
+                WsLauncher.COMPONENT_POOL_MANAGER,
                 super.registryUrl,
                 super.eventCloudUrl,
                 WSConstants.SERVICES_PATH + "eventclouds/"

@@ -30,16 +30,15 @@ import org.oasis_open.docs.wsn.b_2.SubscribeResponse;
 import org.oasis_open.docs.wsn.b_2.Unsubscribe;
 import org.oasis_open.docs.wsn.b_2.UnsubscribeResponse;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnHelper;
@@ -54,8 +53,8 @@ import fr.inria.eventcloud.webservices.listeners.WsnCompoundEventNotificationLis
  * 
  * @author lpellegr
  */
-public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
-        SubscribeWsnApi {
+public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
+        implements SubscribeWsnApi {
 
     private final Map<SubscriptionId, String> subscribers;
 
@@ -65,9 +64,9 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
     /**
      * Creates a {@link SubscribeWsnServiceImpl}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying subscribe proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying subscribe proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the underlying subscribe proxy.
@@ -78,10 +77,11 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      *            the URL which identifies the EventCloud on which the
      *            underlying subscribe proxy must be connected.
      */
-    public SubscribeWsnServiceImpl(NodeProvider nodeProvider,
+    public SubscribeWsnServiceImpl(ComponentPoolManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
-        super(nodeProvider, deploymentConfiguration, registryUrl, streamUrl);
+        super(componentPoolManager, deploymentConfiguration, registryUrl,
+                streamUrl);
         this.subscribers = new HashMap<SubscriptionId, String>();
     }
 
@@ -89,14 +89,23 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeApi> implements
      * {@inheritDoc}
      */
     @Override
-    public SubscribeApi getProxy() throws EventCloudIdNotManaged {
+    public SubscribeProxy getProxy() throws EventCloudIdNotManaged {
         if (super.proxy != null) {
             return super.proxy;
         } else {
-            return ProxyFactory.newSubscribeProxy(
-                    super.nodeProvider, super.deploymentConfiguration,
-                    super.registryUrl, new EventCloudId(super.streamUrl));
+            return super.componentPoolManager.getSubscribeProxy(
+                    super.deploymentConfiguration, super.registryUrl,
+                    new EventCloudId(super.streamUrl));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void releaseProxy(EventCloudsRegistry registry, EventCloudId id) {
+        registry.unregisterProxy(id, this.proxy);
+        super.componentPoolManager.releaseSubscribeProxies(this.proxy);
     }
 
     /**

@@ -30,7 +30,7 @@ public interface SubscribeProxyAttributeController extends
         CommonAttributeController {
 
     /**
-     * Sets the attributes of the subscribe proxy.
+     * Initializes all the attributes of the subscribe proxy.
      * 
      * @param proxy
      *            the EventCloud proxy instance to set to the subscribe proxy.
@@ -40,7 +40,7 @@ public interface SubscribeProxyAttributeController extends
      *            a set of {@link AlterableElaProperty} properties to use for
      *            initializing the {@link SubscribeProxy}.
      */
-    void setAttributes(EventCloudCache proxy, String componentUri,
-                       AlterableElaProperty[] properties);
+    void initAttributes(EventCloudCache proxy, String componentUri,
+                        AlterableElaProperty[] properties);
 
 }

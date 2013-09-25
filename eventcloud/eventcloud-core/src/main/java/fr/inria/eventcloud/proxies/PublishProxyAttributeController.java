@@ -28,11 +28,11 @@ public interface PublishProxyAttributeController extends
         CommonAttributeController {
 
     /**
-     * Sets the attributes of the publish proxy.
+     * Initializes all the attributes of the publish proxy.
      * 
      * @param proxy
      *            the EventCloud proxy instance to set to the publish proxy.
      */
-    void setAttributes(EventCloudCache proxy);
+    void initAttributes(EventCloudCache proxy);
 
 }

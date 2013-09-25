@@ -28,11 +28,11 @@ public interface PutGetProxyAttributeController extends
         CommonAttributeController {
 
     /**
-     * Sets the attributes of the put/get proxy.
+     * Initializes all the attributes of the put/get proxy.
      * 
      * @param proxy
      *            the EventCloud proxy instance to set to the put/get proxy.
      */
-    void setAttributes(EventCloudCache proxy);
+    void initAttributes(EventCloudCache proxy);
 
 }

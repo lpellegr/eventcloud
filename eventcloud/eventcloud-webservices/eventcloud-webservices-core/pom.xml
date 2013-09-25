@@ -53,6 +53,20 @@
 				<artifactId>proactive-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>proactive-generate-stubs</id>
+						<goals>
+							<goal>stubs</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>fr.inria.eventcloud.webservices.deployment.WsComponentPoolManager</include>
+								<include>fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl</include>
+								<include>fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl</include>
+								<include>fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
 						<id>proactive-generate-meta-objects</id>
 						<goals>
 							<goal>gcm</goal>

@@ -21,6 +21,9 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalN
 
 import com.beust.jcommander.Parameter;
 
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
+
 /**
  * Provides JCommander parameters which are compulsory to launch web services.
  * 
@@ -29,8 +32,8 @@ import com.beust.jcommander.Parameter;
  */
 public abstract class WsLauncher extends Launcher {
 
-    protected static final NodeProvider LOCAL_NODE_PROVIDER =
-            getLocalNodeProvider();
+    protected static final ComponentPoolManager COMPONENT_POOL_MANAGER =
+            WsLauncher.getComponentPoolManager();
 
     @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
     protected String registryUrl;
@@ -41,12 +44,15 @@ public abstract class WsLauncher extends Launcher {
     @Parameter(names = {"--number-id", "-n"}, description = "Identification number which will be part of the web service endpoint URL", required = true)
     protected int numberId;
 
-    private static final NodeProvider getLocalNodeProvider() {
+    private static final ComponentPoolManager getComponentPoolManager() {
         NodeProvider nodeProvider = new LocalNodeProvider();
-
         nodeProvider.start();
 
-        return nodeProvider;
+        ComponentPoolManager componentPoolManager =
+                WsComponentPoolManagerFactory.newComponentPoolManager(nodeProvider);
+        componentPoolManager.start();
+
+        return componentPoolManager;
     }
 
     protected String getTopicName(String streamUrl) {

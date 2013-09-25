@@ -33,11 +33,12 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.webservices.WsTest;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
+import fr.inria.eventcloud.webservices.deployment.PutGetWsProxyInfo;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
-import fr.inria.eventcloud.webservices.deployment.WsProxyInfo;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
@@ -51,7 +52,7 @@ public class PutGetTest extends WsTest {
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
-    private WsProxyInfo putgetWsProxyInfo;
+    private PutGetWsProxyInfo putgetWsProxyInfo;
 
     private PutGetWsApi putgetWsClient;
 
@@ -103,11 +104,15 @@ public class PutGetTest extends WsTest {
     private void initEventCloudEnvironmentAndClient() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
 
-        EventCloudId id = this.deployer.newEventCloud(1, 1);
+        EventCloudDeploymentDescriptor deploymentDescriptor =
+                new EventCloudDeploymentDescriptor();
+        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
+        EventCloudId id =
+                this.deployer.newEventCloud(deploymentDescriptor, 1, 1);
 
         this.putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
-                        LOCAL_NODE_PROVIDER,
+                        WsTest.COMPONENT_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         id.getStreamUrl(), "putget");
 
@@ -122,6 +127,7 @@ public class PutGetTest extends WsTest {
     public void tearDown() {
         this.putgetWsProxyInfo.destroy();
         this.deployer.undeploy();
+        WsTest.COMPONENT_POOL_MANAGER.stop();
     }
 
 }

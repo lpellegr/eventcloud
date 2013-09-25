@@ -48,6 +48,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -146,6 +147,23 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
+    public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (SubscribeProxyImpl.this.initialized) {
+                    SubscribeProxyImpl.this.eventsDeliveredCache.close();
+                }
+            }
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
         super.multiActiveService.multiActiveServing(
@@ -158,7 +176,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      */
     @Override
     public void endComponentActivity(Body body) {
-        this.eventsDeliveredCache.close();
+        this.internalResetAttributes();
     }
 
     /**
@@ -178,10 +196,10 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(EventCloudCache proxy, String componentUri,
-                              AlterableElaProperty[] properties) {
-        if (super.eventCloudCache == null) {
-            super.setAttributes(proxy.getTrackers());
+    public void initAttributes(EventCloudCache proxy, String componentUri,
+                               AlterableElaProperty[] properties) {
+        if (!this.initialized) {
+            super.initAttributes(proxy.getTrackers());
 
             super.eventCloudCache = proxy;
 
@@ -234,13 +252,44 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
                 throw new IllegalStateException("Unknown cache engine: "
                         + cacheEngine);
             }
+        }
+    }
 
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    SubscribeProxyImpl.this.eventsDeliveredCache.close();
-                }
-            }));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            // TODO: Check why unsubscribing blocks
+            // this.unsubscribeAll();
+
+            this.internalResetAttributes();
+        }
+    }
+
+    private void unsubscribeAll() {
+        List<List<Response<?>>> responses = new ArrayList<List<Response<?>>>();
+
+        for (SubscriptionId sid : this.subscriptions.keySet()) {
+            responses.add(this.internalUnsubcribe(sid));
+        }
+
+        for (List<Response<?>> response : responses) {
+            PAFuture.waitForAll(response);
+        }
+    }
+
+    private void internalResetAttributes() {
+        if (this.initialized) {
+            this.eventsDeliveredCache.close();
+
+            this.subscriptions = null;
+            this.bindingSolutions = null;
+            this.quadruplesSolutions = null;
+            this.eventCloudCache = null;
+
+            super.resetAttributes();
         }
     }
 
@@ -339,6 +388,10 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @Override
     @MemberOf("parallelSelfCompatible")
     public void unsubscribe(SubscriptionId sid) {
+        this.internalUnsubcribe(sid);
+    }
+
+    private List<Response<?>> internalUnsubcribe(SubscriptionId sid) {
         // once the subscription id is removed from the list of the
         // subscriptions which are matched, the notifications which are received
         // for this subscription are ignored
@@ -352,20 +405,28 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
         Subscription subscription = subscriptionEntry.subscription;
 
+        List<Response<?>> responses = new ArrayList<Response<?>>();
+
         // updates the network to stop sending notifications
         try {
+            responses =
+                    new ArrayList<Response<?>>(
+                            subscription.getSubSubscriptions().length);
+
             for (Subsubscription subSubscription : subscription.getSubSubscriptions()) {
-                super.send(new UnsubscribeRequest(
+                responses.add(super.send(new UnsubscribeRequest(
                         subscription.getOriginalId(),
                         subSubscription.getAtomicQuery(),
                         subscription.getType() == NotificationListenerType.BINDING,
-                        false));
+                        false)));
             }
         } catch (DecompositionException e) {
             throw new IllegalStateException(e);
         }
 
         this.eventsDeliveredCache.removeEntriesFor(sid);
+
+        return responses;
     }
 
     /**

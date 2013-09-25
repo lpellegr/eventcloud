@@ -131,9 +131,13 @@ public class JunitEventCloudInfrastructureDeployer {
 
         while (it.hasNext()) {
             EventCloudId id = it.next();
-            this.eventClouds.get(id).undeploy();
+            EventCloudDeployer eventCloudDeployer = this.eventClouds.get(id);
+            eventCloudDeployer.undeploy();
+            ((EventCloudDeploymentDescriptor) eventCloudDeployer.getDeploymentDescriptor()).getComponentPoolManager()
+                    .stop();
         }
 
+        this.eventClouds.clear();
         ComponentUtils.terminateComponent(this.eventCloudsRegistry);
     }
 
@@ -143,7 +147,11 @@ public class JunitEventCloudInfrastructureDeployer {
                     + eventCloudId);
         }
 
-        this.eventClouds.get(eventCloudId).undeploy();
+        EventCloudDeployer eventCloudDeployer =
+                this.eventClouds.get(eventCloudId);
+        eventCloudDeployer.undeploy();
+        ((EventCloudDeploymentDescriptor) eventCloudDeployer.getDeploymentDescriptor()).getComponentPoolManager()
+                .stop();
         this.eventClouds.remove(eventCloudId);
     }
 

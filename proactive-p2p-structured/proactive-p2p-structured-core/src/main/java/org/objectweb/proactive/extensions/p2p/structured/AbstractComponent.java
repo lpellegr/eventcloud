@@ -29,6 +29,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.component.body.ComponentInitActive;
 import org.objectweb.proactive.core.component.body.ComponentRunActive;
 import org.objectweb.proactive.extensions.dataspaces.api.DataSpacesFileObject;
@@ -54,7 +55,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
  * @author bsauvan
  */
 public abstract class AbstractComponent implements ComponentInitActive,
-        ComponentRunActive, CommonAttributeController {
+        ComponentRunActive, ComponentEndActive, CommonAttributeController {
 
     public static final String INPUT_SPACE_PREFIX = "INPUT_SPACE";
 
@@ -72,6 +73,8 @@ public abstract class AbstractComponent implements ComponentInitActive,
 
     protected Class<?> propertiesClass = P2PStructuredProperties.class;
 
+    protected boolean initialized;
+
     protected DeploymentConfiguration deploymentConfiguration;
 
     /**
@@ -83,7 +86,6 @@ public abstract class AbstractComponent implements ComponentInitActive,
         // setImmediateServices has to be handled in immediate services. This
         // configuration should be done in the ProActive source code.
         body.setImmediateService("setImmediateServices", false);
-        body.setImmediateService("setAttributes", false);
         // body.setImmediateService("unExposeComponentAsWebService", false);
 
         this.loadLogbackConfigurationFromIS();
@@ -112,6 +114,8 @@ public abstract class AbstractComponent implements ComponentInitActive,
         } catch (InstantiationException ie) {
             throw new IllegalStateException(ie);
         }
+
+        this.initialized = false;
     }
 
     private void loadLogbackConfigurationFromIS() {
@@ -249,11 +253,33 @@ public abstract class AbstractComponent implements ComponentInitActive,
      * {@inheritDoc}
      */
     @Override
+    public void endComponentActivity(Body body) {
+        this.resetAttributes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void setDeploymentConfiguration(DeploymentConfiguration deploymentConfiguration) {
         if (this.deploymentConfiguration == null) {
             this.deploymentConfiguration = deploymentConfiguration;
 
             this.deploymentConfiguration.configure();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            if (this.deploymentConfiguration != null) {
+                this.deploymentConfiguration.unconfigure();
+            }
+
+            this.initialized = false;
         }
     }
 

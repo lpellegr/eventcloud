@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import java.io.Serializable;
 
-import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
@@ -40,8 +39,6 @@ public class DeploymentDescriptor implements Serializable {
 
     private InjectionConstraintsProvider injectionConstraintsProvider;
 
-    private NodeProvider nodeProvider;
-
     /**
      * Creates a new deployment descriptor from the specified
      * {@code overlayProvider}.
@@ -53,8 +50,6 @@ public class DeploymentDescriptor implements Serializable {
     public DeploymentDescriptor(
             SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         this.overlayProvider = overlayProvider;
-        this.nodeProvider = new LocalNodeProvider();
-        this.nodeProvider.start();
     }
 
     /**
@@ -91,23 +86,6 @@ public class DeploymentDescriptor implements Serializable {
     }
 
     /**
-     * Sets the node provider to use during the deployment.
-     * 
-     * @param nodeProvider
-     *            the node provider to use during the deployment.
-     */
-    public DeploymentDescriptor setNodeProvider(NodeProvider nodeProvider) {
-        Preconditions.checkState(
-                this.nodeProvider instanceof LocalNodeProvider,
-                "Node provider was already set");
-
-        this.nodeProvider.terminate();
-        this.nodeProvider = nodeProvider;
-
-        return this;
-    }
-
-    /**
      * Returns the deployment configuration used during the deployment.
      * 
      * @return the deployment configuration used during the deployment.
@@ -123,18 +101,6 @@ public class DeploymentDescriptor implements Serializable {
      */
     public InjectionConstraintsProvider getInjectionConstraintsProvider() {
         return this.injectionConstraintsProvider;
-    }
-
-    /**
-     * Returns the instance of the {@link NodeProvider} that is used to deploy
-     * the components, or {@code null} if no {@link NodeProvider} is provided.
-     * 
-     * @return returns the instance of the {@link NodeProvider} that is used to
-     *         deploy the components, or {@code null} if no {@link NodeProvider}
-     *         is used.
-     */
-    public NodeProvider getNodeProvider() {
-        return this.nodeProvider;
     }
 
     /**

@@ -24,10 +24,8 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
-import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -79,10 +77,10 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Peer createPeer() {
-        return SemanticFactory.newSemanticPeer(
-                super.descriptor.getNodeProvider(),
-                super.descriptor.getDeploymentConfiguration(),
-                super.descriptor.getOverlayProvider());
+        return ((EventCloudDeploymentDescriptor) super.descriptor).getComponentPoolManager()
+                .getPeer(
+                        super.descriptor.getDeploymentConfiguration(),
+                        super.descriptor.getOverlayProvider());
     }
 
     /**
@@ -90,9 +88,10 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        return SemanticFactory.newSemanticTracker(
-                super.descriptor.getNodeProvider(),
-                super.descriptor.getDeploymentConfiguration(), networkName);
+        return ((EventCloudDeploymentDescriptor) super.descriptor).getComponentPoolManager()
+                .getTracker(
+                        super.descriptor.getDeploymentConfiguration(),
+                        networkName);
     }
 
     /**
@@ -194,11 +193,25 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void internalUndeploy() {
-        super.internalUndeploy();
+        EventCloudDeploymentDescriptor eventCloudDeploymentDescriptor =
+                (EventCloudDeploymentDescriptor) super.descriptor;
 
-        ComponentUtils.terminateComponents(this.publishProxies);
-        ComponentUtils.terminateComponents(this.putgetProxies);
-        ComponentUtils.terminateComponents(this.subscribeProxies);
+        eventCloudDeploymentDescriptor.getComponentPoolManager()
+                .releaseSemanticPeers(
+                        this.getRandomTracker().getPeers().toArray(
+                                new SemanticPeer[0]));
+        eventCloudDeploymentDescriptor.getComponentPoolManager()
+                .releaseSemanticTrackers(
+                        this.getTrackers().toArray(new SemanticTracker[0]));
+        eventCloudDeploymentDescriptor.getComponentPoolManager()
+                .releasePublishProxies(
+                        this.publishProxies.toArray(new PublishProxy[0]));
+        eventCloudDeploymentDescriptor.getComponentPoolManager()
+                .releaseSubscribeProxies(
+                        this.subscribeProxies.toArray(new SubscribeProxy[0]));
+        eventCloudDeploymentDescriptor.getComponentPoolManager()
+                .releasePutGetProxies(
+                        this.putgetProxies.toArray(new PutGetProxy[0]));
     }
 
     /**

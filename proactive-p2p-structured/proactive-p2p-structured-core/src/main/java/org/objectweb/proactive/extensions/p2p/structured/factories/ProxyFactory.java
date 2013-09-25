@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.proxies;
+package org.objectweb.proactive.extensions.p2p.structured.factories;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +25,9 @@ import org.objectweb.fractal.api.Interface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.proactive.core.node.Node;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
-import org.objectweb.proactive.extensions.p2p.structured.factories.AbstractFactory;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.ProxyAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.ProxyImpl;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
@@ -33,13 +35,13 @@ import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Static utility methods pertaining to {@link Proxy} instances.
+ * ProxyFactory is used to create a new instance of a {@link Proxy}.
  * 
  * @author lpellegr
  */
-public class Proxies extends AbstractFactory {
+public class ProxyFactory extends AbstractFactory {
 
-    private Proxies() {
+    private ProxyFactory() {
 
     }
 
@@ -48,7 +50,7 @@ public class Proxies extends AbstractFactory {
     }
 
     /**
-     * Creates a new put/get proxy component deployed on the local JVM.
+     * Creates a new proxy component deployed on the local JVM.
      * 
      * @param trackers
      *            the trackers to use for getting entry points in the P2P
@@ -62,8 +64,7 @@ public class Proxies extends AbstractFactory {
     }
 
     /**
-     * Creates a new put/get proxy component deployed on the specified
-     * {@code node}.
+     * Creates a new proxy component deployed on the specified {@code node}.
      * 
      * @param node
      *            the node to be used for deployment.
@@ -79,7 +80,7 @@ public class Proxies extends AbstractFactory {
     }
 
     /**
-     * Creates a new put/get proxy component deployed on the specified
+     * Creates a new proxy component deployed on the specified
      * {@code GCM virtual node}.
      * 
      * @param vn
@@ -96,7 +97,7 @@ public class Proxies extends AbstractFactory {
     }
 
     /**
-     * Creates a new put/get proxy component deployed on a node provided by the
+     * Creates a new proxy component deployed on a node provided by the
      * specified {@code node provider}.
      * 
      * @param nodeProvider
@@ -126,7 +127,7 @@ public class Proxies extends AbstractFactory {
                             ProxyImpl.PROXY_ADL, context,
                             ProxyImpl.PROXY_SERVICES_ITF, Proxy.class, true);
 
-            ((ProxyAttributeController) GCM.getAttributeController(((Interface) proxy).getFcItfOwner())).setAttributes(trackers);
+            ((ProxyAttributeController) GCM.getAttributeController(((Interface) proxy).getFcItfOwner())).initAttributes(trackers);
 
             return proxy;
         } catch (NoSuchInterfaceException e) {

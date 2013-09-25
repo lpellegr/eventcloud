@@ -97,6 +97,79 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
+    public void initComponentActivity(Body body) {
+        super.initComponentActivity(body);
+
+        this.id = body.getID();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void runComponentActivity(Body body) {
+        this.multiActiveService = new ComponentMultiActiveService(body);
+        this.multiActiveService.multiActiveServing(
+                P2PStructuredProperties.MAO_SOFT_LIMIT_PROXIES.getValue(),
+                false, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initAttributes(List<Tracker> trackers) {
+        if (!this.initialized) {
+            try {
+                Component component =
+                        Fractive.getComponentRepresentativeOnThis();
+
+                this.url =
+                        Fractive.registerByName(component, this.prefixName()
+                                + "-" + UUID.randomUUID().toString());
+
+                this.peers =
+                        Collections.synchronizedList(new ArrayList<Peer>());
+                this.trackers = trackers;
+
+                this.messageDispatcher =
+                        new MessageDispatcher(
+                                this.id,
+                                this.multiActiveService,
+                                (FinalResponseReceiver) component.getFcInterface("receive"));
+
+                this.initialized = true;
+            } catch (NoSuchInterfaceException e) {
+                throw new IllegalArgumentException(e);
+            } catch (ProActiveException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            this.url = null;
+            this.peers = null;
+            this.trackers = null;
+            this.messageDispatcher = null;
+
+            super.resetAttributes();
+        }
+    }
+
+    protected String prefixName() {
+        return "proxy";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @MemberOf("parallelSelfCompatible")
     public void sendv(Request<?> request) {
         this.sendv(request, this.selectPeer());
@@ -223,57 +296,6 @@ public class ProxyImpl extends AbstractComponent implements
 
     public String getUrl() {
         return this.url;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initComponentActivity(Body body) {
-        super.initComponentActivity(body);
-        this.id = body.getID();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        this.multiActiveService = new ComponentMultiActiveService(body);
-        this.multiActiveService.multiActiveServing(
-                P2PStructuredProperties.MAO_SOFT_LIMIT_PROXIES.getValue(),
-                false, false);
-    }
-
-    protected String prefixName() {
-        return "proxy";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAttributes(List<Tracker> trackers) {
-        try {
-            Component component = Fractive.getComponentRepresentativeOnThis();
-
-            this.url =
-                    Fractive.registerByName(component, this.prefixName() + "-"
-                            + UUID.randomUUID().toString());
-
-            this.peers = Collections.synchronizedList(new ArrayList<Peer>());
-            this.trackers = trackers;
-
-            this.messageDispatcher =
-                    new MessageDispatcher(
-                            this.id,
-                            this.multiActiveService,
-                            (FinalResponseReceiver) component.getFcInterface("receive"));
-        } catch (NoSuchInterfaceException e) {
-            throw new IllegalArgumentException(e);
-        } catch (ProActiveException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
 }

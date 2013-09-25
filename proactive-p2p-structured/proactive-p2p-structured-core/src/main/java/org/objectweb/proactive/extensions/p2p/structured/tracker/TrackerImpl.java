@@ -30,7 +30,6 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAGroup;
 import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.core.component.Fractive;
-import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.group.Group;
 import org.objectweb.proactive.core.mop.ClassNotReifiableException;
 import org.objectweb.proactive.core.util.wrapper.BooleanWrapper;
@@ -57,7 +56,7 @@ import org.slf4j.LoggerFactory;
         @org.objectweb.proactive.annotation.multiactivity.Group(name = "peers", selfCompatible = false)})
 @DefineRules({@Compatible(value = {"peers", "parallel"})})
 public class TrackerImpl extends AbstractComponent implements Tracker,
-        TrackerAttributeController, ComponentEndActive {
+        TrackerAttributeController {
 
     private static final long serialVersionUID = 160L;
 
@@ -79,10 +78,6 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
 
     private static Logger logger = LoggerFactory.getLogger(TrackerImpl.class);
 
-    protected transient String bindingName;
-
-    private transient String bindingNameSuffix;
-
     private UUID id;
 
     private String networkName;
@@ -101,6 +96,10 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
 
     protected OverlayType type;
 
+    protected transient String bindingName;
+
+    private transient String bindingNameSuffix;
+
     /**
      * Empty constructor required by ProActive.
      */
@@ -114,25 +113,6 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
     @Override
     public void initComponentActivity(Body body) {
         super.initComponentActivity(body);
-
-        this.id = UUID.randomUUID();
-
-        this.probabilityToStorePeer =
-                P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
-
-        // copy on write list to avoid to synchronize
-        // when we iterate on the tracker
-        this.peers = new CopyOnWriteArrayList<Peer>();
-
-        try {
-            this.untypedGroupView =
-                    (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
-            this.typedGroupView = PAGroup.getGroup(this.untypedGroupView);
-        } catch (ClassNotReifiableException cnre) {
-            cnre.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
-        }
     }
 
     /**
@@ -149,29 +129,62 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      * {@inheritDoc}
      */
     @Override
-    public void endComponentActivity(Body body) {
-        if (this.bindingName != null) {
+    public void initAttributes(Tracker stub, String networkName) {
+        if (!this.initialized) {
+            this.id = UUID.randomUUID();
+
+            this.networkName = networkName;
+
+            this.probabilityToStorePeer =
+                    P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
+
+            // copy on write list to avoid to synchronize
+            // when we iterate on the tracker
+            this.peers = new CopyOnWriteArrayList<Peer>();
+
+            this.stub = stub;
+
             try {
-                PAActiveObject.unregister(this.bindingName);
-            } catch (IOException e) {
-                e.printStackTrace();
+                this.untypedGroupView =
+                        (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
+                this.typedGroupView = PAGroup.getGroup(this.untypedGroupView);
+            } catch (ClassNotReifiableException cnre) {
+                cnre.printStackTrace();
+            } catch (ClassNotFoundException cnfe) {
+                cnfe.printStackTrace();
             }
+
+            this.initialized = true;
         }
-
-        PAGroup.waitAll(this.untypedGroupView.internalRemoveTracker(this.stub));
-
-        this.typedGroupView = null;
-        this.untypedGroupView = null;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Tracker stub, String networkName) {
-        if (this.stub == null) {
-            this.stub = stub;
-            this.networkName = networkName;
+    public void resetAttributes() {
+        if (this.initialized) {
+            if (this.bindingName != null) {
+                try {
+                    PAActiveObject.unregister(this.bindingName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            PAGroup.waitAll(this.untypedGroupView.internalRemoveTracker(this.stub));
+
+            this.id = null;
+            this.networkName = null;
+            this.probabilityToStorePeer = 0;
+            this.peers = null;
+            this.stub = null;
+            this.untypedGroupView = null;
+            this.typedGroupView = null;
+            this.bindingNameSuffix = null;
+            this.bindingName = null;
+
+            super.resetAttributes();
         }
     }
 

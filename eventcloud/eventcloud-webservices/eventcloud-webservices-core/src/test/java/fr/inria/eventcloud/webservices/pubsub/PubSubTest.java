@@ -32,6 +32,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
+import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
@@ -41,8 +42,9 @@ import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.BindingSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.CompoundEventSubscriberWsApi;
 import fr.inria.eventcloud.webservices.api.subscribers.SignalSubscriberWsApi;
+import fr.inria.eventcloud.webservices.deployment.PublishWsProxyInfo;
+import fr.inria.eventcloud.webservices.deployment.SubscribeWsProxyInfo;
 import fr.inria.eventcloud.webservices.deployment.WsDeployer;
-import fr.inria.eventcloud.webservices.deployment.WsProxyInfo;
 import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 
 /**
@@ -61,9 +63,9 @@ public class PubSubTest extends WsTest {
 
     private EventCloudId id;
 
-    private WsProxyInfo subscribeWsProxyInfo;
+    private SubscribeWsProxyInfo subscribeWsProxyInfo;
 
-    private WsProxyInfo publishWsProxyInfo;
+    private PublishWsProxyInfo publishWsProxyInfo;
 
     private SubscribeWsApi subscribeWsClient;
 
@@ -249,18 +251,24 @@ public class PubSubTest extends WsTest {
 
     private void initEventCloudEnvironmentAndClients() {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
+
+        EventCloudDeploymentDescriptor deploymentDescriptor =
+                new EventCloudDeploymentDescriptor();
+        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
         this.id =
-                this.deployer.newEventCloud(new EventCloudDescription(
-                        "http://streams.event-processing.org/ids/TaxiUc"), 1, 1);
+                this.deployer.newEventCloud(
+                        new EventCloudDescription(
+                                "http://streams.event-processing.org/ids/TaxiUc"),
+                        deploymentDescriptor, 1, 1);
 
         this.subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
-                        LOCAL_NODE_PROVIDER,
+                        WsTest.COMPONENT_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe");
         this.publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
-                        LOCAL_NODE_PROVIDER,
+                        WsTest.COMPONENT_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish");
 
@@ -277,7 +285,7 @@ public class PubSubTest extends WsTest {
         this.signalSubscriberServer =
                 WsDeployer.deployWebService(
                         SignalSubscriberWsApi.class, this.subscriberService,
-                        "signal-subscriber", WEBSERVICES_PORT);
+                        "signal-subscriber", WsTest.WEBSERVICES_PORT);
         this.signalSubscriberEndpointUrl =
                 this.signalSubscriberServer.getEndpoint()
                         .getEndpointInfo()
@@ -285,7 +293,7 @@ public class PubSubTest extends WsTest {
         this.bindingSubscriberServer =
                 WsDeployer.deployWebService(
                         BindingSubscriberWsApi.class, this.subscriberService,
-                        "binding-subscriber", WEBSERVICES_PORT);
+                        "binding-subscriber", WsTest.WEBSERVICES_PORT);
         this.bindingSubscriberEndpointUrl =
                 this.bindingSubscriberServer.getEndpoint()
                         .getEndpointInfo()
@@ -294,7 +302,7 @@ public class PubSubTest extends WsTest {
                 WsDeployer.deployWebService(
                         CompoundEventSubscriberWsApi.class,
                         this.subscriberService, "event-subscriber",
-                        WEBSERVICES_PORT);
+                        WsTest.WEBSERVICES_PORT);
         this.eventSubscriberEndpointUrl =
                 this.eventSubscriberServer.getEndpoint()
                         .getEndpointInfo()
@@ -309,6 +317,7 @@ public class PubSubTest extends WsTest {
         this.signalSubscriberServer.destroy();
         this.bindingSubscriberServer.destroy();
         this.eventSubscriberServer.destroy();
+        WsTest.COMPONENT_POOL_MANAGER.stop();
     }
 
 }

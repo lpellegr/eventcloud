@@ -27,7 +27,6 @@ import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.core.security.exceptions.RenegotiateSessionException;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -91,7 +90,7 @@ import org.slf4j.LoggerFactory;
         @Compatible(value = {
                 "receiveCallableOperation", "receiveRunnableOperation"}, condition = "this.areCompatible")})
 public class PeerImpl extends AbstractComponent implements PeerInterface,
-        PeerAttributeController, ComponentEndActive, Serializable {
+        PeerAttributeController, Serializable {
 
     private static final long serialVersionUID = 160L;
 
@@ -150,23 +149,31 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      * {@inheritDoc}
      */
     @Override
-    public void endComponentActivity(Body body) {
-        this.overlay.close();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAttributes(Peer stub,
-                              SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        if (this.overlay == null) {
+    public void initAttributes(Peer stub,
+                               SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        if (!this.initialized) {
             this.overlay = overlayProvider.get();
             this.overlay.bodyId = PAActiveObject.getBodyOnThis().getID();
             this.overlay.multiActiveService = this.multiActiveService;
             this.overlay.overlayProvider = overlayProvider;
             this.overlay.stub = stub;
             this.overlay.url = PAActiveObject.getUrl(stub);
+
+            this.initialized = true;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            this.overlay.close();
+
+            this.overlay = null;
+
+            super.resetAttributes();
         }
     }
 

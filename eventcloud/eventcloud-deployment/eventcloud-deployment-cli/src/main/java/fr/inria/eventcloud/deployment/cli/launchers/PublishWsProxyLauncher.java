@@ -40,7 +40,7 @@ public final class PublishWsProxyLauncher extends WsLauncher {
     @Override
     public String run() {
         return WsDeployer.deployPublishWsProxy(
-                LOCAL_NODE_PROVIDER,
+                WsLauncher.COMPONENT_POOL_MANAGER,
                 super.registryUrl,
                 super.eventCloudUrl,
                 "eventclouds/" + this.getTopicName(super.eventCloudUrl)

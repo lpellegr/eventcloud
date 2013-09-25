@@ -102,11 +102,42 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(EventCloudCache proxy) {
-        if (super.eventCloudCache == null) {
-            super.setAttributes(proxy.getTrackers());
-            super.eventCloudCache = proxy;
+    public void runComponentActivity(Body body) {
+        super.multiActiveService = new ComponentMultiActiveService(body);
+        super.multiActiveService.multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
+                false, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initAttributes(EventCloudCache proxy) {
+        if (!this.initialized) {
+            super.initAttributes(proxy.getTrackers());
+            this.eventCloudCache = proxy;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            this.eventCloudCache = null;
+
+            super.resetAttributes();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String prefixName() {
+        return "putget-proxy";
     }
 
     /**
@@ -363,25 +394,6 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
                         SparqlResponseCombiner.getInstance());
 
         return (SparqlSelectResponse) PAFuture.getFutureValue(result);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        super.multiActiveService = new ComponentMultiActiveService(body);
-        super.multiActiveService.multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
-                false, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String prefixName() {
-        return "putget-proxy";
     }
 
 }

@@ -27,13 +27,13 @@ import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeControll
 public interface TrackerAttributeController extends CommonAttributeController {
 
     /**
-     * Sets the attributes of the tracker.
+     * Initializes all the attributes of the tracker.
      * 
      * @param stub
      *            the tracker remote reference.
      * @param networkName
      *            the network name to use.
      */
-    void setAttributes(Tracker stub, String networkName);
+    void initAttributes(Tracker stub, String networkName);
 
 }
