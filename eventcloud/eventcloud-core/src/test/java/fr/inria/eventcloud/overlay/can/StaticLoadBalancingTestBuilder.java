@@ -174,7 +174,7 @@ public class StaticLoadBalancingTestBuilder {
                                 this.deployer.getEventCloudsRegistryUrl(),
                                 this.eventCloudId);
 
-                final Stopwatch stopwatch = new Stopwatch();
+                final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
                 Node graph = null;
 

@@ -335,6 +335,14 @@ public final class AtomicQuery implements Serializable {
         return this.distinct;
     }
 
+    /**
+     * Returns {@code true} if the subscription requires filtering evaluation,
+     * {@code false} otherwise.
+     */
+    public boolean isFilterEvaluationRequired() {
+        return !this.filterConstraints.isEmpty();
+    }
+
     public boolean isReduced() {
         return this.reduced;
     }
@@ -482,7 +490,6 @@ public final class AtomicQuery implements Serializable {
             for (ExprList exprList : this.filterConstraints) {
                 String s = ExprUtils.fmtSPARQL(exprList);
                 out.writeUTF(s);
-                // out.writeObject(s);
             }
         } else {
             out.writeInt(0);

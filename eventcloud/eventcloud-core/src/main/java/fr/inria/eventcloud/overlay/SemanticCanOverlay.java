@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,11 +47,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soceda.socialfilter.relationshipstrengthengine.RelationshipStrengthEngineManager;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -100,7 +99,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
 
     private final LoadingCache<SubscriptionId, Subscription> subscriptionsCache;
 
-    private final ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> subscriberConnectionFailures;
+    private final Cache<SubscriptionId, SubscriberConnectionFailure> subscriberConnectionFailures;
 
     private final TransactionalTdbDatastore miscDatastore;
 
@@ -194,7 +193,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 });
 
         this.subscriberConnectionFailures =
-                new MapMaker().softValues().makeMap();
+                CacheBuilder.newBuilder().softValues().build();
 
         if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()
                 || EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
@@ -532,7 +531,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         return this.subscriptionsDatastore;
     }
 
-    public ConcurrentMap<SubscriptionId, SubscriberConnectionFailure> getSubscriberConnectionFailures() {
+    public Cache<SubscriptionId, SubscriberConnectionFailure> getSubscriberConnectionFailures() {
         return this.subscriberConnectionFailures;
     }
 
@@ -1074,7 +1073,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         txnGraph.commit();
 
         this.subscriptionsCache.invalidateAll();
-        this.subscriberConnectionFailures.clear();
+        this.subscriberConnectionFailures.invalidateAll();
 
         if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
             this.loadBalancingManager.clear();

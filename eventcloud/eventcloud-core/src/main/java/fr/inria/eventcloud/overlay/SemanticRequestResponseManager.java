@@ -112,7 +112,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
             try {
                 this.threadPool.awaitTermination(2, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(e);
             }
         }
     }

@@ -36,10 +36,12 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.tdb.TDBFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
@@ -457,6 +459,75 @@ public class PubSubTest {
         }
     }
 
+    @Test(timeout = 60000)
+    public void testSubscribeWithFilterConditions1() {
+        Subscription subscription =
+                new Subscription(
+                        "SELECT ?g ?s ?p ?o WHERE { GRAPH ?g { ?s <urn:p1> ?o1 . ?s <urn:p2> ?o2 . FILTER (?o2 > 7) } }");
+
+        this.subscribeProxy.subscribe(
+                subscription, new CustomCompoundEventNotificationListener());
+
+        SubscriptionTestUtils.waitSubscriptionIndexation();
+
+        CompoundEvent ce =
+                new CompoundEvent(
+                        ImmutableList.of(
+                                new Quadruple(
+                                        NodeFactory.createURI(eventId + "1"),
+                                        NodeFactory.createURI("urn:s1"),
+                                        NodeFactory.createURI("urn:p1"),
+                                        NodeFactory.createURI("urn:o1")),
+                                new Quadruple(
+                                        NodeFactory.createURI(eventId + "1"),
+                                        NodeFactory.createURI("urn:s1"),
+                                        NodeFactory.createURI("urn:p2"),
+                                        NodeFactory.createLiteral(
+                                                "1", XSDDatatype.XSDinteger))));
+
+        this.publishProxy.publish(ce);
+
+        ce =
+                new CompoundEvent(ImmutableList.of(new Quadruple(
+                        NodeFactory.createURI(eventId + "2"),
+                        NodeFactory.createURI("urn:s1"),
+                        NodeFactory.createURI("urn:p1"),
+                        NodeFactory.createURI("urn:o1")), new Quadruple(
+                        NodeFactory.createURI(eventId + "2"),
+                        NodeFactory.createURI("urn:s1"),
+                        NodeFactory.createURI("urn:p2"),
+                        NodeFactory.createURI("urn:o1"))));
+
+        this.publishProxy.publish(ce);
+
+        ce =
+                new CompoundEvent(
+                        ImmutableList.of(
+                                new Quadruple(
+                                        NodeFactory.createURI(eventId + "3"),
+                                        NodeFactory.createURI("urn:s1"),
+                                        NodeFactory.createURI("urn:p1"),
+                                        NodeFactory.createURI("urn:o1")),
+                                new Quadruple(
+                                        NodeFactory.createURI(eventId + "3"),
+                                        NodeFactory.createURI("urn:s1"),
+                                        NodeFactory.createURI("urn:p2"),
+                                        NodeFactory.createLiteral(
+                                                "8", XSDDatatype.XSDinteger))));
+
+        this.publishProxy.publish(ce);
+
+        synchronized (events) {
+            while (events.size() != 1) {
+                try {
+                    events.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     /**
      * Test a basic subscription with a binding wrapper listener deployed as an
      * active object.
@@ -741,6 +812,8 @@ public class PubSubTest {
         signals.setValue(0);
         bindings.clear();
         events.clear();
+
+        TDBFactory.reset();
 
         this.deployer = null;
         this.eventCloudId = null;

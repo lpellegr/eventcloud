@@ -149,7 +149,8 @@ public class LoadBalancingStatsOverheadBenchmark {
                                         ProxyFactory.newPutGetProxy(
                                                 registryURL, id);
 
-                                Stopwatch stopwatch = new Stopwatch();
+                                Stopwatch stopwatch =
+                                        Stopwatch.createUnstarted();
 
                                 for (int i = 0; i < LoadBalancingStatsOverheadBenchmark.this.nbPublications; i++) {
                                     stopwatch.start();

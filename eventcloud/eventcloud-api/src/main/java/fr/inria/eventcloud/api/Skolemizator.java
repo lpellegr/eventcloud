@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.Hasher;
@@ -105,7 +106,7 @@ public class Skolemizator {
         UUID randomId = UUID.randomUUID();
 
         Hasher hasher = Hashing.murmur3_128().newHasher();
-        hasher.putString(subjectOrObject.toString());
+        hasher.putString(subjectOrObject.toString(), Charsets.UTF_8);
         hasher.putLong(randomId.getMostSignificantBits());
         hasher.putLong(randomId.getLeastSignificantBits());
 

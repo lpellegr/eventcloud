@@ -60,7 +60,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.hash.HashCode;
-import com.google.common.hash.HashCodes;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -321,7 +320,7 @@ public class Subscription implements Quadruplable, Serializable {
     }
 
     private static HashCode fromString(String hashCode) {
-        return HashCodes.fromBytes(DatatypeConverter.parseHexBinary(hashCode));
+        return HashCode.fromBytes(DatatypeConverter.parseHexBinary(hashCode));
     }
 
     /**
