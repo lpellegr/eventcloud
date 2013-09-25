@@ -362,6 +362,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                                         overlay.getZone(),
                                         neighbor.getNeighborEntry().getZone(),
                                         coordinate)) {
+
                                     contains = false;
                                 }
                             }
@@ -373,15 +374,19 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                                 if (!this.containsCoordinate(
                                         neighbor.getNeighborEntry().getZone(),
                                         plane[coordinate], coordinate)
-                                // TODO fix or remove it, see issue #101
-                                // ||
-                                // The constraint has already been
-                                // reached
-                                // previously so forwarding again is
-                                // useless
-                                // (request.getConstraintReached() &&
-                                // !request.validatesKeyConstraints(overlay))
-                                ) {
+                                        ||
+
+                                        // TODO Remove or adapt the following
+                                        // optimization condition if multicasts
+                                        // of distinct ranges are enabled.
+
+                                        // The constraint has already been
+                                        // reached previously so forwarding
+                                        // again on dimension 0 is useless if
+                                        // the current peer does not satisfy the
+                                        // constraint.
+                                        ((dimension == 0) && (request.getConstraintReached() && !request.validatesKeyConstraints(overlay)))) {
+
                                     contains = false;
                                 }
                             }

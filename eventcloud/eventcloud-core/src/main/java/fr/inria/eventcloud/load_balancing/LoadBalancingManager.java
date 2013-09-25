@@ -229,11 +229,11 @@ public class LoadBalancingManager {
     }
 
     public void start() {
-        this.scheduledService.start();
+        this.scheduledService.startAsync();
     }
 
     public void stop() {
-        this.scheduledService.stop();
+        this.scheduledService.stopAsync();
     }
 
     public LoadReport getCurrentLoad() {
