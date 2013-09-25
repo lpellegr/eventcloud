@@ -29,11 +29,11 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 public interface ProxyAttributeController extends AttributeController {
 
     /**
-     * Sets the attributes of a {@link Proxy}.
+     * Initializes all the attributes of a {@link Proxy}.
      * 
      * @param trackers
      *            trackers used to get entry points to the P2P network.
      */
-    void setAttributes(List<Tracker> trackers);
+    void initAttributes(List<Tracker> trackers);
 
 }

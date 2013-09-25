@@ -21,18 +21,15 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.WsnTranslator;
 import fr.inria.eventcloud.webservices.api.PublishWsnApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsnApi;
@@ -53,7 +50,7 @@ public abstract class WsnService<T> {
 
     protected static Logger log = LoggerFactory.getLogger(WsnService.class);
 
-    protected final NodeProvider nodeProvider;
+    protected final ComponentPoolManager componentPoolManager;
 
     protected final DeploymentConfiguration deploymentConfiguration;
 
@@ -68,9 +65,9 @@ public abstract class WsnService<T> {
     /**
      * Creates a {@link WsnService}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the underlying proxy.
@@ -81,10 +78,10 @@ public abstract class WsnService<T> {
      *            the URL which identifies the EventCloud on which the
      *            underlying proxy must be connected.
      */
-    public WsnService(NodeProvider nodeProvider,
+    public WsnService(ComponentPoolManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
-        this.nodeProvider = nodeProvider;
+        this.componentPoolManager = componentPoolManager;
         this.deploymentConfiguration = deploymentConfiguration;
         this.registryUrl = registryUrl;
         this.streamUrl = streamUrl;
@@ -125,20 +122,24 @@ public abstract class WsnService<T> {
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
             EventCloudId id = new EventCloudId(this.streamUrl);
 
-            if (this.proxy instanceof PublishProxy) {
-                registry.unregisterProxy(id, (PublishProxy) this.proxy);
-            } else if (this.proxy instanceof SubscribeProxy) {
-                registry.unregisterProxy(id, (SubscribeProxy) this.proxy);
-            } else {
-                logAndThrowIllegalArgumentException("Unknow proxy type: "
-                        + this.proxy.getClass());
-            }
-
-            ComponentUtils.terminateComponent(this.proxy);
+            this.releaseProxy(registry, id);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
+
+    /**
+     * Releases the underlying proxy;
+     * 
+     * @param registry
+     *            the EventClouds registry on which the web service proxy has
+     *            been registered.
+     * @param id
+     *            the identifier of the EventCloud to which the web service
+     *            proxy is associated.
+     */
+    protected abstract void releaseProxy(EventCloudsRegistry registry,
+                                         EventCloudId id);
 
     protected static final void logAndThrowIllegalArgumentException(String msg) {
         log.error(msg);

@@ -85,6 +85,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.factories.ComponentPoolManagerFactory;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
@@ -1128,7 +1129,7 @@ public class PublishSubscribeBenchmark {
         descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
 
         if (this.gcmaDescriptor != null) {
-            descriptor.setNodeProvider(nodeProvider);
+            descriptor.setComponentPoolManager(ComponentPoolManagerFactory.newComponentPoolManager(nodeProvider));
         }
         return descriptor;
     }

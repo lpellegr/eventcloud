@@ -77,11 +77,42 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(EventCloudCache proxy) {
-        if (super.eventCloudCache == null) {
-            super.setAttributes(proxy.getTrackers());
-            super.eventCloudCache = proxy;
+    public void runComponentActivity(Body body) {
+        super.multiActiveService = new ComponentMultiActiveService(body);
+        super.multiActiveService.multiActiveServing(
+                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
+                false, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initAttributes(EventCloudCache proxy) {
+        if (!this.initialized) {
+            super.initAttributes(proxy.getTrackers());
+            this.eventCloudCache = proxy;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetAttributes() {
+        if (this.initialized) {
+            this.eventCloudCache = null;
+
+            super.resetAttributes();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String prefixName() {
+        return "publish-proxy";
     }
 
     /**
@@ -140,25 +171,6 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
         } catch (IOException ioe) {
             log.error("An error occurred when reading from the given URL", ioe);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void runComponentActivity(Body body) {
-        super.multiActiveService = new ComponentMultiActiveService(body);
-        super.multiActiveService.multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
-                false, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String prefixName() {
-        return "publish-proxy";
     }
 
 }

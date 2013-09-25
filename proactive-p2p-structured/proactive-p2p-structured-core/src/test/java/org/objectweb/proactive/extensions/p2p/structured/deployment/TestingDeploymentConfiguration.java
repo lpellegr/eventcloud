@@ -38,4 +38,12 @@ public class TestingDeploymentConfiguration implements DeploymentConfiguration {
         P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(1.0);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unconfigure() {
+        P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.setValue(P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getDefaultValue());
+    }
+
 }

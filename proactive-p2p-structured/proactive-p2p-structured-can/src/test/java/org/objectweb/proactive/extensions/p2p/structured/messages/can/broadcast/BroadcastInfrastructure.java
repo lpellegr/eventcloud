@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
 import org.objectweb.proactive.extensions.p2p.structured.logger.LogReader;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
@@ -35,7 +36,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 
@@ -117,7 +117,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
      */
     public void initialize() {
         super.setUp();
-        this.proxy = Proxies.newProxy(super.getRandomTracker());
+        this.proxy = ProxyFactory.newProxy(super.getRandomTracker());
     }
 
     /**

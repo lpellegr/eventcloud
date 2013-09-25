@@ -24,7 +24,6 @@ import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.SubscribeApi;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.tracker.SemanticTracker;
 
@@ -91,17 +90,20 @@ public class JunitByClassEventCloudDeployer extends
 
         try {
             this.publishProxy =
-                    ProxyFactory.newPublishProxy(
-                            super.getEventCloudsRegistryUrl(),
+                    this.descriptor.getComponentPoolManager().getPublishProxy(
+                            null, this.getEventCloudsRegistryUrl(),
                             this.eventCloudId);
 
             this.putgetProxy =
-                    ProxyFactory.newPutGetProxy(
-                            this.getEventCloudsRegistryUrl(), this.eventCloudId);
+                    this.descriptor.getComponentPoolManager().getPutGetProxy(
+                            null, this.getEventCloudsRegistryUrl(),
+                            this.eventCloudId);
 
             this.subscribeProxy =
-                    ProxyFactory.newSubscribeProxy(
-                            this.getEventCloudsRegistryUrl(), this.eventCloudId);
+                    this.descriptor.getComponentPoolManager()
+                            .getSubscribeProxy(
+                                    null, this.getEventCloudsRegistryUrl(),
+                                    this.eventCloudId);
         } catch (EventCloudIdNotManaged e) {
             throw new IllegalStateException(e);
         }

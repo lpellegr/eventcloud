@@ -27,7 +27,6 @@ import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.ProActiveInet;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 import org.objectweb.proactive.extensions.webservices.component.Utils;
@@ -38,7 +37,11 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.SubscribeApi;
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
+import fr.inria.eventcloud.proxies.PublishProxy;
+import fr.inria.eventcloud.proxies.PutGetProxy;
+import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.webservices.EventCloudsManagementServiceImpl;
 import fr.inria.eventcloud.webservices.api.EventCloudsManagementWsnApi;
 import fr.inria.eventcloud.webservices.api.PublishWsApi;
@@ -46,7 +49,6 @@ import fr.inria.eventcloud.webservices.api.PublishWsnApi;
 import fr.inria.eventcloud.webservices.api.PutGetWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsApi;
 import fr.inria.eventcloud.webservices.api.SubscribeWsnApi;
-import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
 import fr.inria.eventcloud.webservices.proxies.PublishWsProxyImpl;
 import fr.inria.eventcloud.webservices.proxies.PutGetWsProxyImpl;
 import fr.inria.eventcloud.webservices.proxies.SubscribeWsProxyImpl;
@@ -88,9 +90,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PublishWsnApi publish WS-Notification service}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying publish proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying publish proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying publish proxy.
@@ -104,21 +106,22 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deployPublishWsnService(NodeProvider nodeProvider,
+    public static WsnServiceInfo deployPublishWsnService(ComponentPoolManager componentPoolManager,
                                                          String registryUrl,
                                                          String streamUrl,
                                                          String urlSuffix,
                                                          int port) {
         return deployPublishWsnService(
-                nodeProvider, null, registryUrl, streamUrl, urlSuffix, port);
+                componentPoolManager, null, registryUrl, streamUrl, urlSuffix,
+                port);
     }
 
     /**
      * Deploys a new {@link PublishWsnApi publish WS-Notification service}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying publish proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying publish proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the underlying publish proxy.
@@ -135,7 +138,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deployPublishWsnService(NodeProvider nodeProvider,
+    public static WsnServiceInfo deployPublishWsnService(ComponentPoolManager componentPoolManager,
                                                          DeploymentConfiguration deploymentConfiguration,
                                                          String registryUrl,
                                                          String streamUrl,
@@ -143,8 +146,8 @@ public class WsDeployer {
                                                          int port) {
         PublishWsnServiceImpl publishWsnService =
                 new PublishWsnServiceImpl(
-                        nodeProvider, deploymentConfiguration, registryUrl,
-                        streamUrl);
+                        componentPoolManager, deploymentConfiguration,
+                        registryUrl, streamUrl);
 
         Server publishWsnServer =
                 deployWebService(
@@ -157,9 +160,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link SubscribeWsnApi subscribe service}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying subscribe proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying subscribe proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the underlying subscribe proxy.
@@ -173,21 +176,22 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deploySubscribeWsnService(NodeProvider nodeProvider,
+    public static WsnServiceInfo deploySubscribeWsnService(ComponentPoolManager componentPoolManager,
                                                            String registryUrl,
                                                            String streamUrl,
                                                            String urlSuffix,
                                                            int port) {
         return deploySubscribeWsnService(
-                nodeProvider, null, registryUrl, streamUrl, urlSuffix, port);
+                componentPoolManager, null, registryUrl, streamUrl, urlSuffix,
+                port);
     }
 
     /**
      * Deploys a new {@link SubscribeWsnApi subscribe service}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying subscribe proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying subscribe proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the underlying subcribe proxy.
@@ -204,7 +208,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deploySubscribeWsnService(NodeProvider nodeProvider,
+    public static WsnServiceInfo deploySubscribeWsnService(ComponentPoolManager componentPoolManager,
                                                            DeploymentConfiguration deploymentConfiguration,
                                                            String registryUrl,
                                                            String streamUrl,
@@ -212,8 +216,8 @@ public class WsDeployer {
                                                            int port) {
         SubscribeWsnServiceImpl subscribeWsnService =
                 new SubscribeWsnServiceImpl(
-                        nodeProvider, deploymentConfiguration, registryUrl,
-                        streamUrl);
+                        componentPoolManager, deploymentConfiguration,
+                        registryUrl, streamUrl);
 
         Server subscribeWsnServer =
                 deployWebService(
@@ -291,9 +295,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PublishWsApi publish web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the publish
-     *            web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the publish web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the publish web service proxy.
@@ -304,22 +308,22 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the PublishWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPublishWsProxy(NodeProvider nodeProvider,
-                                                   String registryUrl,
-                                                   String streamUrl,
-                                                   String proxyName) {
+    public static PublishWsProxyInfo deployPublishWsProxy(ComponentPoolManager componentPoolManager,
+                                                          String registryUrl,
+                                                          String streamUrl,
+                                                          String proxyName) {
         return deployPublishWsProxy(
-                nodeProvider, null, registryUrl, streamUrl, proxyName);
+                componentPoolManager, null, registryUrl, streamUrl, proxyName);
     }
 
     /**
      * Deploys a new {@link PublishWsApi publish web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the publish
-     *            web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the publish web service proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the publish web service proxy.
@@ -333,25 +337,26 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the PublishWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPublishWsProxy(NodeProvider nodeProvider,
-                                                   DeploymentConfiguration deploymentConfiguration,
-                                                   String registryUrl,
-                                                   String streamUrl,
-                                                   String proxyName) {
+    public static PublishWsProxyInfo deployPublishWsProxy(ComponentPoolManager componentPoolManager,
+                                                          DeploymentConfiguration deploymentConfiguration,
+                                                          String registryUrl,
+                                                          String streamUrl,
+                                                          String proxyName) {
         try {
-            PublishApi publishProxy =
-                    WsProxyFactory.newPublishProxy(
-                            nodeProvider, deploymentConfiguration, registryUrl,
+            PublishProxy publishProxy =
+                    componentPoolManager.getPublishProxy(
+                            deploymentConfiguration, registryUrl,
                             new EventCloudId(streamUrl));
 
             String endpointUrl =
                     exposePublishWebService(publishProxy, proxyName);
 
-            return new WsProxyInfo(
-                    streamUrl, endpointUrl, registryUrl, (Proxy) publishProxy,
-                    proxyName, PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
+            return new PublishWsProxyInfo(
+                    streamUrl, endpointUrl, componentPoolManager, registryUrl,
+                    publishProxy, proxyName,
+                    PublishWsProxyImpl.PUBLISH_WEBSERVICES_ITF);
         } catch (EventCloudIdNotManaged e) {
             throw new IllegalStateException(e);
         }
@@ -360,9 +365,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link SubscribeWsApi subscribe web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            subscribe web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the subscribe web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the subscribe web service proxy.
@@ -373,22 +378,22 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the SubscribeWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deploySubscribeWsProxy(NodeProvider nodeProvider,
-                                                     String registryUrl,
-                                                     String streamUrl,
-                                                     String proxyName) {
+    public static SubscribeWsProxyInfo deploySubscribeWsProxy(ComponentPoolManager componentPoolManager,
+                                                              String registryUrl,
+                                                              String streamUrl,
+                                                              String proxyName) {
         return deploySubscribeWsProxy(
-                nodeProvider, null, registryUrl, streamUrl, proxyName);
+                componentPoolManager, null, registryUrl, streamUrl, proxyName);
     }
 
     /**
      * Deploys a new {@link SubscribeWsApi subscribe web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            subscribe web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the subscribe web service proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the subscribe web service proxy.
@@ -402,25 +407,25 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the SubscribeWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deploySubscribeWsProxy(NodeProvider nodeProvider,
-                                                     DeploymentConfiguration deploymentConfiguration,
-                                                     String registryUrl,
-                                                     String streamUrl,
-                                                     String proxyName) {
+    public static SubscribeWsProxyInfo deploySubscribeWsProxy(ComponentPoolManager componentPoolManager,
+                                                              DeploymentConfiguration deploymentConfiguration,
+                                                              String registryUrl,
+                                                              String streamUrl,
+                                                              String proxyName) {
         try {
-            SubscribeApi subscribeProxy =
-                    WsProxyFactory.newSubscribeProxy(
-                            nodeProvider, deploymentConfiguration, registryUrl,
+            SubscribeProxy subscribeProxy =
+                    componentPoolManager.getSubscribeProxy(
+                            deploymentConfiguration, registryUrl,
                             new EventCloudId(streamUrl));
 
             String endpointUrl =
                     exposeSubscribeWebService(subscribeProxy, proxyName);
 
-            return new WsProxyInfo(
-                    streamUrl, endpointUrl, registryUrl,
-                    (Proxy) subscribeProxy, proxyName,
+            return new SubscribeWsProxyInfo(
+                    streamUrl, endpointUrl, componentPoolManager, registryUrl,
+                    subscribeProxy, proxyName,
                     SubscribeWsProxyImpl.SUBSCRIBE_WEBSERVICES_ITF);
         } catch (EventCloudIdNotManaged e) {
             throw new IllegalStateException(e);
@@ -430,9 +435,9 @@ public class WsDeployer {
     /**
      * Deploys a new {@link PutGetWsApi put/get web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the put/get
-     *            web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the put/get web service proxy.
      * @param registryUrl
      *            the URL of the EventClouds registry to connect to in order to
      *            create the put/get web service proxy.
@@ -443,22 +448,22 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the PutGetWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPutGetWsProxy(NodeProvider nodeProvider,
-                                                  String registryUrl,
-                                                  String streamUrl,
-                                                  String proxyName) {
+    public static PutGetWsProxyInfo deployPutGetWsProxy(ComponentPoolManager componentPoolManager,
+                                                        String registryUrl,
+                                                        String streamUrl,
+                                                        String proxyName) {
         return deployPutGetWsProxy(
-                nodeProvider, null, registryUrl, streamUrl, proxyName);
+                componentPoolManager, null, registryUrl, streamUrl, proxyName);
     }
 
     /**
      * Deploys a new {@link PutGetWsApi put/get web service proxy}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the put/get
-     *            web service proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the put/get web service proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the put/get web service proxy.
@@ -472,24 +477,25 @@ public class WsDeployer {
      *            as part of the URL associated to the web service to be
      *            deployed.
      * 
-     * @return the WsProxyInfo instance of the web service.
+     * @return the PutGetWsProxyInfo instance of the web service.
      */
-    public static WsProxyInfo deployPutGetWsProxy(NodeProvider nodeProvider,
-                                                  DeploymentConfiguration deploymentConfiguration,
-                                                  String registryUrl,
-                                                  String streamUrl,
-                                                  String proxyName) {
+    public static PutGetWsProxyInfo deployPutGetWsProxy(ComponentPoolManager componentPoolManager,
+                                                        DeploymentConfiguration deploymentConfiguration,
+                                                        String registryUrl,
+                                                        String streamUrl,
+                                                        String proxyName) {
         try {
-            PutGetApi putgetProxy =
-                    WsProxyFactory.newPutGetProxy(
-                            nodeProvider, deploymentConfiguration, registryUrl,
+            PutGetProxy putgetProxy =
+                    componentPoolManager.getPutGetProxy(
+                            deploymentConfiguration, registryUrl,
                             new EventCloudId(streamUrl));
 
             String endpointUrl = exposePutGetWebService(putgetProxy, proxyName);
 
-            return new WsProxyInfo(
-                    streamUrl, endpointUrl, registryUrl, (Proxy) putgetProxy,
-                    proxyName, PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
+            return new PutGetWsProxyInfo(
+                    streamUrl, endpointUrl, componentPoolManager, registryUrl,
+                    putgetProxy, proxyName,
+                    PutGetWsProxyImpl.PUTGET_WEBSERVICES_ITF);
         } catch (EventCloudIdNotManaged e) {
             throw new IllegalStateException(e);
         }

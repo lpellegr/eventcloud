@@ -450,7 +450,7 @@ public final class SemanticFactory extends AbstractFactory {
             if (deploymentConfiguration != null) {
                 trackerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
             }
-            trackerAttributeController.setAttributes(tracker, networkName);
+            trackerAttributeController.initAttributes(tracker, networkName);
 
             GCM.getGCMLifeCycleController(trackerComponent).startFc();
 
@@ -720,7 +720,7 @@ public final class SemanticFactory extends AbstractFactory {
             if (deploymentConfiguration != null) {
                 peerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
             }
-            peerAttributeController.setAttributes(peer, overlayProvider);
+            peerAttributeController.initAttributes(peer, overlayProvider);
 
             if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
                 RelationshipStrengthEngineManager socialFilter =

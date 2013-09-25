@@ -69,6 +69,10 @@ public abstract class NetworkDeployer extends
         this.descriptor = descriptor;
     }
 
+    public DeploymentDescriptor getDeploymentDescriptor() {
+        return this.descriptor;
+    }
+
     public void deploy(int nbPeers) {
         this.deploy(1, nbPeers);
     }

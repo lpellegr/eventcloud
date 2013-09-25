@@ -28,4 +28,6 @@ public interface DeploymentConfiguration extends Serializable {
 
     void configure();
 
+    void unconfigure();
+
 }

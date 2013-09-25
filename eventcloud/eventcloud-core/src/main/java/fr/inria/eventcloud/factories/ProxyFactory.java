@@ -417,7 +417,7 @@ public class ProxyFactory extends AbstractFactory {
             }
             EventCloudCache eventCloudProxy =
                     new EventCloudCache(registryUrl, id);
-            publishProxyAttributeController.setAttributes(eventCloudProxy);
+            publishProxyAttributeController.initAttributes(eventCloudProxy);
 
             GCM.getGCMLifeCycleController(pubComponent).startFc();
 
@@ -825,7 +825,7 @@ public class ProxyFactory extends AbstractFactory {
             }
             EventCloudCache eventCloudProxy =
                     new EventCloudCache(registryUrl, id);
-            subscribeProxyAttributeController.setAttributes(
+            subscribeProxyAttributeController.initAttributes(
                     eventCloudProxy, componentUri, properties);
 
             GCM.getGCMLifeCycleController(subComponent).startFc();
@@ -1177,7 +1177,7 @@ public class ProxyFactory extends AbstractFactory {
             }
             EventCloudCache eventCloudProxy =
                     new EventCloudCache(registryUrl, id);
-            putGetProxyAttributeController.setAttributes(eventCloudProxy);
+            putGetProxyAttributeController.initAttributes(eventCloudProxy);
 
             GCM.getGCMLifeCycleController(putgetComponent).startFc();
 

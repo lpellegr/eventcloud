@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableP
 public interface PeerAttributeController extends CommonAttributeController {
 
     /**
-     * Sets the attributes of the peer.
+     * Initializes all the attributes of the peer.
      * 
      * @param stub
      *            the remote peer reference.
@@ -36,7 +36,7 @@ public interface PeerAttributeController extends CommonAttributeController {
      *            the provider to use for getting the {@link StructuredOverlay}
      *            embedded by the peer.
      */
-    void setAttributes(Peer stub,
-                       SerializableProvider<? extends StructuredOverlay> overlayProvider);
+    void initAttributes(Peer stub,
+                        SerializableProvider<? extends StructuredOverlay> overlayProvider);
 
 }

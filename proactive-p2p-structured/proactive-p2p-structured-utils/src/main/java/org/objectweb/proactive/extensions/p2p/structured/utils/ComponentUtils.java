@@ -232,8 +232,10 @@ public class ComponentUtils {
      *            the stubs of the components to terminate.
      */
     public static <T> void terminateComponents(List<T> stubs) {
-        for (T stub : stubs) {
-            terminateComponent(stub);
+        synchronized (stubs) {
+            for (T stub : stubs) {
+                terminateComponent(stub);
+            }
         }
     }
 

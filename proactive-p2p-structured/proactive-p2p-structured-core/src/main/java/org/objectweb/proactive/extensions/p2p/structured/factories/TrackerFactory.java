@@ -347,7 +347,7 @@ public class TrackerFactory extends AbstractFactory {
             if (deploymentConfiguration != null) {
                 ((TrackerAttributeController) GCM.getAttributeController(((Interface) tracker).getFcItfOwner())).setDeploymentConfiguration(deploymentConfiguration);
             }
-            trackerAttributeController.setAttributes(tracker, networkName);
+            trackerAttributeController.initAttributes(tracker, networkName);
 
             log.info(
                     "Tracker {} associated to network named '{}' created",

@@ -19,25 +19,24 @@ package fr.inria.eventcloud.webservices.deployment;
 import java.io.IOException;
 
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.proxies.PublishProxy;
-import fr.inria.eventcloud.proxies.PutGetProxy;
-import fr.inria.eventcloud.proxies.SubscribeProxy;
 
 /**
  * Provides information associated to a web service proxy.
  * 
  * @author bsauvan
  */
-public class WsProxyInfo extends WsInfo {
+public abstract class WsProxyInfo<T extends Proxy> extends WsInfo {
+
+    protected final ComponentPoolManager componentPoolManager;
 
     private final String registryUrl;
 
-    private final Proxy proxy;
+    protected final T proxy;
 
     private final String proxyName;
 
@@ -51,9 +50,12 @@ public class WsProxyInfo extends WsInfo {
      *            create the web service.
      * @param wsEndpointUrl
      *            the endpoint URL of the web service.
-     * @param registryUrl
-     *            the URL of the EventClouds registry used to create the web
+     * @param componentPoolManager
+     *            the component pool manager used for the deployment of the web
      *            service proxy.
+     * @param registryUrl
+     *            the URL of the EventClouds registry on which the web service
+     *            proxy has been registered.
      * @param proxy
      *            the Proxy interface of the component owning the interface
      *            exposed as a web service.
@@ -64,9 +66,10 @@ public class WsProxyInfo extends WsInfo {
      *            the name of the interface exposed as a web service.
      */
     public WsProxyInfo(String streamUrl, String wsEndpointUrl,
-            String registryUrl, Proxy proxy, String proxyName,
-            String interfaceName) {
+            ComponentPoolManager componentPoolManager, String registryUrl,
+            T proxy, String proxyName, String interfaceName) {
         super(streamUrl, wsEndpointUrl);
+        this.componentPoolManager = componentPoolManager;
         this.registryUrl = registryUrl;
         this.proxy = proxy;
         this.proxyName = proxyName;
@@ -91,7 +94,7 @@ public class WsProxyInfo extends WsInfo {
      * @return the Proxy interface of the component owning the interface exposed
      *         as a web service.
      */
-    public Proxy getProxy() {
+    public T getProxy() {
         return this.proxy;
     }
 
@@ -125,25 +128,25 @@ public class WsProxyInfo extends WsInfo {
         try {
             EventCloudsRegistry registry =
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
+            EventCloudId id = new EventCloudId(this.streamUrl);
 
-            EventCloudId eventCloudId = new EventCloudId(this.streamUrl);
-
-            if (this.proxy instanceof PublishProxy) {
-                registry.unregisterProxy(
-                        eventCloudId, (PublishProxy) this.proxy);
-            } else if (this.proxy instanceof SubscribeProxy) {
-                registry.unregisterProxy(
-                        eventCloudId, (SubscribeProxy) this.proxy);
-            } else if (this.proxy instanceof PutGetProxy) {
-                registry.unregisterProxy(eventCloudId, (PutGetProxy) this.proxy);
-            } else {
-                throw new IllegalArgumentException("Unknow proxy type: "
-                        + this.proxy.getClass());
-            }
-
-            ComponentUtils.terminateComponent(this.proxy);
+            this.releaseProxy(registry, id);
         } catch (IOException ioe) {
             throw new IllegalStateException(ioe);
         }
     }
+
+    /**
+     * Releases the proxy;
+     * 
+     * @param registry
+     *            the EventClouds registry on which the web service proxy has
+     *            been registered.
+     * @param id
+     *            the identifier of the EventCloud to which the web service
+     *            proxy is associated.
+     */
+    protected abstract void releaseProxy(EventCloudsRegistry registry,
+                                         EventCloudId id);
+
 }

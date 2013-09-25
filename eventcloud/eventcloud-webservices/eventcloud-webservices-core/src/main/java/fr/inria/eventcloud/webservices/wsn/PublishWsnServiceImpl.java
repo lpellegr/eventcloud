@@ -19,15 +19,14 @@ package fr.inria.eventcloud.webservices.wsn;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.PublishApi;
+import fr.inria.eventcloud.deployment.ComponentPoolManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
 import fr.inria.eventcloud.translators.wsn.WsnLogUtils;
@@ -40,7 +39,7 @@ import fr.inria.eventcloud.webservices.api.PublishWsnApi;
  * 
  * @author lpellegr
  */
-public class PublishWsnServiceImpl extends WsnService<PublishApi> implements
+public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
         PublishWsnApi {
 
     private static final Logger log =
@@ -49,9 +48,9 @@ public class PublishWsnServiceImpl extends WsnService<PublishApi> implements
     /**
      * Creates a {@link PublishWsnServiceImpl}.
      * 
-     * @param nodeProvider
-     *            the node provider to be used for the deployment of the
-     *            underlying publish proxy.
+     * @param componentPoolManager
+     *            the component pool manager to be used for the deployment of
+     *            the underlying publish proxy.
      * @param deploymentConfiguration
      *            the deployment configuration to use during the deployment of
      *            the underlying publish proxy.
@@ -62,24 +61,34 @@ public class PublishWsnServiceImpl extends WsnService<PublishApi> implements
      *            the URL which identifies the EventCloud on which the
      *            underlying publish proxy must be connected.
      */
-    public PublishWsnServiceImpl(NodeProvider nodeProvider,
+    public PublishWsnServiceImpl(ComponentPoolManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
-        super(nodeProvider, deploymentConfiguration, registryUrl, streamUrl);
+        super(componentPoolManager, deploymentConfiguration, registryUrl,
+                streamUrl);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PublishApi getProxy() throws EventCloudIdNotManaged {
+    public PublishProxy getProxy() throws EventCloudIdNotManaged {
         if (super.proxy != null) {
             return super.proxy;
         } else {
-            return ProxyFactory.newPublishProxy(
-                    super.nodeProvider, super.deploymentConfiguration,
-                    super.registryUrl, new EventCloudId(super.streamUrl));
+            return super.componentPoolManager.getPublishProxy(
+                    super.deploymentConfiguration, super.registryUrl,
+                    new EventCloudId(super.streamUrl));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void releaseProxy(EventCloudsRegistry registry, EventCloudId id) {
+        registry.unregisterProxy(id, this.proxy);
+        super.componentPoolManager.releasePublishProxies(this.proxy);
     }
 
     /**

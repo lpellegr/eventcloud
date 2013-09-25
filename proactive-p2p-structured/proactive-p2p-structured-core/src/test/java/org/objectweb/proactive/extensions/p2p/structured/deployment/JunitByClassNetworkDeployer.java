@@ -18,8 +18,8 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.junit.After;
 import org.junit.Before;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxies;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
@@ -60,7 +60,7 @@ public abstract class JunitByClassNetworkDeployer {
     @Before
     public void setUp() {
         this.deployer.deploy(this.nbTrackers, this.nbPeers);
-        this.proxy = Proxies.newProxy(this.deployer.getTrackers());
+        this.proxy = ProxyFactory.newProxy(this.deployer.getTrackers());
     }
 
     @After

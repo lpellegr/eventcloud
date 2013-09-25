@@ -42,6 +42,21 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator
  */
 public class EventCloudProperties {
 
+    public static final PropertyInteger NB_TRACKERS_POOL = new PropertyInteger(
+            "eventcloud.pool.trackers", 2);
+
+    public static final PropertyInteger NB_PEERS_POOL = new PropertyInteger(
+            "eventcloud.pool.peers", 5);
+
+    public static final PropertyInteger NB_PUBLISH_PROXIES_POOL =
+            new PropertyInteger("eventcloud.pool.publish.proxies", 2);
+
+    public static final PropertyInteger NB_SUBSCRIBE_PROXIES_POOL =
+            new PropertyInteger("eventcloud.pool.subscribe.proxies", 2);
+
+    public static final PropertyInteger NB_PUTGET_PROXIES_POOL =
+            new PropertyInteger("eventcloud.pool.putget.proxies", 2);
+
     /**
      * Defines approximatively the average number of quadruples contained for
      * each compound event handled by the system. This value is used to
