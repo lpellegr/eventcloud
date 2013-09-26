@@ -388,6 +388,21 @@
 										<ignore />
 									</action>
 								</pluginExecution>
+
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.objectweb.proactive</groupId>
+										<artifactId>proactive-maven-plugin</artifactId>
+										<versionRange>[1.2.3,)</versionRange>
+										<goals>
+											<goal>gcm</goal>
+											<goal>stubs</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
