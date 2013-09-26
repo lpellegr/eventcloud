@@ -41,6 +41,9 @@ public class NotificationListenerFactory extends AbstractFactory {
     private static final Logger log =
             LoggerFactory.getLogger(NotificationListenerFactory.class);
 
+    private NotificationListenerFactory() {
+    }
+
     /**
      * Creates a new notification listener active object deployed on the local
      * JVM.
