@@ -89,10 +89,10 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
      */
     @Override
     public void initAttributes(EventCloudCache proxy) {
-        if (!this.initialized) {
-            super.initAttributes(proxy.getTrackers());
-            this.eventCloudCache = proxy;
-        }
+        assert !this.initialized;
+
+        this.eventCloudCache = proxy;
+        super.initAttributes(proxy.getTrackers());
     }
 
     /**
@@ -102,7 +102,6 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
     public void resetAttributes() {
         if (this.initialized) {
             this.eventCloudCache = null;
-
             super.resetAttributes();
         }
     }

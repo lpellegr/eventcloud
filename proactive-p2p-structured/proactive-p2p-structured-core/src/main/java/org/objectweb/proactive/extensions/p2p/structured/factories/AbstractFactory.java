@@ -85,6 +85,10 @@ public class AbstractFactory {
 
     protected static Map<String, Object> getContextFromNodeProvider(NodeProvider nodeProvider,
                                                                     String vnName) {
+        if (!nodeProvider.isStarted()) {
+            nodeProvider.start();
+        }
+
         GCMVirtualNode vn = nodeProvider.getGcmVirtualNode(vnName);
 
         if (vn != null) {

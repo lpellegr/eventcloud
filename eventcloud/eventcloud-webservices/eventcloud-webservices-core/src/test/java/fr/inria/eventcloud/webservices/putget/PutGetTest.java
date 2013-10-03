@@ -29,6 +29,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 
+import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
@@ -106,13 +107,17 @@ public class PutGetTest extends WsTest {
 
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
-        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+
         EventCloudId id =
-                this.deployer.newEventCloud(deploymentDescriptor, 1, 1);
+                this.deployer.newEventCloud(
+                        new EventCloudDescription(), deploymentDescriptor,
+                        WsTest.EVENTCLOUD_POOL_MANAGER, 1, 1);
 
         this.putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
-                        WsTest.COMPONENT_POOL_MANAGER,
+                        WsTest.EVENTCLOUD_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         id.getStreamUrl(), "putget");
 
@@ -127,7 +132,8 @@ public class PutGetTest extends WsTest {
     public void tearDown() {
         this.putgetWsProxyInfo.destroy();
         this.deployer.undeploy();
-        WsTest.COMPONENT_POOL_MANAGER.stop();
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
     }
 
 }

@@ -167,12 +167,13 @@ public class ComponentUtils {
                 interfaceClass, toStart);
     }
 
-    private static <T> T createComponentAndGetInterface(Factory factory,
-                                                        String componentAdl,
-                                                        Map<String, Object> context,
-                                                        String interfaceName,
-                                                        Class<T> interfaceClass,
-                                                        boolean toStart) {
+    // TODO: remove synchronized once issue #98 is fixed
+    private synchronized static <T> T createComponentAndGetInterface(Factory factory,
+                                                                     String componentAdl,
+                                                                     Map<String, Object> context,
+                                                                     String interfaceName,
+                                                                     Class<T> interfaceClass,
+                                                                     boolean toStart) {
         try {
             Component component =
                     (Component) factory.newComponent(componentAdl, context);
@@ -231,11 +232,9 @@ public class ComponentUtils {
      * @param stubs
      *            the stubs of the components to terminate.
      */
-    public static <T> void terminateComponents(List<T> stubs) {
-        synchronized (stubs) {
-            for (T stub : stubs) {
-                terminateComponent(stub);
-            }
+    public static <T> void terminateComponents(Iterable<T> stubs) {
+        for (T stub : stubs) {
+            terminateComponent(stub);
         }
     }
 

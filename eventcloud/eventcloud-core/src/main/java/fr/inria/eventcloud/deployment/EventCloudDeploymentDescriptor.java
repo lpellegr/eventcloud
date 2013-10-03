@@ -18,13 +18,8 @@ package fr.inria.eventcloud.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentDescriptor;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
-import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
-import com.google.common.base.Preconditions;
-
-import fr.inria.eventcloud.factories.ComponentPoolManagerFactory;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticElement;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
@@ -38,8 +33,6 @@ public class EventCloudDeploymentDescriptor extends
         CanDeploymentDescriptor<SemanticElement> {
 
     private static final long serialVersionUID = 160L;
-
-    private ComponentPoolManager componentPoolManager;
 
     /**
      * Creates a new {@link EventCloudDeploymentDescriptor} by using an
@@ -59,45 +52,6 @@ public class EventCloudDeploymentDescriptor extends
     public EventCloudDeploymentDescriptor(
             SerializableProvider<? extends SemanticCanOverlay> overlayProvider) {
         super(overlayProvider);
-    }
-
-    /**
-     * Sets the component pool manager to use during the deployment.
-     * 
-     * @param componentPoolManager
-     *            the component pool manager to use during the deployment.
-     */
-    public DeploymentDescriptor setComponentPoolManager(ComponentPoolManager componentPoolManager) {
-        Preconditions.checkState(
-                this.componentPoolManager == null,
-                "Node provider was already set or deployment has already started");
-
-        this.componentPoolManager = componentPoolManager;
-
-        if (!this.componentPoolManager.isStarted()) {
-            this.componentPoolManager.start();
-        }
-
-        return this;
-    }
-
-    /**
-     * Returns the instance of the {@link ComponentPoolManager} that is used to
-     * deploy the components.
-     * 
-     * @return returns the instance of the {@link ComponentPoolManager} that is
-     *         used to deploy the components.
-     */
-    public ComponentPoolManager getComponentPoolManager() {
-        if (this.componentPoolManager == null) {
-            NodeProvider nodeProvider = new LocalNodeProvider();
-            nodeProvider.start();
-            this.componentPoolManager =
-                    ComponentPoolManagerFactory.newComponentPoolManager(nodeProvider);
-            this.componentPoolManager.start();
-        }
-
-        return this.componentPoolManager;
     }
 
 }

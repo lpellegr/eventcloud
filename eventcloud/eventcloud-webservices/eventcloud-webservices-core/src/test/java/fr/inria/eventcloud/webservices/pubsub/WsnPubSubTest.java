@@ -25,6 +25,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.apache.cxf.endpoint.Server;
+import org.apache.cxf.frontend.ClientProxy;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -255,22 +256,25 @@ public class WsnPubSubTest extends WsTest {
 
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
-        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+
         this.id =
                 this.deployer.newEventCloud(
                         new EventCloudDescription(
                                 "http://streams.event-processing.org/ids/TaxiUc"),
-                        deploymentDescriptor, 1, 1);
+                        deploymentDescriptor, WsTest.EVENTCLOUD_POOL_MANAGER,
+                        1, 1);
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
-                        WsTest.COMPONENT_POOL_MANAGER,
+                        WsTest.EVENTCLOUD_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe",
                         WsTest.WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
-                        WsTest.COMPONENT_POOL_MANAGER,
+                        WsTest.EVENTCLOUD_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish",
                         WsTest.WEBSERVICES_PORT);
@@ -337,11 +341,16 @@ public class WsnPubSubTest extends WsTest {
 
     @After
     public void tearDown() {
+        ClientProxy.getClient(this.publishWsnClient).destroy();
+        ClientProxy.getClient(this.subscribeWsnClient).destroy();
+
         this.subscribeWsnServiceInfo.destroy();
         this.publishWsnServiceInfo.destroy();
+
         this.deployer.undeploy();
         this.notificationConsumerServer.destroy();
-        WsTest.COMPONENT_POOL_MANAGER.stop();
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
     }
 
 }

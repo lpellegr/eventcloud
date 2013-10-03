@@ -22,10 +22,13 @@ import java.util.List;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NetworkDeployer;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
+import fr.inria.eventcloud.factories.EventCloudComponentsManagerFactory;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.proxies.PublishProxy;
@@ -47,6 +50,10 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     private final EventCloudDescription eventCloudDescription;
 
+    private EventCloudComponentsManager componentPoolManager;
+
+    private boolean componentPoolManagerCreatedInternally;
+
     private List<PublishProxy> publishProxies;
 
     private List<PutGetProxy> putgetProxies;
@@ -55,8 +62,32 @@ public class EventCloudDeployer extends NetworkDeployer {
 
     public EventCloudDeployer(EventCloudDescription description,
             EventCloudDeploymentDescriptor deploymentDescriptor) {
+        this(description, deploymentDescriptor, null);
+    }
+
+    /**
+     * Creates a new EventCloud deployer.
+     * 
+     * @param description
+     *            the description used to create the EventCloud.
+     * @param deploymentDescriptor
+     *            the deployment descriptor to use.
+     * @param componentPoolManager
+     *            the pool manager used to retrieve entities such as peers,
+     *            trackers, etc. It is up to the programmer to start the
+     *            instance of the pool manager before to pass it as an argument.
+     *            Similarly, the programmer should stop manually the instance of
+     *            the pool manager used after a call to {@link #undeploy()}. The
+     *            pool's lifecycle is not managed by the deployer because the
+     *            pool may be shared between several deployers.
+     */
+    public EventCloudDeployer(EventCloudDescription description,
+            EventCloudDeploymentDescriptor deploymentDescriptor,
+            EventCloudComponentsManager componentPoolManager) {
         super(deploymentDescriptor);
+
         this.eventCloudDescription = description;
+        this.componentPoolManager = componentPoolManager;
 
         this.publishProxies =
                 Collections.synchronizedList(new ArrayList<PublishProxy>());
@@ -76,11 +107,29 @@ public class EventCloudDeployer extends NetworkDeployer {
      * {@inheritDoc}
      */
     @Override
+    public void deploy(int nbTrackers, int nbPeers) {
+        if (this.componentPoolManager == null) {
+            this.componentPoolManager =
+                    EventCloudComponentsManagerFactory.newComponentsManager(
+                            new LocalNodeProvider(), nbTrackers, nbPeers, 0, 0,
+                            0);
+            this.componentPoolManager.start();
+            this.componentPoolManagerCreatedInternally = true;
+        } else {
+            this.componentPoolManagerCreatedInternally = false;
+        }
+
+        super.deploy(nbTrackers, nbPeers);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected synchronized Peer createPeer() {
-        return ((EventCloudDeploymentDescriptor) super.descriptor).getComponentPoolManager()
-                .getPeer(
-                        super.descriptor.getDeploymentConfiguration(),
-                        super.descriptor.getOverlayProvider());
+        return this.componentPoolManager.getPeer(
+                super.descriptor.getDeploymentConfiguration(),
+                super.descriptor.getOverlayProvider());
     }
 
     /**
@@ -88,10 +137,8 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected synchronized Tracker createTracker(String networkName) {
-        return ((EventCloudDeploymentDescriptor) super.descriptor).getComponentPoolManager()
-                .getTracker(
-                        super.descriptor.getDeploymentConfiguration(),
-                        networkName);
+        return this.componentPoolManager.getTracker(
+                super.descriptor.getDeploymentConfiguration(), networkName);
     }
 
     /**
@@ -163,6 +210,10 @@ public class EventCloudDeployer extends NetworkDeployer {
         return this.subscribeProxies.remove(proxy);
     }
 
+    public EventCloudComponentsManager getComponentPoolManager() {
+        return this.componentPoolManager;
+    }
+
     public EventCloudDescription getEventCloudDescription() {
         return this.eventCloudDescription;
     }
@@ -193,25 +244,15 @@ public class EventCloudDeployer extends NetworkDeployer {
      */
     @Override
     protected void internalUndeploy() {
-        EventCloudDeploymentDescriptor eventCloudDeploymentDescriptor =
-                (EventCloudDeploymentDescriptor) super.descriptor;
+        super.internalUndeploy();
 
-        eventCloudDeploymentDescriptor.getComponentPoolManager()
-                .releaseSemanticPeers(
-                        this.getRandomTracker().getPeers().toArray(
-                                new SemanticPeer[0]));
-        eventCloudDeploymentDescriptor.getComponentPoolManager()
-                .releaseSemanticTrackers(
-                        this.getTrackers().toArray(new SemanticTracker[0]));
-        eventCloudDeploymentDescriptor.getComponentPoolManager()
-                .releasePublishProxies(
-                        this.publishProxies.toArray(new PublishProxy[0]));
-        eventCloudDeploymentDescriptor.getComponentPoolManager()
-                .releaseSubscribeProxies(
-                        this.subscribeProxies.toArray(new SubscribeProxy[0]));
-        eventCloudDeploymentDescriptor.getComponentPoolManager()
-                .releasePutGetProxies(
-                        this.putgetProxies.toArray(new PutGetProxy[0]));
+        ComponentUtils.terminateComponents(this.publishProxies);
+        ComponentUtils.terminateComponents(this.putgetProxies);
+        ComponentUtils.terminateComponents(this.subscribeProxies);
+
+        if (this.componentPoolManagerCreatedInternally) {
+            this.componentPoolManager.stop();
+        }
     }
 
     /**
@@ -220,6 +261,7 @@ public class EventCloudDeployer extends NetworkDeployer {
     @Override
     protected void reset() {
         super.reset();
+
         this.publishProxies = null;
         this.putgetProxies = null;
         this.subscribeProxies = null;

@@ -32,6 +32,7 @@ import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
@@ -82,10 +83,11 @@ import fr.inria.eventcloud.benchmarks.pubsub.proxies.CustomPublishProxy;
 import fr.inria.eventcloud.benchmarks.pubsub.suppliers.CompoundEventSupplier;
 import fr.inria.eventcloud.benchmarks.pubsub.suppliers.QuadrupleSupplier;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
-import fr.inria.eventcloud.factories.ComponentPoolManagerFactory;
+import fr.inria.eventcloud.factories.EventCloudComponentsManagerFactory;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
@@ -320,7 +322,7 @@ public class PublishSubscribeBenchmark {
 
                     private String collectorURL;
 
-                    private GcmDeploymentNodeProvider nodeProvider;
+                    private NodeProvider nodeProvider;
 
                     private EventCloudDeployer deployer;
 
@@ -355,9 +357,21 @@ public class PublishSubscribeBenchmark {
                                 PublishSubscribeBenchmark.this.createDeploymentDescriptor(
                                         this.nodeProvider, this.collectorURL);
 
+                        EventCloudComponentsManager componentPoolManager =
+                                EventCloudComponentsManagerFactory.newComponentsManager(
+                                        this.nodeProvider,
+                                        1,
+                                        PublishSubscribeBenchmark.this.nbPeers,
+                                        PublishSubscribeBenchmark.this.nbPublishers,
+                                        PublishSubscribeBenchmark.this.nbSubscribers,
+                                        1);
+
+                        componentPoolManager.start();
+
                         this.deployer =
                                 new EventCloudDeployer(
-                                        new EventCloudDescription(), descriptor);
+                                        new EventCloudDescription(),
+                                        descriptor, componentPoolManager);
                         this.deployer.deploy(
                                 1, PublishSubscribeBenchmark.this.nbPeers);
 
@@ -820,13 +834,14 @@ public class PublishSubscribeBenchmark {
         return statsBuffer.toString();
     }
 
-    private void undeploy(GcmDeploymentNodeProvider nodeProvider,
+    private void undeploy(NodeProvider nodeProvider,
                           EventCloudDeployer deployer,
                           EventCloudsRegistry registry, String collectorURL)
             throws IOException {
         registry.unregister();
-
         deployer.undeploy();
+
+        deployer.getComponentPoolManager().stop();
 
         if (nodeProvider != null) {
             nodeProvider.terminate();
@@ -1042,15 +1057,9 @@ public class PublishSubscribeBenchmark {
     }
 
     private EventCloudsRegistry deployRegistry(EventCloudDeployer deployer,
-                                               GcmDeploymentNodeProvider nodeProvider) {
-        EventCloudsRegistry registry;
-
-        if (this.gcmaDescriptor == null) {
-            registry = EventCloudsRegistryFactory.newEventCloudsRegistry();
-        } else {
-            registry =
-                    EventCloudsRegistryFactory.newEventCloudsRegistry(nodeProvider);
-        }
+                                               NodeProvider nodeProvider) {
+        EventCloudsRegistry registry =
+                EventCloudsRegistryFactory.newEventCloudsRegistry(nodeProvider);
         registry.register(deployer);
 
         return registry;
@@ -1121,28 +1130,22 @@ public class PublishSubscribeBenchmark {
 
     }
 
-    private EventCloudDeploymentDescriptor createDeploymentDescriptor(GcmDeploymentNodeProvider nodeProvider,
+    private EventCloudDeploymentDescriptor createDeploymentDescriptor(NodeProvider nodeProvider,
                                                                       String benchmarkStatsCollectorURL) {
         EventCloudDeploymentDescriptor descriptor =
                 new EventCloudDeploymentDescriptor(this.createOverlayProvider(
                         benchmarkStatsCollectorURL, this.inMemoryDatastore));
         descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
 
-        if (this.gcmaDescriptor != null) {
-            descriptor.setComponentPoolManager(ComponentPoolManagerFactory.newComponentPoolManager(nodeProvider));
-        }
         return descriptor;
     }
 
-    private GcmDeploymentNodeProvider createNodeProviderIfRequired() {
-        GcmDeploymentNodeProvider nodeProvider = null;
-
+    private NodeProvider createNodeProviderIfRequired() {
         if (this.gcmaDescriptor != null) {
-            nodeProvider = new GcmDeploymentNodeProvider(this.gcmaDescriptor);
-            nodeProvider.start();
+            return new GcmDeploymentNodeProvider(this.gcmaDescriptor);
         }
 
-        return nodeProvider;
+        return new LocalNodeProvider();
     }
 
     private SerializableProvider<? extends SemanticCanOverlay> createOverlayProvider(String statsCollectorURL,

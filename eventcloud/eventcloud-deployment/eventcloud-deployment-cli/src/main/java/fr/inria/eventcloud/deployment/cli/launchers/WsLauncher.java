@@ -21,8 +21,8 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalN
 
 import com.beust.jcommander.Parameter;
 
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
-import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
+import fr.inria.eventcloud.webservices.factories.WsEventCloudComponentsManagerFactory;
 
 /**
  * Provides JCommander parameters which are compulsory to launch web services.
@@ -32,7 +32,7 @@ import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
  */
 public abstract class WsLauncher extends Launcher {
 
-    protected static final ComponentPoolManager COMPONENT_POOL_MANAGER =
+    protected static final EventCloudComponentsManager COMPONENT_POOL_MANAGER =
             WsLauncher.getComponentPoolManager();
 
     @Parameter(names = {"--registry-url", "-r"}, description = "EventClouds registry URL", required = true)
@@ -44,13 +44,13 @@ public abstract class WsLauncher extends Launcher {
     @Parameter(names = {"--number-id", "-n"}, description = "Identification number which will be part of the web service endpoint URL", required = true)
     protected int numberId;
 
-    private static final ComponentPoolManager getComponentPoolManager() {
+    private static final EventCloudComponentsManager getComponentPoolManager() {
         NodeProvider nodeProvider = new LocalNodeProvider();
         nodeProvider.start();
 
-        ComponentPoolManager componentPoolManager =
-                WsComponentPoolManagerFactory.newComponentPoolManager(nodeProvider);
-        componentPoolManager.start();
+        EventCloudComponentsManager componentPoolManager =
+                WsEventCloudComponentsManagerFactory.newComponentsManager(
+                        nodeProvider, 1, 1, 0, 0, 0);
 
         return componentPoolManager;
     }

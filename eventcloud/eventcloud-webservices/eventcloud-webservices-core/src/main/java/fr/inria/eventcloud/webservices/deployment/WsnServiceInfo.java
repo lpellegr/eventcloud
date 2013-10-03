@@ -72,6 +72,7 @@ public class WsnServiceInfo extends WsInfo {
      */
     @Override
     public void destroy() {
+        this.server.stop();
         this.server.destroy();
         this.service.terminateProxy();
     }

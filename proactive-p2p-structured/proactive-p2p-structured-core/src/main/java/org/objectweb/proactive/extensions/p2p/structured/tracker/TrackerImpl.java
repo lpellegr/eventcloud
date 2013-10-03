@@ -130,32 +130,30 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      */
     @Override
     public void initAttributes(Tracker stub, String networkName) {
-        if (!this.initialized) {
-            this.id = UUID.randomUUID();
+        assert !this.initialized;
 
-            this.networkName = networkName;
+        this.id = UUID.randomUUID();
+        this.networkName = networkName;
+        this.probabilityToStorePeer =
+                P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
 
-            this.probabilityToStorePeer =
-                    P2PStructuredProperties.TRACKER_STORAGE_PROBABILITY.getValue();
+        // copy on write list to avoid to synchronize
+        // when we iterate on the tracker
+        this.peers = new CopyOnWriteArrayList<Peer>();
 
-            // copy on write list to avoid to synchronize
-            // when we iterate on the tracker
-            this.peers = new CopyOnWriteArrayList<Peer>();
+        this.stub = stub;
 
-            this.stub = stub;
-
-            try {
-                this.untypedGroupView =
-                        (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
-                this.typedGroupView = PAGroup.getGroup(this.untypedGroupView);
-            } catch (ClassNotReifiableException cnre) {
-                cnre.printStackTrace();
-            } catch (ClassNotFoundException cnfe) {
-                cnfe.printStackTrace();
-            }
-
-            this.initialized = true;
+        try {
+            this.untypedGroupView =
+                    (Tracker) PAGroup.newGroup(Tracker.class.getCanonicalName());
+            this.typedGroupView = PAGroup.getGroup(this.untypedGroupView);
+        } catch (ClassNotReifiableException cnre) {
+            cnre.printStackTrace();
+        } catch (ClassNotFoundException cnfe) {
+            cnfe.printStackTrace();
         }
+
+        this.initialized = true;
     }
 
     /**
@@ -163,7 +161,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             if (this.bindingName != null) {
                 try {
                     PAActiveObject.unregister(this.bindingName);

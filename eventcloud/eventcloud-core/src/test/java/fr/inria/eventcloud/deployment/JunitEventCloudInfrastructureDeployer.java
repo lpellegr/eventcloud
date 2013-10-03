@@ -72,13 +72,23 @@ public class JunitEventCloudInfrastructureDeployer {
     public EventCloudId newEventCloud(EventCloudDescription eventCloudDescription,
                                       EventCloudDeploymentDescriptor deploymentDescriptor,
                                       int nbTrackers, int nbPeers) {
+        return this.newEventCloud(
+                eventCloudDescription, deploymentDescriptor, null, nbTrackers,
+                nbPeers);
+    }
+
+    public EventCloudId newEventCloud(EventCloudDescription eventCloudDescription,
+                                      EventCloudDeploymentDescriptor deploymentDescriptor,
+                                      EventCloudComponentsManager componentPoolManager,
+                                      int nbTrackers, int nbPeers) {
         this.initializeEventCloudsRegistry();
 
         JunitHelper.setTestingDeploymentConfiguration(deploymentDescriptor);
 
         EventCloudDeployer deployer =
                 new EventCloudDeployer(
-                        eventCloudDescription, deploymentDescriptor);
+                        eventCloudDescription, deploymentDescriptor,
+                        componentPoolManager);
         deployer.deploy(nbTrackers, nbPeers);
 
         this.eventClouds.put(eventCloudDescription.getId(), deployer);
@@ -131,28 +141,23 @@ public class JunitEventCloudInfrastructureDeployer {
 
         while (it.hasNext()) {
             EventCloudId id = it.next();
-            EventCloudDeployer eventCloudDeployer = this.eventClouds.get(id);
-            eventCloudDeployer.undeploy();
-            ((EventCloudDeploymentDescriptor) eventCloudDeployer.getDeploymentDescriptor()).getComponentPoolManager()
-                    .stop();
+            EventCloudDeployer deployer = this.eventClouds.get(id);
+            deployer.undeploy();
+            it.remove();
         }
 
-        this.eventClouds.clear();
         ComponentUtils.terminateComponent(this.eventCloudsRegistry);
     }
 
     public void undeploy(EventCloudId eventCloudId) {
-        if (!this.eventClouds.containsKey(eventCloudId)) {
-            throw new IllegalArgumentException("EventCloud id not managed: "
-                    + eventCloudId);
+        EventCloudDeployer deployer = this.eventClouds.remove(eventCloudId);
+
+        if (deployer == null) {
+            throw new IllegalArgumentException(
+                    "EventCloud identifier not managed: " + eventCloudId);
         }
 
-        EventCloudDeployer eventCloudDeployer =
-                this.eventClouds.get(eventCloudId);
-        eventCloudDeployer.undeploy();
-        ((EventCloudDeploymentDescriptor) eventCloudDeployer.getDeploymentDescriptor()).getComponentPoolManager()
-                .stop();
-        this.eventClouds.remove(eventCloudId);
+        deployer.undeploy();
     }
 
 }

@@ -114,10 +114,10 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      */
     @Override
     public void initAttributes(EventCloudCache proxy) {
-        if (!this.initialized) {
-            super.initAttributes(proxy.getTrackers());
-            this.eventCloudCache = proxy;
-        }
+        assert !this.initialized;
+
+        this.eventCloudCache = proxy;
+        super.initAttributes(proxy.getTrackers());
     }
 
     /**
@@ -125,9 +125,8 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             this.eventCloudCache = null;
-
             super.resetAttributes();
         }
     }

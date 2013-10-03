@@ -49,6 +49,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
+import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -149,15 +150,6 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @Override
     public void initComponentActivity(Body body) {
         super.initComponentActivity(body);
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (SubscribeProxyImpl.this.initialized) {
-                    SubscribeProxyImpl.this.eventsDeliveredCache.close();
-                }
-            }
-        });
     }
 
     /**
@@ -169,14 +161,6 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
         super.multiActiveService.multiActiveServing(
                 EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
                 false, false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void endComponentActivity(Body body) {
-        this.internalResetAttributes();
     }
 
     /**
@@ -198,61 +182,74 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @Override
     public void initAttributes(EventCloudCache proxy, String componentUri,
                                AlterableElaProperty[] properties) {
-        if (!this.initialized) {
-            super.initAttributes(proxy.getTrackers());
+        assert !this.initialized;
 
-            super.eventCloudCache = proxy;
+        super.eventCloudCache = proxy;
+        super.initAttributes(proxy.getTrackers());
+    }
 
-            // even if we could have
-            // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
-            // threads handling subscriptions in parallelSelfCompatible, the
-            // subscribe method
-            // is not supposed to be called very often. We may allow some
-            // contention at the price of less memory to be used
-            this.subscriptions =
-                    new ConcurrentHashMap<SubscriptionId, SubscriptionEntry<?>>(
-                            100, 0.90f, 2);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void _initAttributes(List<Tracker> trackers) {
+        // even if we could have
+        // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
+        // threads handling subscriptions in parallelSelfCompatible, the
+        // subscribe method
+        // is not supposed to be called very often. We may allow some
+        // contention at the price of less memory to be used
+        this.subscriptions =
+                new ConcurrentHashMap<SubscriptionId, SubscriptionEntry<?>>(
+                        100, 0.90f, 2);
 
-            this.bindingSolutions =
-                    new ConcurrentHashMap<NotificationId, BindingSolution>(
-                            // At most
-                            // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
-                            // threads can update the map in
-                            // parallelSelfCompatible. Each of
-                            // them can add part of a solution. The solution is
-                            // eventually removed when all the sub solutions are
-                            // received. Thus if we suppose that the average
-                            // number of sub solutions that compose a solution
-                            // is
-                            // EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT
-                            // we get the following formula
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
-                                    * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
-                            0.75f,
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
-            this.quadruplesSolutions =
-                    new ConcurrentHashMap<NotificationId, QuadruplesSolution>(
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
-                                    * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
-                            0.75f,
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+        this.bindingSolutions =
+                new ConcurrentHashMap<NotificationId, BindingSolution>(
+                        // At most
+                        // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
+                        // threads can update the map in
+                        // parallelSelfCompatible. Each of
+                        // them can add part of a solution. The solution is
+                        // eventually removed when all the sub solutions are
+                        // received. Thus if we suppose that the average
+                        // number of sub solutions that compose a solution
+                        // is
+                        // EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT
+                        // we get the following formula
+                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                                * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
+                        0.75f,
+                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+        this.quadruplesSolutions =
+                new ConcurrentHashMap<NotificationId, QuadruplesSolution>(
+                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                                * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
+                        0.75f,
+                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
-            String cacheEngine =
-                    EventCloudProperties.SUBSCRIBER_CACHE_ENGINE.getValue();
+        String cacheEngine =
+                EventCloudProperties.SUBSCRIBER_CACHE_ENGINE.getValue();
 
-            if (cacheEngine.equals("ehcache")) {
-                this.eventsDeliveredCache =
-                        new EhcacheEventsDeliveredCache(this.getComponentId());
+        if (cacheEngine.equals("ehcache")) {
+            this.eventsDeliveredCache =
+                    new EhcacheEventsDeliveredCache(this.getComponentId());
 
-            } else if (cacheEngine.equals("infinispan")) {
-                this.eventsDeliveredCache =
-                        new InfinispanEventsDeliveredCache(
-                                this.getComponentId());
-            } else {
-                throw new IllegalStateException("Unknown cache engine: "
-                        + cacheEngine);
-            }
+        } else if (cacheEngine.equals("infinispan")) {
+            this.eventsDeliveredCache =
+                    new InfinispanEventsDeliveredCache(this.getComponentId());
+        } else {
+            throw new IllegalStateException("Unknown cache engine: "
+                    + cacheEngine);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (SubscribeProxyImpl.this.initialized) {
+                    SubscribeProxyImpl.this.eventsDeliveredCache.close();
+                }
+            }
+        });
     }
 
     /**
@@ -260,16 +257,16 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
-            // TODO: Check why unsubscribing blocks
-            // this.unsubscribeAll();
-
+        if (super.initialized) {
             this.internalResetAttributes();
         }
     }
 
-    private void unsubscribeAll() {
-        List<List<Response<?>>> responses = new ArrayList<List<Response<?>>>();
+    @Override
+    @MemberOf("parallelSelfCompatible")
+    public void unsubscribeAll() throws IllegalStateException {
+        List<List<Response<?>>> responses =
+                new ArrayList<List<Response<?>>>(this.subscriptions.size());
 
         for (SubscriptionId sid : this.subscriptions.keySet()) {
             responses.add(this.internalUnsubcribe(sid));
@@ -281,7 +278,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     }
 
     private void internalResetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             this.eventsDeliveredCache.close();
 
             this.subscriptions = null;
@@ -319,7 +316,6 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             // the result variables. Indeed we need only the graph variable
             // (which identifies the event which is matched) to
             // reconstruct the compound event
-
             sparqlQuery =
                     PublishSubscribeUtils.removeResultVarsExceptGraphVar(subscription.getSparqlQuery());
         } else {
@@ -405,7 +401,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
         Subscription subscription = subscriptionEntry.subscription;
 
-        List<Response<?>> responses = new ArrayList<Response<?>>();
+        List<Response<?>> responses;
 
         // updates the network to stop sending notifications
         try {
@@ -421,6 +417,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
                         false)));
             }
         } catch (DecompositionException e) {
+            e.printStackTrace();
             throw new IllegalStateException(e);
         }
 

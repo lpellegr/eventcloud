@@ -18,6 +18,9 @@ package fr.inria.eventcloud.deployment;
 
 import org.junit.After;
 import org.junit.Before;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
@@ -83,35 +86,40 @@ public class JunitByClassEventCloudDeployer extends
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws EventCloudIdNotManaged {
         this.eventCloudId =
                 super.newEventCloud(
                         this.descriptor, this.nbTrackers, this.nbPeers);
 
-        try {
-            this.publishProxy =
-                    this.descriptor.getComponentPoolManager().getPublishProxy(
-                            null, this.getEventCloudsRegistryUrl(),
-                            this.eventCloudId);
+        EventCloudComponentsManager componentPoolManager =
+                super.find(this.eventCloudId).getComponentPoolManager();
 
-            this.putgetProxy =
-                    this.descriptor.getComponentPoolManager().getPutGetProxy(
-                            null, this.getEventCloudsRegistryUrl(),
-                            this.eventCloudId);
+        DeploymentConfiguration deploymentConfiguration =
+                new TestingDeploymentConfiguration();
 
-            this.subscribeProxy =
-                    this.descriptor.getComponentPoolManager()
-                            .getSubscribeProxy(
-                                    null, this.getEventCloudsRegistryUrl(),
-                                    this.eventCloudId);
-        } catch (EventCloudIdNotManaged e) {
-            throw new IllegalStateException(e);
-        }
+        this.publishProxy =
+                componentPoolManager.getPublishProxy(
+                        deploymentConfiguration,
+                        this.getEventCloudsRegistryUrl(), this.eventCloudId);
+
+        this.putgetProxy =
+                componentPoolManager.getPutGetProxy(
+                        deploymentConfiguration,
+                        this.getEventCloudsRegistryUrl(), this.eventCloudId);
+
+        this.subscribeProxy =
+                componentPoolManager.getSubscribeProxy(
+                        deploymentConfiguration,
+                        this.getEventCloudsRegistryUrl(), this.eventCloudId);
     }
 
     @After
     public void tearDown() {
         super.undeploy();
+
+        ComponentUtils.terminateComponent(this.publishProxy);
+        ComponentUtils.terminateComponent(this.putgetProxy);
+        ComponentUtils.terminateComponent(this.subscribeProxy);
     }
 
 }

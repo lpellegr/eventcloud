@@ -36,7 +36,7 @@ import com.esotericsoftware.yamlbeans.YamlReader;
  */
 public class NodeProvidersManager {
 
-    public static final String DEFAULT_NODE_PROVIDER_ID = "Default";
+    public static final String DEFAULT_NODE_PROVIDER_ID = "default";
 
     private final Map<String, NodeProvider> nodeProviders;
 

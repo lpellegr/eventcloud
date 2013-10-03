@@ -175,4 +175,6 @@ public interface SubscribeProxy extends Proxy, SubscribeApi, Serializable {
      */
     void receiveSbce1(PollingSignalNotification notification);
 
+    void unsubscribeAll() throws IllegalStateException;
+
 }

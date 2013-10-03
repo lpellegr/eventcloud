@@ -254,21 +254,24 @@ public class PubSubTest extends WsTest {
 
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
-        deploymentDescriptor.setComponentPoolManager(WsTest.COMPONENT_POOL_MANAGER);
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+
         this.id =
                 this.deployer.newEventCloud(
                         new EventCloudDescription(
                                 "http://streams.event-processing.org/ids/TaxiUc"),
-                        deploymentDescriptor, 1, 1);
+                        deploymentDescriptor, WsTest.EVENTCLOUD_POOL_MANAGER,
+                        1, 1);
 
         this.subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
-                        WsTest.COMPONENT_POOL_MANAGER,
+                        WsTest.EVENTCLOUD_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe");
         this.publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
-                        WsTest.COMPONENT_POOL_MANAGER,
+                        WsTest.EVENTCLOUD_POOL_MANAGER,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish");
 
@@ -313,11 +316,14 @@ public class PubSubTest extends WsTest {
     public void tearDown() {
         this.subscribeWsProxyInfo.destroy();
         this.publishWsProxyInfo.destroy();
+
         this.deployer.undeploy();
+
         this.signalSubscriberServer.destroy();
         this.bindingSubscriberServer.destroy();
         this.eventSubscriberServer.destroy();
-        WsTest.COMPONENT_POOL_MANAGER.stop();
+
+        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
     }
 
 }
