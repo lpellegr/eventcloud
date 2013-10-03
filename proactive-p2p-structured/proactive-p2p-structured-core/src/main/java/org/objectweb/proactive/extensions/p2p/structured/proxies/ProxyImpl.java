@@ -205,9 +205,7 @@ public class ProxyImpl extends AbstractComponent implements
     @Override
     @MemberOf("parallelSelfCompatible")
     public Response<?> send(final Request<?> request) {
-        Peer p = this.selectPeer();
-
-        return this.send(request, p);
+        return this.send(request, this.selectPeer());
     }
 
     /**
@@ -224,7 +222,6 @@ public class ProxyImpl extends AbstractComponent implements
         try {
             return this.messageDispatcher.dispatch(request, peer);
         } catch (ProActiveRuntimeException e) {
-            e.printStackTrace();
             // peer not reachable, try with another
             this.peers.remove(peer);
             return this.send(request, this.selectPeer());
