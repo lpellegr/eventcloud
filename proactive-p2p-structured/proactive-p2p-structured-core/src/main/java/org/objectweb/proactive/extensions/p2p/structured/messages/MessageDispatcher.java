@@ -80,6 +80,7 @@ public class MessageDispatcher {
         request.responseDestination = SerializedValue.create(this.receiverStub);
 
         this.entries.put(request.id, new Entry());
+
         peer.route(request);
 
         return (Response<?>) this.pull(request.id);

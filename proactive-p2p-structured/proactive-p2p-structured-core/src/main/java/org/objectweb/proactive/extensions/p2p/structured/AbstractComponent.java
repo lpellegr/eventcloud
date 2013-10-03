@@ -114,8 +114,6 @@ public abstract class AbstractComponent implements ComponentInitActive,
         } catch (InstantiationException ie) {
             throw new IllegalStateException(ie);
         }
-
-        this.initialized = false;
     }
 
     private void loadLogbackConfigurationFromIS() {

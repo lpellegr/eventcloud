@@ -16,11 +16,10 @@
  **/
 package fr.inria.eventcloud.webservices;
 
-import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
-import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
+import fr.inria.eventcloud.webservices.factories.WsEventCloudComponentsManagerFactory;
 
 /**
  * Abstract class common to all web service tests.
@@ -29,17 +28,15 @@ import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
  */
 public abstract class WsTest {
 
-    protected static final ComponentPoolManager COMPONENT_POOL_MANAGER =
+    protected static final EventCloudComponentsManager EVENTCLOUD_POOL_MANAGER =
             WsTest.getComponentPoolManager();
 
     protected static final int WEBSERVICES_PORT = getWebservicesPort();
 
-    private static final ComponentPoolManager getComponentPoolManager() {
-        NodeProvider nodeProvider = new LocalNodeProvider();
-        nodeProvider.start();
-
-        ComponentPoolManager componentPoolManager =
-                WsComponentPoolManagerFactory.newComponentPoolManager(nodeProvider);
+    private static final EventCloudComponentsManager getComponentPoolManager() {
+        EventCloudComponentsManager componentPoolManager =
+                WsEventCloudComponentsManagerFactory.newComponentsManager(
+                        new LocalNodeProvider(), 1, 1, 0, 0, 0);
 
         return componentPoolManager;
     }

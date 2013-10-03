@@ -95,7 +95,7 @@
 								<include>fr.inria.eventcloud.api.QuadruplePattern</include>
 								<include>fr.inria.eventcloud.EventCloudsRegistry</include>
 								<include>fr.inria.eventcloud.EventCloudsRegistryImpl</include>
-								<include>fr.inria.eventcloud.deployment.ComponentPoolManager</include>
+								<include>fr.inria.eventcloud.deployment.EventCloudComponentsManager</include>
 								<include>fr.inria.eventcloud.tracker.SemanticTrackerImpl</include>
 								<include>fr.inria.eventcloud.overlay.SemanticPeerImpl</include>
 								<include>fr.inria.eventcloud.proxies.PublishProxyImpl</include>

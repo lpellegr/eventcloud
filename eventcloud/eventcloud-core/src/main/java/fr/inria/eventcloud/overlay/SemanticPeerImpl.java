@@ -132,7 +132,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
                 ((SemanticCanOverlay) super.overlay).getLoadBalancingManager()
                         .stop();

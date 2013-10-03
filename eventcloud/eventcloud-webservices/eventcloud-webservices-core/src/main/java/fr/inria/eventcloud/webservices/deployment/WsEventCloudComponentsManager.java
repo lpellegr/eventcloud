@@ -21,40 +21,43 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.SubscribeApi;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.webservices.factories.WsProxyFactory;
 
 /**
- * Extension of {@link ComponentPoolManager} to allow proxies contained in the
- * pools to be exposed as web services.
+ * Extension of {@link EventCloudComponentsManager} that allows proxies
+ * pre-allocated or created by the pool to be exposed as web services.
  * 
  * @author bsauvan
  */
-public class WsComponentPoolManager extends ComponentPoolManager {
+public class WsEventCloudComponentsManager extends EventCloudComponentsManager {
 
     private static final long serialVersionUID = 160L;
 
     /**
      * Empty constructor required by ProActive.
      */
-    public WsComponentPoolManager() {
+    public WsEventCloudComponentsManager() {
     }
 
     /**
-     * Creates a {@link WsComponentPoolManager}.
+     * Creates a {@link WsEventCloudComponentsManager}.
      * 
      * @param nodeProvider
      *            the node provider to be used for deployment of components.
      */
-    public WsComponentPoolManager(NodeProvider nodeProvider) {
-        super(nodeProvider);
+    public WsEventCloudComponentsManager(NodeProvider nodeProvider,
+            int nbTrackers, int nbPeers, int nbPublishProxies,
+            int nbSubscribeProxies, int nbPutGetProxies) {
+        super(nodeProvider, nbTrackers, nbPeers, nbPublishProxies,
+                nbSubscribeProxies, nbPutGetProxies);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected synchronized PublishApi newGenericPublishProxy() {
+    protected PublishApi newGenericPublishProxy() {
         return WsProxyFactory.newGenericPublishProxy(this.nodeProvider);
     }
 
@@ -62,7 +65,7 @@ public class WsComponentPoolManager extends ComponentPoolManager {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized SubscribeApi newGenericSubscribeProxy() {
+    protected SubscribeApi newGenericSubscribeProxy() {
         return WsProxyFactory.newGenericSubscribeProxy(this.nodeProvider);
     }
 
@@ -70,7 +73,7 @@ public class WsComponentPoolManager extends ComponentPoolManager {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized PutGetApi newGenericPutGetProxy() {
+    protected PutGetApi newGenericPutGetProxy() {
         return WsProxyFactory.newGenericPutGetProxy(this.nodeProvider);
     }
 

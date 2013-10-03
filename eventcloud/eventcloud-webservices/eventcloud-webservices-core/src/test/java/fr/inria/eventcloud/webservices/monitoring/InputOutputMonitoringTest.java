@@ -185,14 +185,6 @@ public class InputOutputMonitoringTest extends WsTest {
                                 .getAddress());
 
         this.eventCloudsManagementWsnClient.createEventCloud(InputOutputMonitoringTest.STREAM_URL);
-
-        // Needed to ensure that there is no concurrent calls to the
-        // ProActive/GCM factory
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void initializeJavaProxies() throws EventCloudIdNotManaged {
@@ -262,8 +254,10 @@ public class InputOutputMonitoringTest extends WsTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         ComponentUtils.terminateComponent(this.publishProxy);
         ComponentUtils.terminateComponent(this.subscribeProxy);
+
         this.eventCloudsManagementWsnClient.destroyEventCloud(InputOutputMonitoringTest.STREAM_URL);
         this.eventCloudsManagementServer.destroy();
         this.monitoringServer.destroy();

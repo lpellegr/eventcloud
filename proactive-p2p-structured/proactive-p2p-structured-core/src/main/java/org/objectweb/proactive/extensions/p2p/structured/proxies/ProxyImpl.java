@@ -119,32 +119,36 @@ public class ProxyImpl extends AbstractComponent implements
      */
     @Override
     public void initAttributes(List<Tracker> trackers) {
-        if (!this.initialized) {
-            try {
-                Component component =
-                        Fractive.getComponentRepresentativeOnThis();
+        assert !this.initialized;
 
-                this.url =
-                        Fractive.registerByName(component, this.prefixName()
-                                + "-" + UUID.randomUUID().toString());
+        try {
+            Component component = Fractive.getComponentRepresentativeOnThis();
 
-                this.peers =
-                        Collections.synchronizedList(new ArrayList<Peer>());
-                this.trackers = trackers;
+            this.url =
+                    Fractive.registerByName(component, this.prefixName() + "-"
+                            + UUID.randomUUID().toString());
 
-                this.messageDispatcher =
-                        new MessageDispatcher(
-                                this.id,
-                                this.multiActiveService,
-                                (FinalResponseReceiver) component.getFcInterface("receive"));
+            this.peers = Collections.synchronizedList(new ArrayList<Peer>());
+            this.trackers = trackers;
 
-                this.initialized = true;
-            } catch (NoSuchInterfaceException e) {
-                throw new IllegalArgumentException(e);
-            } catch (ProActiveException e) {
-                throw new IllegalArgumentException(e);
-            }
+            this.messageDispatcher =
+                    new MessageDispatcher(
+                            this.id,
+                            this.multiActiveService,
+                            (FinalResponseReceiver) component.getFcInterface("receive"));
+
+            this._initAttributes(trackers);
+
+            this.initialized = true;
+        } catch (NoSuchInterfaceException e) {
+            throw new IllegalArgumentException(e);
+        } catch (ProActiveException e) {
+            throw new IllegalArgumentException(e);
         }
+    }
+
+    protected void _initAttributes(List<Tracker> trackers) {
+        // to be overriden if required
     }
 
     /**
@@ -152,7 +156,7 @@ public class ProxyImpl extends AbstractComponent implements
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             this.url = null;
             this.peers = null;
             this.trackers = null;
@@ -201,7 +205,9 @@ public class ProxyImpl extends AbstractComponent implements
     @Override
     @MemberOf("parallelSelfCompatible")
     public Response<?> send(final Request<?> request) {
-        return this.send(request, this.selectPeer());
+        Peer p = this.selectPeer();
+
+        return this.send(request, p);
     }
 
     /**
@@ -218,6 +224,7 @@ public class ProxyImpl extends AbstractComponent implements
         try {
             return this.messageDispatcher.dispatch(request, peer);
         } catch (ProActiveRuntimeException e) {
+            e.printStackTrace();
             // peer not reachable, try with another
             this.peers.remove(peer);
             return this.send(request, this.selectPeer());

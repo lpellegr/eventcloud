@@ -151,16 +151,16 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     @Override
     public void initAttributes(Peer stub,
                                SerializableProvider<? extends StructuredOverlay> overlayProvider) {
-        if (!this.initialized) {
-            this.overlay = overlayProvider.get();
-            this.overlay.bodyId = PAActiveObject.getBodyOnThis().getID();
-            this.overlay.multiActiveService = this.multiActiveService;
-            this.overlay.overlayProvider = overlayProvider;
-            this.overlay.stub = stub;
-            this.overlay.url = PAActiveObject.getUrl(stub);
+        assert !this.initialized;
 
-            this.initialized = true;
-        }
+        this.overlay = overlayProvider.get();
+        this.overlay.bodyId = PAActiveObject.getBodyOnThis().getID();
+        this.overlay.multiActiveService = this.multiActiveService;
+        this.overlay.overlayProvider = overlayProvider;
+        this.overlay.stub = stub;
+        this.overlay.url = PAActiveObject.getUrl(stub);
+
+        this.initialized = true;
     }
 
     /**
@@ -168,11 +168,9 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      */
     @Override
     public void resetAttributes() {
-        if (this.initialized) {
+        if (super.initialized) {
             this.overlay.close();
-
             this.overlay = null;
-
             super.resetAttributes();
         }
     }

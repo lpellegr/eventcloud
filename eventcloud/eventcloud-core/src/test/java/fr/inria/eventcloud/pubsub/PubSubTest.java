@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.objectweb.proactive.core.util.MutableInteger;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
@@ -59,6 +60,7 @@ import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
 import fr.inria.eventcloud.api.listeners.NotificationListenerType;
 import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.NotificationListenerFactory;
@@ -104,12 +106,16 @@ public class PubSubTest {
         this.deployer = new JunitEventCloudInfrastructureDeployer();
         this.eventCloudId = this.deployer.newEventCloud(1, 5);
 
+        EventCloudDeployer ecDeployer = this.deployer.find(this.eventCloudId);
+
         this.subscribeProxy =
-                ProxyFactory.newSubscribeProxy(
+                ecDeployer.getComponentPoolManager().getSubscribeProxy(
+                        new TestingDeploymentConfiguration(),
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
         this.publishProxy =
-                ProxyFactory.newPublishProxy(
+                ecDeployer.getComponentPoolManager().getPublishProxy(
+                        new TestingDeploymentConfiguration(),
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
     }

@@ -22,12 +22,13 @@ import javax.annotation.PostConstruct;
 
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.translators.wsn.WsnTranslator;
@@ -46,11 +47,11 @@ import fr.inria.eventcloud.webservices.api.SubscribeWsnApi;
  * @param <T>
  *            proxy type.
  */
-public abstract class WsnService<T> {
+public abstract class WsnService<T extends Proxy> {
 
     protected static Logger log = LoggerFactory.getLogger(WsnService.class);
 
-    protected final ComponentPoolManager componentPoolManager;
+    protected final EventCloudComponentsManager componentPoolManager;
 
     protected final DeploymentConfiguration deploymentConfiguration;
 
@@ -78,7 +79,7 @@ public abstract class WsnService<T> {
      *            the URL which identifies the EventCloud on which the
      *            underlying proxy must be connected.
      */
-    public WsnService(ComponentPoolManager componentPoolManager,
+    public WsnService(EventCloudComponentsManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
         this.componentPoolManager = componentPoolManager;
@@ -116,13 +117,15 @@ public abstract class WsnService<T> {
     /**
      * Terminates the underlying proxy.
      */
-    public void terminateProxy() {
+    public void terminateProxy() throws IllegalStateException {
         try {
             EventCloudsRegistry registry =
                     EventCloudsRegistryFactory.lookupEventCloudsRegistry(this.registryUrl);
             EventCloudId id = new EventCloudId(this.streamUrl);
 
             this.releaseProxy(registry, id);
+
+            ComponentUtils.terminateComponent(this.proxy);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -37,7 +37,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PublishApi;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.SubscribeApi;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.proxies.PutGetProxy;
@@ -106,7 +106,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deployPublishWsnService(ComponentPoolManager componentPoolManager,
+    public static WsnServiceInfo deployPublishWsnService(EventCloudComponentsManager componentPoolManager,
                                                          String registryUrl,
                                                          String streamUrl,
                                                          String urlSuffix,
@@ -138,7 +138,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deployPublishWsnService(ComponentPoolManager componentPoolManager,
+    public static WsnServiceInfo deployPublishWsnService(EventCloudComponentsManager componentPoolManager,
                                                          DeploymentConfiguration deploymentConfiguration,
                                                          String registryUrl,
                                                          String streamUrl,
@@ -176,7 +176,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deploySubscribeWsnService(ComponentPoolManager componentPoolManager,
+    public static WsnServiceInfo deploySubscribeWsnService(EventCloudComponentsManager componentPoolManager,
                                                            String registryUrl,
                                                            String streamUrl,
                                                            String urlSuffix,
@@ -208,7 +208,7 @@ public class WsDeployer {
      * 
      * @return the WsnServiceInfo instance of the web service.
      */
-    public static WsnServiceInfo deploySubscribeWsnService(ComponentPoolManager componentPoolManager,
+    public static WsnServiceInfo deploySubscribeWsnService(EventCloudComponentsManager componentPoolManager,
                                                            DeploymentConfiguration deploymentConfiguration,
                                                            String registryUrl,
                                                            String streamUrl,
@@ -310,7 +310,7 @@ public class WsDeployer {
      * 
      * @return the PublishWsProxyInfo instance of the web service.
      */
-    public static PublishWsProxyInfo deployPublishWsProxy(ComponentPoolManager componentPoolManager,
+    public static PublishWsProxyInfo deployPublishWsProxy(EventCloudComponentsManager componentPoolManager,
                                                           String registryUrl,
                                                           String streamUrl,
                                                           String proxyName) {
@@ -339,7 +339,7 @@ public class WsDeployer {
      * 
      * @return the PublishWsProxyInfo instance of the web service.
      */
-    public static PublishWsProxyInfo deployPublishWsProxy(ComponentPoolManager componentPoolManager,
+    public static PublishWsProxyInfo deployPublishWsProxy(EventCloudComponentsManager componentPoolManager,
                                                           DeploymentConfiguration deploymentConfiguration,
                                                           String registryUrl,
                                                           String streamUrl,
@@ -380,7 +380,7 @@ public class WsDeployer {
      * 
      * @return the SubscribeWsProxyInfo instance of the web service.
      */
-    public static SubscribeWsProxyInfo deploySubscribeWsProxy(ComponentPoolManager componentPoolManager,
+    public static SubscribeWsProxyInfo deploySubscribeWsProxy(EventCloudComponentsManager componentPoolManager,
                                                               String registryUrl,
                                                               String streamUrl,
                                                               String proxyName) {
@@ -409,7 +409,7 @@ public class WsDeployer {
      * 
      * @return the SubscribeWsProxyInfo instance of the web service.
      */
-    public static SubscribeWsProxyInfo deploySubscribeWsProxy(ComponentPoolManager componentPoolManager,
+    public static SubscribeWsProxyInfo deploySubscribeWsProxy(EventCloudComponentsManager componentPoolManager,
                                                               DeploymentConfiguration deploymentConfiguration,
                                                               String registryUrl,
                                                               String streamUrl,
@@ -450,7 +450,7 @@ public class WsDeployer {
      * 
      * @return the PutGetWsProxyInfo instance of the web service.
      */
-    public static PutGetWsProxyInfo deployPutGetWsProxy(ComponentPoolManager componentPoolManager,
+    public static PutGetWsProxyInfo deployPutGetWsProxy(EventCloudComponentsManager componentPoolManager,
                                                         String registryUrl,
                                                         String streamUrl,
                                                         String proxyName) {
@@ -479,7 +479,7 @@ public class WsDeployer {
      * 
      * @return the PutGetWsProxyInfo instance of the web service.
      */
-    public static PutGetWsProxyInfo deployPutGetWsProxy(ComponentPoolManager componentPoolManager,
+    public static PutGetWsProxyInfo deployPutGetWsProxy(EventCloudComponentsManager componentPoolManager,
                                                         DeploymentConfiguration deploymentConfiguration,
                                                         String registryUrl,
                                                         String streamUrl,

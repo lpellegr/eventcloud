@@ -18,10 +18,10 @@ package fr.inria.eventcloud.webservices;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.PostConstruct;
 import javax.xml.namespace.QName;
@@ -47,19 +47,21 @@ import org.objectweb.proactive.core.component.control.PAMembraneController;
 import org.objectweb.proactive.core.component.exceptions.NoSuchComponentException;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvidersManager;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Multimaps;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
@@ -77,7 +79,7 @@ import fr.inria.eventcloud.webservices.deployment.WsInfo;
 import fr.inria.eventcloud.webservices.deployment.WsProxyInfo;
 import fr.inria.eventcloud.webservices.deployment.WsnServiceInfo;
 import fr.inria.eventcloud.webservices.factories.ProxyMonitoringManagerFactory;
-import fr.inria.eventcloud.webservices.factories.WsComponentPoolManagerFactory;
+import fr.inria.eventcloud.webservices.factories.WsEventCloudComponentsManagerFactory;
 import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManager;
 import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
 
@@ -99,7 +101,7 @@ public class EventCloudsManagementServiceImpl implements
 
     private final NodeProvidersManager nodeProvidersManager;
 
-    private final Map<String, ComponentPoolManager> componentPoolManagers;
+    private final ConcurrentMap<String, EventCloudComponentsManager> componentPoolManagers;
 
     private final String registryUrl;
 
@@ -142,17 +144,29 @@ public class EventCloudsManagementServiceImpl implements
     public EventCloudsManagementServiceImpl(String registryUrl,
             int wsnServicePort) {
         this.nodeProvidersManager = new NodeProvidersManager();
-        this.componentPoolManagers = Maps.newHashMap();
-        this.registryUrl = registryUrl;
         this.wsnServicePort = wsnServicePort;
-        this.wsInfos = Maps.newHashMap();
-        this.assignedNumberIds = ArrayListMultimap.create();
-        this.publishWsnServiceEndpointUrls = ArrayListMultimap.create();
-        this.subscribeWsnServiceEndpointUrls = ArrayListMultimap.create();
-        this.publishWsProxyEndpointUrls = ArrayListMultimap.create();
-        this.subscribeWsProxyEndpointUrls = ArrayListMultimap.create();
-        this.putgetWsProxyEndpointUrls = ArrayListMultimap.create();
-        this.monitoringSubscriptions = new HashMap<SubscriptionId, String>();
+        this.registryUrl = registryUrl;
+
+        // the following data structures maybe be updated concurrently through
+        // parallel web service calls
+        this.componentPoolManagers =
+                new MapMaker().concurrencyLevel(2).makeMap();
+        this.monitoringSubscriptions =
+                new MapMaker().concurrencyLevel(2).makeMap();
+        this.wsInfos = new MapMaker().concurrencyLevel(2).makeMap();
+
+        this.assignedNumberIds =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, Integer> create());
+        this.publishWsnServiceEndpointUrls =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create());
+        this.subscribeWsnServiceEndpointUrls =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create());
+        this.publishWsProxyEndpointUrls =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create());
+        this.subscribeWsProxyEndpointUrls =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create());
+        this.putgetWsProxyEndpointUrls =
+                Multimaps.synchronizedListMultimap(ArrayListMultimap.<String, String> create());
     }
 
     /**
@@ -228,9 +242,11 @@ public class EventCloudsManagementServiceImpl implements
             EventCloudDeploymentDescriptor deploymentDescriptor =
                     new EventCloudDeploymentDescriptor(
                             new SemanticOverlayProvider(false));
-            deploymentDescriptor.setComponentPoolManager(this.getComponentPoolManagers(nodeProviderId));
+
             EventCloudDeployer deployer =
-                    new EventCloudDeployer(description, deploymentDescriptor);
+                    new EventCloudDeployer(
+                            description, deploymentDescriptor,
+                            this.getComponentPoolManagers(nodeProviderId));
 
             deployer.deploy(1, 1);
 
@@ -332,6 +348,7 @@ public class EventCloudsManagementServiceImpl implements
 
         String topicName = this.getTopicName(streamUrl);
         int numberId = this.lockUnassignedNumberId(topicName);
+
         WsnServiceInfo publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
                         this.getComponentPoolManagers(nodeProviderId),
@@ -468,14 +485,31 @@ public class EventCloudsManagementServiceImpl implements
                 putgetWsProxyInfo, this.putgetWsProxyEndpointUrls);
     }
 
-    private ComponentPoolManager getComponentPoolManagers(String nodeProviderId) {
-        if (!this.componentPoolManagers.containsKey(nodeProviderId)) {
-            this.componentPoolManagers.put(
-                    nodeProviderId,
-                    WsComponentPoolManagerFactory.newComponentPoolManager(this.nodeProvidersManager.getNodeProvider(nodeProviderId)));
+    private EventCloudComponentsManager getComponentPoolManagers(String nodeProviderId) {
+        // get to avoid most of the time the expensive pool creation with
+        // every call to putIfAbsent
+        EventCloudComponentsManager result =
+                this.componentPoolManagers.get(nodeProviderId);
+
+        if (result == null) {
+            EventCloudComponentsManager newPool =
+                    WsEventCloudComponentsManagerFactory.newComponentsManager(
+                            this.nodeProvidersManager.getNodeProvider(nodeProviderId),
+                            1, 1, 0, 0, 0);
+
+            result =
+                    this.componentPoolManagers.putIfAbsent(
+                            nodeProviderId, newPool);
+
+            if (result == null) {
+                result = newPool;
+                result.start();
+            } else {
+                ComponentUtils.terminateComponent(newPool);
+            }
         }
 
-        return this.componentPoolManagers.get(nodeProviderId);
+        return result;
     }
 
     private void checkEventCloudId(String streamUrl) {

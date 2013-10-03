@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
 /**
@@ -32,7 +32,7 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
  */
 public abstract class WsProxyInfo<T extends Proxy> extends WsInfo {
 
-    protected final ComponentPoolManager componentPoolManager;
+    protected final EventCloudComponentsManager componentPoolManager;
 
     private final String registryUrl;
 
@@ -66,8 +66,8 @@ public abstract class WsProxyInfo<T extends Proxy> extends WsInfo {
      *            the name of the interface exposed as a web service.
      */
     public WsProxyInfo(String streamUrl, String wsEndpointUrl,
-            ComponentPoolManager componentPoolManager, String registryUrl,
-            T proxy, String proxyName, String interfaceName) {
+            EventCloudComponentsManager componentPoolManager,
+            String registryUrl, T proxy, String proxyName, String interfaceName) {
         super(streamUrl, wsEndpointUrl);
         this.componentPoolManager = componentPoolManager;
         this.registryUrl = registryUrl;

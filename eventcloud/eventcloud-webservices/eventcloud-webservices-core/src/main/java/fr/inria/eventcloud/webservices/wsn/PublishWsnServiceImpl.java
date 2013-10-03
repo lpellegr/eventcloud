@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.PublishProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
@@ -61,7 +61,8 @@ public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
      *            the URL which identifies the EventCloud on which the
      *            underlying publish proxy must be connected.
      */
-    public PublishWsnServiceImpl(ComponentPoolManager componentPoolManager,
+    public PublishWsnServiceImpl(
+            EventCloudComponentsManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
         super(componentPoolManager, deploymentConfiguration, registryUrl,
@@ -72,14 +73,15 @@ public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
      * {@inheritDoc}
      */
     @Override
-    public PublishProxy getProxy() throws EventCloudIdNotManaged {
-        if (super.proxy != null) {
-            return super.proxy;
-        } else {
-            return super.componentPoolManager.getPublishProxy(
-                    super.deploymentConfiguration, super.registryUrl,
-                    new EventCloudId(super.streamUrl));
+    public synchronized PublishProxy getProxy() throws EventCloudIdNotManaged {
+        if (super.proxy == null) {
+            super.proxy =
+                    super.componentPoolManager.getPublishProxy(
+                            super.deploymentConfiguration, super.registryUrl,
+                            new EventCloudId(super.streamUrl));
         }
+
+        return super.proxy;
     }
 
     /**
@@ -88,7 +90,7 @@ public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
     @Override
     public void releaseProxy(EventCloudsRegistry registry, EventCloudId id) {
         registry.unregisterProxy(id, this.proxy);
-        super.componentPoolManager.releasePublishProxies(this.proxy);
+        // super.componentPoolManager.releasePublishProxies(ImmutableList.of(this.proxy));
     }
 
     /**

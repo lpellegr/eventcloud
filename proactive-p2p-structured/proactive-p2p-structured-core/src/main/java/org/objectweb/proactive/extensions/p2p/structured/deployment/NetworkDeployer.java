@@ -48,8 +48,6 @@ public abstract class NetworkDeployer extends
     private static final Logger log =
             LoggerFactory.getLogger(NetworkDeployer.class);
 
-    // private static final int INJECTION_THRESHOLD = 10;
-
     protected final DeploymentDescriptor descriptor;
 
     // this atomic reference is used to detect the deployer state and the
@@ -99,8 +97,6 @@ public abstract class NetworkDeployer extends
             }
         }
 
-        // FIXME: the deployment configuration must be executed one each machine
-        // where a component is deployed
         if (this.descriptor.getDeploymentConfiguration() != null) {
             this.descriptor.getDeploymentConfiguration().configure();
         }

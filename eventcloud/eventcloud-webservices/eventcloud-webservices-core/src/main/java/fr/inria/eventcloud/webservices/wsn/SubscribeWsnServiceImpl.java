@@ -37,7 +37,7 @@ import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Subscription;
 import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.translators.wsn.TranslationException;
@@ -77,7 +77,8 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
      *            the URL which identifies the EventCloud on which the
      *            underlying subscribe proxy must be connected.
      */
-    public SubscribeWsnServiceImpl(ComponentPoolManager componentPoolManager,
+    public SubscribeWsnServiceImpl(
+            EventCloudComponentsManager componentPoolManager,
             DeploymentConfiguration deploymentConfiguration,
             String registryUrl, String streamUrl) {
         super(componentPoolManager, deploymentConfiguration, registryUrl,
@@ -89,14 +90,15 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
      * {@inheritDoc}
      */
     @Override
-    public SubscribeProxy getProxy() throws EventCloudIdNotManaged {
-        if (super.proxy != null) {
-            return super.proxy;
-        } else {
-            return super.componentPoolManager.getSubscribeProxy(
-                    super.deploymentConfiguration, super.registryUrl,
-                    new EventCloudId(super.streamUrl));
+    public synchronized SubscribeProxy getProxy() throws EventCloudIdNotManaged {
+        if (super.proxy == null) {
+            super.proxy =
+                    super.componentPoolManager.getSubscribeProxy(
+                            super.deploymentConfiguration, super.registryUrl,
+                            new EventCloudId(super.streamUrl));
         }
+
+        return super.proxy;
     }
 
     /**
@@ -105,7 +107,16 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
     @Override
     public void releaseProxy(EventCloudsRegistry registry, EventCloudId id) {
         registry.unregisterProxy(id, this.proxy);
-        super.componentPoolManager.releaseSubscribeProxies(this.proxy);
+        // super.componentPoolManager.releaseSubscribeProxies(ImmutableList.of(this.proxy));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void terminateProxy() throws IllegalStateException {
+        super.proxy.unsubscribeAll();
+        super.terminateProxy();
     }
 
     /**

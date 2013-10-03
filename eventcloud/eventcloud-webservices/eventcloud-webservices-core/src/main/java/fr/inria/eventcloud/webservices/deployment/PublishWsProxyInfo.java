@@ -16,9 +16,11 @@
  **/
 package fr.inria.eventcloud.webservices.deployment;
 
+import com.google.common.collect.ImmutableList;
+
 import fr.inria.eventcloud.EventCloudsRegistry;
 import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.deployment.ComponentPoolManager;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.proxies.PublishProxy;
 
 /**
@@ -52,8 +54,9 @@ public class PublishWsProxyInfo extends WsProxyInfo<PublishProxy> {
      *            the name of the interface exposed as a web service.
      */
     public PublishWsProxyInfo(String streamUrl, String wsEndpointUrl,
-            ComponentPoolManager componentPoolManager, String registryUrl,
-            PublishProxy publishProxy, String proxyName, String interfaceName) {
+            EventCloudComponentsManager componentPoolManager,
+            String registryUrl, PublishProxy publishProxy, String proxyName,
+            String interfaceName) {
         super(streamUrl, wsEndpointUrl, componentPoolManager, registryUrl,
                 publishProxy, proxyName, interfaceName);
     }
@@ -64,7 +67,6 @@ public class PublishWsProxyInfo extends WsProxyInfo<PublishProxy> {
     @Override
     protected void releaseProxy(EventCloudsRegistry registry, EventCloudId id) {
         registry.unregisterProxy(id, super.proxy);
-        super.componentPoolManager.releasePublishProxies(super.proxy);
+        super.componentPoolManager.releasePublishProxies(ImmutableList.of(super.proxy));
     }
-
 }
