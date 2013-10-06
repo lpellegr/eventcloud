@@ -17,8 +17,6 @@
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +34,7 @@ import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.component.Fractive;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyCache;
 import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponse;
 import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponseReceiver;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageDispatcher;
@@ -43,8 +42,6 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
-import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 
@@ -87,9 +84,7 @@ public class ProxyImpl extends AbstractComponent implements
 
     protected MultiActiveService multiActiveService;
 
-    private List<? extends Tracker> trackers;
-
-    private List<Peer> peers;
+    private ProxyCache proxyCache;
 
     protected String url;
 
@@ -118,7 +113,7 @@ public class ProxyImpl extends AbstractComponent implements
      * {@inheritDoc}
      */
     @Override
-    public void initAttributes(List<Tracker> trackers) {
+    public void initAttributes(ProxyCache proxyCache) {
         assert !this.initialized;
 
         try {
@@ -128,8 +123,7 @@ public class ProxyImpl extends AbstractComponent implements
                     Fractive.registerByName(component, this.prefixName() + "-"
                             + UUID.randomUUID().toString());
 
-            this.peers = Collections.synchronizedList(new ArrayList<Peer>());
-            this.trackers = trackers;
+            this.proxyCache = proxyCache;
 
             this.messageDispatcher =
                     new MessageDispatcher(
@@ -137,7 +131,7 @@ public class ProxyImpl extends AbstractComponent implements
                             this.multiActiveService,
                             (FinalResponseReceiver) component.getFcInterface("receive"));
 
-            this._initAttributes(trackers);
+            this._initAttributes();
 
             this.initialized = true;
         } catch (NoSuchInterfaceException e) {
@@ -147,7 +141,7 @@ public class ProxyImpl extends AbstractComponent implements
         }
     }
 
-    protected void _initAttributes(List<Tracker> trackers) {
+    protected void _initAttributes() {
         // to be overriden if required
     }
 
@@ -158,8 +152,7 @@ public class ProxyImpl extends AbstractComponent implements
     public void resetAttributes() {
         if (super.initialized) {
             this.url = null;
-            this.peers = null;
-            this.trackers = null;
+            this.proxyCache = null;
             this.messageDispatcher = null;
 
             super.resetAttributes();
@@ -194,7 +187,7 @@ public class ProxyImpl extends AbstractComponent implements
             this.messageDispatcher.dispatchv(request, peer);
         } catch (ProActiveRuntimeException e) {
             // peer not reachable, try with another
-            this.peers.remove(peer);
+            this.proxyCache.invalidate(peer);
             this.sendv(request, this.selectPeer());
         }
     }
@@ -223,7 +216,7 @@ public class ProxyImpl extends AbstractComponent implements
             return this.messageDispatcher.dispatch(request, peer);
         } catch (ProActiveRuntimeException e) {
             // peer not reachable, try with another
-            this.peers.remove(peer);
+            this.proxyCache.invalidate(peer);
             return this.send(request, this.selectPeer());
         }
     }
@@ -259,7 +252,7 @@ public class ProxyImpl extends AbstractComponent implements
                     requests, context, responseCombiner, peer);
         } catch (ProActiveRuntimeException e) {
             // peer not reachable, try with another
-            this.peers.remove(peer);
+            this.proxyCache.invalidate(peer);
             return this.send(
                     requests, context, responseCombiner, this.selectPeer());
         }
@@ -280,22 +273,7 @@ public class ProxyImpl extends AbstractComponent implements
     @Override
     @MemberOf("parallelSelfCompatible")
     public Peer selectPeer() {
-        if (this.peers == null || this.peers.isEmpty()) {
-            List<Peer> newStubs = this.selectTracker().getPeers();
-
-            if (newStubs.isEmpty()) {
-                throw new IllegalStateException(
-                        "No peer available from trackers");
-            }
-
-            this.peers.addAll(newStubs);
-        }
-
-        return this.peers.get(RandomUtils.nextInt(this.peers.size()));
-    }
-
-    private Tracker selectTracker() {
-        return this.trackers.get(RandomUtils.nextInt(this.trackers.size()));
+        return this.proxyCache.selectPeer();
     }
 
     public String getUrl() {

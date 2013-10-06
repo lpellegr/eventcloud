@@ -92,7 +92,7 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
         assert !this.initialized;
 
         this.eventCloudCache = proxy;
-        super.initAttributes(proxy.getTrackers());
+        super.initAttributes(this.eventCloudCache.getProxyCache());
     }
 
     /**

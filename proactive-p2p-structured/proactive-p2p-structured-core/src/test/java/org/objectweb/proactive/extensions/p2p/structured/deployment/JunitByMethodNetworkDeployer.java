@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.junit.After;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
@@ -60,6 +61,7 @@ public abstract class JunitByMethodNetworkDeployer {
         // undeploy only if a call to deploy has been performed
         if (this.deployer.getState() == NetworkDeployerState.DEPLOYED) {
             this.deployer.undeploy();
+            ProxyFactory.clear();
         }
     }
 

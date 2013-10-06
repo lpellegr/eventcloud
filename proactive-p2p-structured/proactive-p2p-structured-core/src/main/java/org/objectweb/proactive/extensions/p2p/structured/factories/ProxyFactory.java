@@ -32,6 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.gcmdeployment.GCMVirtualNode;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -40,6 +41,9 @@ import com.google.common.collect.ImmutableList;
  * @author lpellegr
  */
 public class ProxyFactory extends AbstractFactory {
+
+    private static Map<String, ProxyCache> PROXY_CACHES =
+            new HashMap<String, ProxyCache>();
 
     private ProxyFactory() {
 
@@ -117,9 +121,7 @@ public class ProxyFactory extends AbstractFactory {
 
     protected static Proxy createProxy(Map<String, Object> context,
                                        List<Tracker> trackers) {
-        if (trackers.size() == 0) {
-            throw new IllegalArgumentException("No tracker specified");
-        }
+        Preconditions.checkArgument(trackers.size() > 0, "No tracker specified");
 
         try {
             Proxy proxy =
@@ -127,11 +129,37 @@ public class ProxyFactory extends AbstractFactory {
                             ProxyImpl.PROXY_ADL, context,
                             ProxyImpl.PROXY_SERVICES_ITF, Proxy.class, true);
 
-            ((ProxyAttributeController) GCM.getAttributeController(((Interface) proxy).getFcItfOwner())).initAttributes(trackers);
+            ProxyCache proxyCache =
+                    ProxyFactory.getOrCreateProxyCache(trackers);
+
+            ((ProxyAttributeController) GCM.getAttributeController(((Interface) proxy).getFcItfOwner())).initAttributes(proxyCache);
 
             return proxy;
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    public static ProxyCache getOrCreateProxyCache(List<Tracker> trackers) {
+        String networkName = trackers.get(0).getNetworkName();
+
+        ProxyCache proxyCache = null;
+
+        synchronized (PROXY_CACHES) {
+            proxyCache = PROXY_CACHES.get(networkName);
+
+            if (proxyCache == null) {
+                proxyCache = new ProxyCache(trackers);
+                PROXY_CACHES.put(networkName, proxyCache);
+            }
+        }
+
+        return proxyCache;
+    }
+
+    public static void clear() {
+        synchronized (PROXY_CACHES) {
+            PROXY_CACHES.clear();
         }
     }
 

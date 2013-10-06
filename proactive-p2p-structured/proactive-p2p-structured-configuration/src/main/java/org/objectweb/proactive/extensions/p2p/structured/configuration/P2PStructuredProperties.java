@@ -118,6 +118,9 @@ public class P2PStructuredProperties {
             new PropertyInteger("mao.soft.limit.trackers", Runtime.getRuntime()
                     .availableProcessors() + 1);
 
+    public static final PropertyBoolean PROXY_CACHE_RANDOM_SELECTION =
+            new PropertyBoolean("proxy.cache.random.selection", false);
+
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);
 

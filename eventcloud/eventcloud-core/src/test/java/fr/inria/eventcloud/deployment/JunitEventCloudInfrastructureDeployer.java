@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitHelper;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.EventCloudDescription;
@@ -147,6 +148,8 @@ public class JunitEventCloudInfrastructureDeployer {
         }
 
         ComponentUtils.terminateComponent(this.eventCloudsRegistry);
+
+        ProxyFactory.clear();
     }
 
     public void undeploy(EventCloudId eventCloudId) {
