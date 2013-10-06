@@ -30,6 +30,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -344,6 +345,8 @@ public class StaticLoadBalancingTestBuilder {
                 } else {
                     log.info("Peer dump:\n" + firstPeer.dump());
                 }
+
+                ComponentUtils.terminateComponent(putgetProxy);
             }
 
             private Quadruple buildQuadruple(Node graph, int rdfTermSize) {

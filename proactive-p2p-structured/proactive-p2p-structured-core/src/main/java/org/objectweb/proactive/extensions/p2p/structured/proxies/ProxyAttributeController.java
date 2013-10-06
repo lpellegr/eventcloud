@@ -16,10 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.proxies;
 
-import java.util.List;
-
 import org.objectweb.fractal.api.control.AttributeController;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyCache;
 
 /**
  * {@link AttributeController} for {@link Proxy} components.
@@ -31,9 +29,8 @@ public interface ProxyAttributeController extends AttributeController {
     /**
      * Initializes all the attributes of a {@link Proxy}.
      * 
-     * @param trackers
-     *            trackers used to get entry points to the P2P network.
+     * @param proxyCache
      */
-    void initAttributes(List<Tracker> trackers);
+    void initAttributes(ProxyCache proxyCache);
 
 }

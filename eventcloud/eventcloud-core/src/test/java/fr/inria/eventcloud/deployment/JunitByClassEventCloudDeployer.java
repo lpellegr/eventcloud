@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 
 import fr.inria.eventcloud.api.EventCloudId;
@@ -120,6 +121,8 @@ public class JunitByClassEventCloudDeployer extends
         ComponentUtils.terminateComponent(this.publishProxy);
         ComponentUtils.terminateComponent(this.putgetProxy);
         ComponentUtils.terminateComponent(this.subscribeProxy);
+
+        ProxyFactory.clear();
     }
 
 }

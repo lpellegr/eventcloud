@@ -46,10 +46,8 @@ import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
-import org.objectweb.proactive.core.component.body.ComponentEndActive;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
-import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -101,7 +99,7 @@ import fr.inria.eventcloud.pubsub.solutions.QuadruplesSolution;
  * @see ProxyFactory
  */
 public class SubscribeProxyImpl extends EventCloudProxy implements
-        ComponentEndActive, SubscribeProxy, SubscribeProxyAttributeController {
+        SubscribeProxy, SubscribeProxyAttributeController {
 
     private static final long serialVersionUID = 160L;
 
@@ -185,14 +183,14 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
         assert !this.initialized;
 
         super.eventCloudCache = proxy;
-        super.initAttributes(proxy.getTrackers());
+        super.initAttributes(this.eventCloudCache.getProxyCache());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void _initAttributes(List<Tracker> trackers) {
+    protected void _initAttributes() {
         // even if we could have
         // EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES
         // threads handling subscriptions in parallelSelfCompatible, the

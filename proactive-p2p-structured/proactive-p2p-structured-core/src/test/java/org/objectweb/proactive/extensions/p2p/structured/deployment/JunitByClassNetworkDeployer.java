@@ -69,6 +69,7 @@ public abstract class JunitByClassNetworkDeployer {
 
         ComponentUtils.terminateComponent(this.proxy);
         this.proxy = null;
+        ProxyFactory.clear();
     }
 
     public Peer getPeer(int index) {
