@@ -47,7 +47,6 @@ import org.objectweb.proactive.core.component.control.PAMembraneController;
 import org.objectweb.proactive.core.component.exceptions.NoSuchComponentException;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvidersManager;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.webservices.WSConstants;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -505,7 +504,7 @@ public class EventCloudsManagementServiceImpl implements
                 result = newPool;
                 result.start();
             } else {
-                ComponentUtils.terminateComponent(newPool);
+                PAActiveObject.terminateActiveObject(newPool, false);
             }
         }
 
