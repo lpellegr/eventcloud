@@ -54,6 +54,7 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
@@ -97,6 +98,8 @@ public class WsnPubSubTest extends WsTest {
     private Server notificationConsumerServer;
 
     private String notificationConsumerEndpointUrl;
+
+    private EventCloudComponentsManager componentsManager;
 
     @Before
     public void setUp() {
@@ -257,24 +260,23 @@ public class WsnPubSubTest extends WsTest {
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+        this.componentsManager = WsTest.createAndStartComponentsManager();
 
         this.id =
                 this.deployer.newEventCloud(
                         new EventCloudDescription(
                                 "http://streams.event-processing.org/ids/TaxiUc"),
-                        deploymentDescriptor, WsTest.EVENTCLOUD_POOL_MANAGER,
-                        1, 1);
+                        deploymentDescriptor, this.componentsManager, 1, 1);
 
         this.subscribeWsnServiceInfo =
                 WsDeployer.deploySubscribeWsnService(
-                        WsTest.EVENTCLOUD_POOL_MANAGER,
+                        this.componentsManager,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe",
                         WsTest.WEBSERVICES_PORT);
         this.publishWsnServiceInfo =
                 WsDeployer.deployPublishWsnService(
-                        WsTest.EVENTCLOUD_POOL_MANAGER,
+                        this.componentsManager,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish",
                         WsTest.WEBSERVICES_PORT);
@@ -350,7 +352,7 @@ public class WsnPubSubTest extends WsTest {
         this.deployer.undeploy();
         this.notificationConsumerServer.destroy();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
+        WsTest.stopAndTerminateComponentsManager(this.componentsManager);
     }
 
 }
