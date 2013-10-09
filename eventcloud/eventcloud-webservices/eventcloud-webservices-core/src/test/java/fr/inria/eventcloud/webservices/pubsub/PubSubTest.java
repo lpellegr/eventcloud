@@ -32,6 +32,7 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.generators.CompoundEventGenerator;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
@@ -84,6 +85,8 @@ public class PubSubTest extends WsTest {
     private String bindingSubscriberEndpointUrl;
 
     private String eventSubscriberEndpointUrl;
+
+    private EventCloudComponentsManager componentsManager;
 
     @Before
     public void setUp() {
@@ -255,23 +258,22 @@ public class PubSubTest extends WsTest {
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+        this.componentsManager = WsTest.createAndStartComponentsManager();
 
         this.id =
                 this.deployer.newEventCloud(
                         new EventCloudDescription(
                                 "http://streams.event-processing.org/ids/TaxiUc"),
-                        deploymentDescriptor, WsTest.EVENTCLOUD_POOL_MANAGER,
-                        1, 1);
+                        deploymentDescriptor, this.componentsManager, 1, 1);
 
         this.subscribeWsProxyInfo =
                 WsDeployer.deploySubscribeWsProxy(
-                        WsTest.EVENTCLOUD_POOL_MANAGER,
+                        this.componentsManager,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "subscribe");
         this.publishWsProxyInfo =
                 WsDeployer.deployPublishWsProxy(
-                        WsTest.EVENTCLOUD_POOL_MANAGER,
+                        this.componentsManager,
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.id.getStreamUrl(), "publish");
 
@@ -323,7 +325,7 @@ public class PubSubTest extends WsTest {
         this.bindingSubscriberServer.destroy();
         this.eventSubscriberServer.destroy();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
+        WsTest.stopAndTerminateComponentsManager(this.componentsManager);
     }
 
 }

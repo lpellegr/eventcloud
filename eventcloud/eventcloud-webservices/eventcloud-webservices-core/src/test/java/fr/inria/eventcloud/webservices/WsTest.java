@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.webservices;
 
+import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
 
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
@@ -28,17 +29,20 @@ import fr.inria.eventcloud.webservices.factories.WsEventCloudComponentsManagerFa
  */
 public abstract class WsTest {
 
-    protected static final EventCloudComponentsManager EVENTCLOUD_POOL_MANAGER =
-            WsTest.getComponentPoolManager();
-
     protected static final int WEBSERVICES_PORT = getWebservicesPort();
 
-    private static final EventCloudComponentsManager getComponentPoolManager() {
-        EventCloudComponentsManager componentPoolManager =
+    public static final EventCloudComponentsManager createAndStartComponentsManager() {
+        EventCloudComponentsManager componentsManager =
                 WsEventCloudComponentsManagerFactory.newComponentsManager(
                         new LocalNodeProvider(), 1, 1, 0, 0, 0);
+        componentsManager.start();
 
-        return componentPoolManager;
+        return componentsManager;
+    }
+
+    public static final void stopAndTerminateComponentsManager(EventCloudComponentsManager componentsManager) {
+        componentsManager.stop();
+        PAActiveObject.terminateActiveObject(componentsManager, false);
     }
 
     private static final int getWebservicesPort() {

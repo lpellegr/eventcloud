@@ -34,6 +34,7 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
 import fr.inria.eventcloud.webservices.WsTest;
@@ -56,6 +57,8 @@ public class PutGetTest extends WsTest {
     private PutGetWsProxyInfo putgetWsProxyInfo;
 
     private PutGetWsApi putgetWsClient;
+
+    private EventCloudComponentsManager componentsManager;
 
     @Before
     public void setUp() {
@@ -97,8 +100,10 @@ public class PutGetTest extends WsTest {
                 this.putgetWsClient.executeSparqlSelect(sparqlQuery);
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
+
         log.info("Answer for SPARQL query {}:", sparqlQuery);
         log.info(resultNode.toString());
+
         Assert.assertEquals(expectedNodeResult, resultNode);
     }
 
@@ -108,16 +113,16 @@ public class PutGetTest extends WsTest {
         EventCloudDeploymentDescriptor deploymentDescriptor =
                 new EventCloudDeploymentDescriptor();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.start();
+        this.componentsManager = WsTest.createAndStartComponentsManager();
 
         EventCloudId id =
                 this.deployer.newEventCloud(
                         new EventCloudDescription(), deploymentDescriptor,
-                        WsTest.EVENTCLOUD_POOL_MANAGER, 1, 1);
+                        this.componentsManager, 1, 1);
 
         this.putgetWsProxyInfo =
                 WsDeployer.deployPutGetWsProxy(
-                        WsTest.EVENTCLOUD_POOL_MANAGER,
+                        this.componentsManager,
                         this.deployer.getEventCloudsRegistryUrl(),
                         id.getStreamUrl(), "putget");
 
@@ -133,7 +138,7 @@ public class PutGetTest extends WsTest {
         this.putgetWsProxyInfo.destroy();
         this.deployer.undeploy();
 
-        WsTest.EVENTCLOUD_POOL_MANAGER.stop();
+        WsTest.stopAndTerminateComponentsManager(this.componentsManager);
     }
 
 }

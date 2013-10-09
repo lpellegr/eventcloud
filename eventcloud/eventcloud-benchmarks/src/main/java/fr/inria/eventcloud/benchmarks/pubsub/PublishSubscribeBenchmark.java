@@ -842,6 +842,8 @@ public class PublishSubscribeBenchmark {
         deployer.undeploy();
 
         deployer.getComponentPoolManager().stop();
+        PAActiveObject.terminateActiveObject(
+                deployer.getComponentPoolManager(), false);
 
         if (nodeProvider != null) {
             nodeProvider.terminate();
