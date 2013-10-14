@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
@@ -126,6 +127,8 @@ public class PublishCompoundEventRequestOperator extends
 
         QueryIterator it = null;
 
+        Subscription subscription = null;
+
         try {
             Optimize.noOptimizer();
 
@@ -148,7 +151,7 @@ public class PublishCompoundEventRequestOperator extends
                 Quadruple quadruple =
                         matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
 
-                Subscription subscription =
+                subscription =
                         this.overlay.findSubscription(
                                 txnGraph, matchingResult.subscriptionId);
 
@@ -240,6 +243,16 @@ public class PublishCompoundEventRequestOperator extends
             this.findAndHandleEphemeralSubscriptions(
                     txnGraph, extendedCompoundEvents);
 
+        } catch (ExecutionException e) {
+            log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
+                    + subscription.getSubscriberUrl());
+
+            // This could be due to a subscriber which has left
+            // without unsubscribing or a temporary network outage.
+            // In that case the subscription could be removed after some
+            // attempts and/or time
+            PublishSubscribeUtils.handleSubscriberConnectionFailure(
+                    this.overlay, subscription);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
