@@ -651,8 +651,8 @@ public final class PublishSubscribeUtils {
         return false;
     }
 
-    private static void handleSubscriberConnectionFailure(final SemanticCanOverlay semanticCanOverlay,
-                                                          final Subscription subscription) {
+    public static void handleSubscriberConnectionFailure(final SemanticCanOverlay semanticCanOverlay,
+                                                         final Subscription subscription) {
         SubscriberConnectionFailure subscriberConnectionFailure;
 
         try {
