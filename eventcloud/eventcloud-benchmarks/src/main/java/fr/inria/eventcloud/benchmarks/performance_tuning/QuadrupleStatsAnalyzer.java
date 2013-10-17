@@ -28,7 +28,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 /**
- * 
+ * Simple analyzer to measure the average size of quadruples (and RDF terms)
+ * contained in a file that uses the NQuads format.
  * 
  * @author lpellegr
  */
