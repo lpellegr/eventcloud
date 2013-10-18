@@ -74,9 +74,9 @@ public class SubscribeEventCloudCommand extends Command<EventCloudsRegistry> {
                         subscription,
                         new ConsoleCompoundEventNotificationListener());
 
-                while (System.in.read() != 'q') {
+                do {
                     System.out.println("Type 'q' to unsubscribe");
-                }
+                } while (System.in.read() != 'q');
 
                 subscribeProxy.unsubscribe(subscription.getId());
             } catch (EventCloudIdNotManaged e) {

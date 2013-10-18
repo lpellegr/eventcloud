@@ -41,7 +41,7 @@ public class ListEventCloudsCommand extends Command<EventCloudsRegistry> {
     public void execute(CommandLineReader<EventCloudsRegistry> reader,
                         EventCloudsRegistry registry) {
         for (EventCloudId id : registry.listEventClouds()) {
-            System.out.println("  * " + id);
+            System.out.println("  - " + id);
         }
     }
 
