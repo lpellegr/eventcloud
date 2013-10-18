@@ -516,7 +516,12 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @Override
     @MemberOf("parallelSelfCompatible")
     @SuppressWarnings("unchecked")
-    public void receiveSbce2(QuadruplesNotification notification) {
+    /*
+     * The method requires synchronization due to race condition on quadruplesSolutions
+     * TODO: find a way to avoid to synchronize the whole method since it 
+     * decreases the performance of SBCE2 by at least 33%.
+     */
+    public synchronized void receiveSbce2(QuadruplesNotification notification) {
         this.logNotificationReception(notification);
 
         SubscriptionId subscriptionId = notification.getSubscriptionId();
