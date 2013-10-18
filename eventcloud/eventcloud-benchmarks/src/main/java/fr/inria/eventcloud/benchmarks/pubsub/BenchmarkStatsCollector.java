@@ -47,7 +47,7 @@ import fr.inria.eventcloud.benchmarks.pubsub.measurements.SimpleMeasurement;
 /**
  * Class in charge of collecting benchmark statistics. Also, it allows to create
  * a synchronization point to wait for the specified number of reports from
- * publishers and susbcribers.
+ * publishers and subscribers.
  * 
  * @author lpellegr
  */
