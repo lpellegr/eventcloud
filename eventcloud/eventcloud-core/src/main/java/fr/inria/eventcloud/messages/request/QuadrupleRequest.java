@@ -107,7 +107,7 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
             throws IOException {
         // do not serialize the constraints validator to avoid to serialize and
         // convey two times the same the data. The constraint validator can be
-        // reconstructed from the quadruple which is embeded
+        // reconstructed from the quadruple which is embedded
     }
 
     private void readObject(java.io.ObjectInputStream stream)
