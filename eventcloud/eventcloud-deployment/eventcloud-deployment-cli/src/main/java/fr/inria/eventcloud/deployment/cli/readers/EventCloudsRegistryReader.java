@@ -32,6 +32,8 @@ import fr.inria.eventcloud.deployment.cli.commands.Command;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.DestroyEventCloudCommand;
 import fr.inria.eventcloud.deployment.cli.commands.ListEventCloudsCommand;
+import fr.inria.eventcloud.deployment.cli.commands.ListSubscriptionsCommand;
+import fr.inria.eventcloud.deployment.cli.commands.RemoveAllSubscriptionsCommand;
 import fr.inria.eventcloud.deployment.cli.commands.SubscribeEventCloudCommand;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 
@@ -84,6 +86,8 @@ public class EventCloudsRegistryReader {
                                 new CreateEventCloudCommand(),
                                 new DestroyEventCloudCommand(),
                                 new ListEventCloudsCommand(),
+                                new ListSubscriptionsCommand(),
+                                new RemoveAllSubscriptionsCommand(),
                                 new SubscribeEventCloudCommand()), registry);
         reader.run();
     }
