@@ -16,6 +16,10 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Stopwatch;
+
 /**
  * A simple class that allows to perform a microbenchmark for a given task. The
  * micro benchmark consist in running the task the specified number of time and
@@ -38,6 +42,8 @@ public class MicroBenchmark {
     private boolean showProgress = false;
 
     private StatsRecorder statsRecorder;
+
+    private long runExecutionTimes[];
 
     public MicroBenchmark(int nbRuns, MicroBenchmarkService task) {
         this(new String[] {"default"}, nbRuns, task);
@@ -63,6 +69,7 @@ public class MicroBenchmark {
     }
 
     public void execute() {
+        this.runExecutionTimes = new long[this.nbRuns + this.discardFirstRuns];
         this.statsRecorder =
                 new StatsRecorderImpl(
                         this.categoryNames, this.nbRuns, this.discardFirstRuns);
@@ -73,19 +80,26 @@ public class MicroBenchmark {
             throw new RuntimeException(e);
         }
 
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+
         for (int i = 0; i < this.nbRuns + this.discardFirstRuns; i++) {
             try {
+                stopwatch.start();
                 this.benchmark.run(this.statsRecorder);
+                stopwatch.stop();
+
+                this.runExecutionTimes[i] =
+                        stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
                 this.benchmark.clear();
+                stopwatch.reset();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
             if (this.showProgress) {
                 System.out.print("Run #" + (i + 1) + " performed");
-                System.out.print(" ("
-                        + this.statsRecorder.getCategory(DEFAULT_CATEGORY_NAME)
-                                .getTime(i) + ")");
+                System.out.print(" (" + this.runExecutionTimes[i] + ")");
 
                 if (this.discardFirstRuns > 0 && i < this.discardFirstRuns) {
                     System.out.println(" [ignored]");
