@@ -42,7 +42,7 @@ public interface DataHandler {
 
     /**
      * Returns a copy of all the data managed by the current peer. This is
-     * automatically executed when a peer leaves the network to transfert data.
+     * automatically executed when a peer leaves the network to transfer data.
      * 
      * @return all the data managed by the current peer.
      */
