@@ -16,8 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathEntry;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathStack;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
@@ -89,7 +89,7 @@ public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> 
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
+    public Router<? extends Message<Coordinate<E>>, Coordinate<E>> getRouter() {
         return new FloodingBroadcastRequestRouter<MulticastRequest<E>, E>();
     }
 

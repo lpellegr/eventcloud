@@ -27,7 +27,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * 
  * @author lpellegr
  */
-public abstract class Response<K> extends RequestResponseMessage<K> {
+public abstract class Response<K> extends Message<K> {
 
     private static final long serialVersionUID = 160L;
 

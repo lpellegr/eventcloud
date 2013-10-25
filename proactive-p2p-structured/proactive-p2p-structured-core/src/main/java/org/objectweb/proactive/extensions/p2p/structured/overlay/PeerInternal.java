@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponseReceiver;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
 
 /**
@@ -51,14 +51,13 @@ public interface PeerInternal {
 
     /**
      * Routes the specified {@code msg} by using double dispatch. The main
-     * difference between this method and
-     * {@link Peer#route(RequestResponseMessage)} is that the former increases
-     * the number of hop count where the latter does not.
+     * difference between this method and {@link Peer#route(Message)} is that
+     * the former increases the number of hop count where the latter does not.
      * 
      * @param msg
      *            the message to route.
      */
-    void forward(RequestResponseMessage<?> msg);
+    void forward(Message<?> msg);
 
     /**
      * Injects the specified list of requests in the request queue of the

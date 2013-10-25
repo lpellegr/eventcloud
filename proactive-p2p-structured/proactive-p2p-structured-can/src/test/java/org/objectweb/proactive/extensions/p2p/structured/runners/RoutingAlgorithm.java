@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.runners;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -38,7 +38,7 @@ public enum RoutingAlgorithm {
         return RoutingAlgorithm.valueOf(System.getProperty("junit.routing.algorithm"));
     }
 
-    public static <E extends Element> Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> createRouterToUse() {
+    public static <E extends Element> Router<? extends Message<Coordinate<E>>, Coordinate<E>> createRouterToUse() {
         switch (RoutingAlgorithm.toUse()) {
             case EFFICIENT_BROADCAST:
                 return new EfficientBroadcastRequestRouter<MulticastRequest<E>, E>();

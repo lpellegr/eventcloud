@@ -21,7 +21,7 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
@@ -132,7 +132,7 @@ public interface Peer extends Comparable<Peer>, Serializable {
      * 
      * @param msg
      */
-    void route(RequestResponseMessage<?> msg);
+    void route(Message<?> msg);
 
     /**
      * Returns debug information as String.

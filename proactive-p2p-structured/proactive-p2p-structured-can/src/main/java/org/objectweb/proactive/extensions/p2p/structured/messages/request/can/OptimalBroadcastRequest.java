@@ -16,8 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.messages.request.can;
 
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
@@ -104,7 +104,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends RequestResponseMessage<Coordinate<E>>, Coordinate<E>> getRouter() {
+    public Router<? extends Message<Coordinate<E>>, Coordinate<E>> getRouter() {
         return new OptimalBroadcastRequestRouter<OptimalBroadcastRequest<E>, E>();
     }
 
