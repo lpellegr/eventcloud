@@ -16,11 +16,11 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.router;
 
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
- * A router defines how to route a {@link RequestResponseMessage}.
+ * A router defines how to route a {@link Message}.
  * 
  * @author lpellegr
  * 
@@ -30,7 +30,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
  *            the key type used to check at each routing step whether the
  *            constraints are validated or not.
  */
-public abstract class Router<T extends RequestResponseMessage<K>, K> {
+public abstract class Router<T extends Message<K>, K> {
 
     /**
      * Constructs a new Router.
@@ -41,14 +41,12 @@ public abstract class Router<T extends RequestResponseMessage<K>, K> {
     /**
      * This method is used by a router to make decision when a message is
      * received on a peer. The decision consists in choosing which method
-     * between {@link #route(StructuredOverlay, RequestResponseMessage)} or
-     * {@link #handle(StructuredOverlay, RequestResponseMessage)} must be
-     * called. A correct implementation of
-     * {@link #makeDecision(StructuredOverlay, RequestResponseMessage)} is
-     * supposed to call
-     * {@link #route(StructuredOverlay, RequestResponseMessage)} and
-     * {@link #handle(StructuredOverlay, RequestResponseMessage)} methods
-     * according to the conditions which are verified.
+     * between {@link #route(StructuredOverlay, Message)} or
+     * {@link #handle(StructuredOverlay, Message)} must be called. A correct
+     * implementation of {@link #makeDecision(StructuredOverlay, Message)} is
+     * supposed to call {@link #route(StructuredOverlay, Message)} and
+     * {@link #handle(StructuredOverlay, Message)} methods according to the
+     * conditions which are verified.
      * 
      * @param overlay
      *            the overlay used to make the decision.
@@ -64,7 +62,7 @@ public abstract class Router<T extends RequestResponseMessage<K>, K> {
      * @param overlay
      *            the {@link StructuredOverlay} used to handle the message.
      * @param msg
-     *            the {@link RequestResponseMessage} to handle.
+     *            the {@link Message} to handle.
      */
     protected abstract void handle(StructuredOverlay overlay, T msg);
 
@@ -75,7 +73,7 @@ public abstract class Router<T extends RequestResponseMessage<K>, K> {
      *            the {@link StructuredOverlay} to use in order to make the
      *            decision.
      * @param msg
-     *            the {@link RequestResponseMessage} which have to be routed.
+     *            the {@link Message} which have to be routed.
      */
     protected abstract void route(StructuredOverlay overlay, T msg);
 

@@ -21,8 +21,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 
 /**
- * This interface is assumed to be implemented by all
- * {@link RequestResponseMessage} in order to add router features.
+ * This interface is assumed to be implemented by all {@link Message} in order
+ * to add router features.
  * 
  * @author lpellegr
  * 
@@ -37,12 +37,12 @@ public interface Routable<K> {
      * 
      * @return the {@link Router} to use in order to route the message.
      */
-    Router<? extends RequestResponseMessage<K>, K> getRouter();
+    Router<? extends Message<K>, K> getRouter();
 
     /**
-     * Route the {@link RequestResponseMessage} to the correct {@link Peer}. If
-     * the current peer contains the key to reach, the query is handled and a
-     * response is routed to the sender.
+     * Route the {@link Message} to the correct {@link Peer}. If the current
+     * peer contains the key to reach, the query is handled and a response is
+     * routed to the sender.
      * 
      * @param overlay
      *            the overlay used in order to route the request.

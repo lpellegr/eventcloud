@@ -33,8 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * 
  * @author lpellegr
  */
-public abstract class RequestResponseMessage<K> implements Routable<K>,
-        Serializable {
+public abstract class Message<K> implements Routable<K>, Serializable {
 
     private static final long serialVersionUID = 160L;
 
@@ -72,7 +71,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
      * @param constraintsValidator
      *            the constraints validator to use for routing the message.
      */
-    public RequestResponseMessage(ConstraintsValidator<K> constraintsValidator) {
+    public Message(ConstraintsValidator<K> constraintsValidator) {
         this.constraintsValidator = constraintsValidator;
     }
 
@@ -160,8 +159,7 @@ public abstract class RequestResponseMessage<K> implements Routable<K>,
             this.id = overlay.newMessageId();
         }
 
-        ((Router<RequestResponseMessage<K>, K>) this.getRouter()).makeDecision(
-                overlay, this);
+        ((Router<Message<K>, K>) this.getRouter()).makeDecision(overlay, this);
     }
 
     /**

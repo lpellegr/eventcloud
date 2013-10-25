@@ -26,7 +26,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.CanDeploymentDescriptor;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.JunitByClassCanNetworkDeployer;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.EfficientBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
@@ -187,7 +187,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return new FloodingBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
@@ -211,7 +211,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return new EfficientBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
@@ -235,7 +235,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return new OptimalBroadcastRequestRouter<GetZonesValidatingConstraintsFloodingRequest, StringElement>() {
                 @Override
                 public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
@@ -268,7 +268,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 
@@ -294,7 +294,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 
@@ -320,7 +320,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 
@@ -372,7 +372,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 
@@ -399,7 +399,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 
@@ -426,7 +426,7 @@ public class MulticastLookupRequestTest extends JunitByClassCanNetworkDeployer {
         }
 
         @Override
-        public Router<? extends RequestResponseMessage<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
+        public Router<? extends Message<Coordinate<StringElement>>, Coordinate<StringElement>> getRouter() {
             return RoutingAlgorithm.createRouterToUse();
         }
 

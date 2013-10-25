@@ -35,8 +35,8 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJo
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponseReceiver;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
-import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseMessage;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
 import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
@@ -288,7 +288,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      */
     @Override
     @MemberOf("routing")
-    public void forward(RequestResponseMessage<?> msg) {
+    public void forward(Message<?> msg) {
         msg.incrementHopCount(1);
         msg.route(this.overlay);
     }
@@ -298,7 +298,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      */
     @Override
     @MemberOf("routing")
-    public void route(RequestResponseMessage<?> msg) {
+    public void route(Message<?> msg) {
         msg.route(this.overlay);
     }
 
