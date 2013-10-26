@@ -765,13 +765,14 @@ public class EventCloudsManagementServiceImpl implements
             Component proxy = ((PAInterface) proxyStub).getFcItfOwner();
             PAMembraneController membraneController =
                     Utils.getPAMembraneController(proxy);
-            Component proxyMonitoringManager =
-                    membraneController.nfGetFcSubComponent(ProxyMonitoringManagerImpl.COMPONENT_NAME);
 
-            if (proxyMonitoringManager == null) {
-                return this.addProxyMonitoringManager(proxy, membraneController);
-            } else {
+            try {
+                Component proxyMonitoringManager =
+                        membraneController.nfGetFcSubComponent(ProxyMonitoringManagerImpl.COMPONENT_NAME);
+
                 return (ProxyMonitoringManager) proxyMonitoringManager.getFcInterface(ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF);
+            } catch (NoSuchComponentException e) {
+                return this.addProxyMonitoringManager(proxy, membraneController);
             }
         } catch (NoSuchInterfaceException nsie) {
             nsie.printStackTrace();
