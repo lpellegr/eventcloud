@@ -42,16 +42,6 @@
 
 	<repositories>
 		<repository>
-			<id>eventcloud-releases</id>
-			<url>http://eventcloud.bitbucket.org/maven/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<id>soceda-releases</id>
 			<url>http://maven.petalslink.com/soceda-release</url>
 			<releases>
