@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Defines some methods to compute the online mean estimation for each quadruple
@@ -74,7 +74,7 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
     }
 
     private static final Apfloat toRadix10(Node n) {
-        return ApfloatUtils.toFloatRadix10(SemanticElement.removePrefix(n));
+        return ApfloatUtils.toFloatRadix10(SemanticCoordinate.removePrefix(n));
     }
 
     /**

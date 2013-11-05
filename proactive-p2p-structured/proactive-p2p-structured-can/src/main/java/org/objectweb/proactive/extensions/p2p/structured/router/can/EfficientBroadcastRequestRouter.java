@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTableWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +50,12 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            the request type to route.
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author jrochas
  */
-public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Element>
-        extends Router<EfficientBroadcastRequest<E>, Coordinate<E>> {
+public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Coordinate>
+        extends Router<EfficientBroadcastRequest<E>, Point<E>> {
 
     private static final Logger log =
             LoggerFactory.getLogger(EfficientBroadcastRequestRouter.class);

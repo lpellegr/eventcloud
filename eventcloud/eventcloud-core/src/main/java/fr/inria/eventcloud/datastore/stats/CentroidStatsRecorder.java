@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Defines some methods to compute the online centroid estimation for each
@@ -55,10 +55,10 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public synchronized void _register(Node g, Node s, Node p, Node o) {
-        String gs = SemanticElement.removePrefix(g);
-        String ss = SemanticElement.removePrefix(s);
-        String ps = SemanticElement.removePrefix(p);
-        String os = SemanticElement.removePrefix(o);
+        String gs = SemanticCoordinate.removePrefix(g);
+        String ss = SemanticCoordinate.removePrefix(s);
+        String ps = SemanticCoordinate.removePrefix(p);
+        String os = SemanticCoordinate.removePrefix(o);
 
         Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
         Apfloat sf = ApfloatUtils.toFloatRadix10(ss);
@@ -86,10 +86,10 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     protected synchronized void _unregister(Node g, Node s, Node p, Node o) {
-        String gs = SemanticElement.removePrefix(g);
-        String ss = SemanticElement.removePrefix(s);
-        String ps = SemanticElement.removePrefix(p);
-        String os = SemanticElement.removePrefix(o);
+        String gs = SemanticCoordinate.removePrefix(g);
+        String ss = SemanticCoordinate.removePrefix(s);
+        String ps = SemanticCoordinate.removePrefix(p);
+        String os = SemanticCoordinate.removePrefix(o);
 
         Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
         Apfloat sf = ApfloatUtils.toFloatRadix10(ss);

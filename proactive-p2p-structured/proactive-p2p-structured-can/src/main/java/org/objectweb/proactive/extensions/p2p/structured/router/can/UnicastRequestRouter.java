@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +40,12 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            the response type to route.
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends Element>
-        extends Router<T, Coordinate<E>> {
+public class UnicastRequestRouter<T extends Request<Point<E>>, E extends Coordinate>
+        extends Router<T, Point<E>> {
 
     private static final Logger log =
             LoggerFactory.getLogger(UnicastRequestRouter.class);
@@ -74,7 +74,7 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         this.onDestinationReached(overlay, request);
 
         if (request.getResponseProvider() != null) {
-            Response<Coordinate<E>> response =
+            Response<Point<E>> response =
                     request.getResponseProvider().get(request, overlay);
 
             response.route(overlay);
@@ -96,7 +96,8 @@ public class UnicastRequestRouter<T extends Request<Coordinate<E>>, E extends El
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
                     canOverlay.getZone().contains(
-                            dimension, request.getKey().getElement(dimension));
+                            dimension,
+                            request.getKey().getCoordinate(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.DIRECTION_INFERIOR;

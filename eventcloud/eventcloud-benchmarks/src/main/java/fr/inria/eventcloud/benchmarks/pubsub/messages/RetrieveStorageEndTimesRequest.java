@@ -18,14 +18,14 @@ package fr.inria.eventcloud.benchmarks.pubsub.messages;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.benchmarks.pubsub.StorageTimes;
 import fr.inria.eventcloud.benchmarks.pubsub.overlay.CustomSemanticOverlay;
 import fr.inria.eventcloud.messages.request.StatefulQuadruplePatternRequest;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 public class RetrieveStorageEndTimesRequest extends
         StatefulQuadruplePatternRequest<StorageTimes> {
@@ -35,7 +35,7 @@ public class RetrieveStorageEndTimesRequest extends
     public RetrieveStorageEndTimesRequest() {
         super(
                 QuadruplePattern.ANY,
-                new ResponseProvider<RetrieveStorageEndTimesResponse, Coordinate<SemanticElement>>() {
+                new ResponseProvider<RetrieveStorageEndTimesResponse, Point<SemanticCoordinate>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
@@ -49,8 +49,8 @@ public class RetrieveStorageEndTimesRequest extends
      * {@inheritDoc}
      */
     @Override
-    public StorageTimes onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                       MulticastRequest<SemanticElement> request,
+    public StorageTimes onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                       MulticastRequest<SemanticCoordinate> request,
                                                        QuadruplePattern quadruplePattern) {
         CustomSemanticOverlay customOverlay = (CustomSemanticOverlay) overlay;
 

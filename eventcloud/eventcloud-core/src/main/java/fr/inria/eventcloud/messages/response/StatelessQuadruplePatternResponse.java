@@ -20,7 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.M
 import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
 
 import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Response associated to {@link StatelessQuadruplePatternRequest}.
@@ -28,7 +28,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * @author lpellegr
  */
 public class StatelessQuadruplePatternResponse extends
-        MulticastResponse<SemanticElement> {
+        MulticastResponse<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
@@ -40,8 +40,8 @@ public class StatelessQuadruplePatternResponse extends
      * {@inheritDoc}
      */
     @Override
-    public BroadcastResponseRouter<MulticastResponse<SemanticElement>, SemanticElement> getRouter() {
-        return new BroadcastResponseRouter<MulticastResponse<SemanticElement>, SemanticElement>();
+    public BroadcastResponseRouter<MulticastResponse<SemanticCoordinate>, SemanticCoordinate> getRouter() {
+        return new BroadcastResponseRouter<MulticastResponse<SemanticCoordinate>, SemanticCoordinate>();
     }
 
 }

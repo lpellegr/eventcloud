@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEnt
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTableWrapper;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +50,12 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            the request type to route.
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author jrochas
  */
-public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Element>
-        extends Router<OptimalBroadcastRequest<E>, Coordinate<E>> {
+public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Coordinate>
+        extends Router<OptimalBroadcastRequest<E>, Point<E>> {
 
     private static final Logger log =
             LoggerFactory.getLogger(OptimalBroadcastRequestRouter.class);
@@ -299,7 +299,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
         byte[][] directions;
         // The constraints that the neighbors have to validate in order to
         // receive the message
-        Element[] plane;
+        Coordinate[] plane;
 
         // If the current overlay satisfies the constraint, the request
         // must be informed to be able to cut off the forwarding asap
@@ -397,7 +397,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                         if (contains) {
                             byte[][] newDirections =
                                     this.copyDirections(directions);
-                            Element[] newPlan = this.copyPlan(plane);
+                            Coordinate[] newPlan = this.copyPlan(plane);
                             // Remove from the directions array the peer's
                             // opposite direction (if it is neighbor with the
                             // sender on the x superior side, the x inferior
@@ -468,9 +468,9 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
      * @return the coordinates to be contained by the peers receiving the
      *         message.
      */
-    protected Element[] getPlanToBeContained(CanOverlay<E> can) {
+    protected Coordinate[] getPlanToBeContained(CanOverlay<E> can) {
         int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
-        Element[] plan = new Element[dimensions];
+        Coordinate[] plan = new Coordinate[dimensions];
         // In this case the values of the constraints are equal to the lowest
         // bound of the initiator. We can choose other constraints too as long
         // as the values are in the initiator's zone.
@@ -493,7 +493,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
      * @return true if zone contains the value on the given dimension; false,
      *         otherwise.
      */
-    protected boolean containsCoordinate(Zone<E> zone, Element value,
+    protected boolean containsCoordinate(Zone<E> zone, Coordinate value,
                                          byte dimension) {
         if (value != null) {
             if (!value.isBetween(
@@ -544,9 +544,9 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
      *            initial StringElement array
      * @return the new StringElement array
      */
-    protected Element[] copyPlan(Element[] initialPlan) {
+    protected Coordinate[] copyPlan(Coordinate[] initialPlan) {
         int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
-        Element[] plan = new Element[dimensions];
+        Coordinate[] plan = new Coordinate[dimensions];
         for (int j = 0; j < dimensions; j++) {
             plan[j] = initialPlan[j];
         }

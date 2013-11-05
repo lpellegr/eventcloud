@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.TestingDeplo
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
@@ -128,7 +128,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
         public GetLoadInformationRequest() {
             super(
                     QuadruplePattern.ANY,
-                    new ResponseProvider<GetLoadInformationResponse, Coordinate<SemanticElement>>() {
+                    new ResponseProvider<GetLoadInformationResponse, Point<SemanticCoordinate>>() {
                         private static final long serialVersionUID = 160L;
 
                         @Override
@@ -142,8 +142,8 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
          * {@inheritDoc}
          */
         @Override
-        public Map<OverlayId, LoadInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                                              MulticastRequest<SemanticElement> request,
+        public Map<OverlayId, LoadInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                                              MulticastRequest<SemanticCoordinate> request,
                                                                               QuadruplePattern quadruplePattern) {
             SemanticCanOverlay customOverlay = (SemanticCanOverlay) overlay;
 

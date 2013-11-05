@@ -20,14 +20,14 @@ import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * An entry in an {@link NeighborTableWrapper}.
  * 
  * @author acraciun
  */
-public class NeighborEntryWrapper<E extends Element> implements Serializable {
+public class NeighborEntryWrapper<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
@@ -37,7 +37,7 @@ public class NeighborEntryWrapper<E extends Element> implements Serializable {
     // The coordinates of the plan(if not null) that needs to be contained by
     // the neighbors of the current peer, in order to receive the broadcast
     // request
-    private Element[] splitPlans;
+    private Coordinate[] splitPlans;
     // The dimension relative to the sender.
     private byte dimension;
     // The direction relative to the sender.
@@ -50,7 +50,7 @@ public class NeighborEntryWrapper<E extends Element> implements Serializable {
         this.side = side;
         this.directions = this.initializeByteArray();
         this.splitPlans =
-                new Element[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+                new Coordinate[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
     }
 
     private byte[][] initializeByteArray() {
@@ -82,19 +82,19 @@ public class NeighborEntryWrapper<E extends Element> implements Serializable {
         this.directions[i][dimension] = direction;
     }
 
-    public Element[] getSplitPlans() {
+    public Coordinate[] getSplitPlans() {
         return this.splitPlans;
     }
 
-    public Element getSplitPlan(int index) {
+    public Coordinate getSplitPlan(int index) {
         return this.splitPlans[index];
     }
 
-    public void setSplitPlans(Element[] splitPlans) {
+    public void setSplitPlans(Coordinate[] splitPlans) {
         this.splitPlans = splitPlans;
     }
 
-    public void setSplitPlan(int dimension, Element plan) {
+    public void setSplitPlan(int dimension, Coordinate plan) {
         this.splitPlans[dimension] = plan;
     }
 

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
@@ -70,7 +70,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
+    public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticCoordinate> overlay,
                                                QuadruplePattern quadruplePattern) {
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
         Subscription subscription = this.subscription.getValue();

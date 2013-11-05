@@ -24,17 +24,17 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAnd
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * NeighborEntry is an entry in a {@link NeighborTable}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class NeighborEntry<E extends Element> implements Serializable {
+public class NeighborEntry<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 

@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Mu
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.BroadcastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
@@ -37,18 +37,17 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * it is supposed to sent back a response.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class MulticastResponse<E extends Element> extends
-        Response<Coordinate<E>> {
+public class MulticastResponse<E extends Coordinate> extends Response<Point<E>> {
 
     private static final long serialVersionUID = 160L;
 
     private ReversePathStack<E> reversePathStack;
 
-    private ConstraintsValidator<Coordinate<E>> requestConstraintValidator;
+    private ConstraintsValidator<Point<E>> requestConstraintValidator;
 
     private boolean isEmpty = false;
 
@@ -61,7 +60,7 @@ public class MulticastResponse<E extends Element> extends
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void setAttributes(Request<Coordinate<E>> request,
+    public void setAttributes(Request<Point<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 
@@ -116,7 +115,7 @@ public class MulticastResponse<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends MulticastResponse<E>, Coordinate<E>> getRouter() {
+    public Router<? extends MulticastResponse<E>, Point<E>> getRouter() {
         return new BroadcastResponseRouter<MulticastResponse<E>, E>();
     }
 
@@ -150,8 +149,8 @@ public class MulticastResponse<E extends Element> extends
      * 
      * @see #mergeAttributes(MulticastResponse)
      */
-    public static <E extends Element> MulticastResponse<E> merge(MulticastResponse<E> localResponse,
-                                                                 MulticastResponse<E> responseReceived) {
+    public static <E extends Coordinate> MulticastResponse<E> merge(MulticastResponse<E> localResponse,
+                                                                    MulticastResponse<E> responseReceived) {
         if (localResponse == null) {
             return responseReceived;
         } else {
@@ -161,7 +160,7 @@ public class MulticastResponse<E extends Element> extends
         }
     }
 
-    public void setConstraintsValidator(ConstraintsValidator<Coordinate<E>> constraintsValidator) {
+    public void setConstraintsValidator(ConstraintsValidator<Point<E>> constraintsValidator) {
         super.constraintsValidator = constraintsValidator;
     }
 

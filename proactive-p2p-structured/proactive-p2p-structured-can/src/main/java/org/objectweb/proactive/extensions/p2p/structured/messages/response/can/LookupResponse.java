@@ -21,17 +21,17 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Lo
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 /**
  * Response associated to {@link LookupRequest}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LookupResponse<E extends Element> extends ForwardResponse<E> {
+public class LookupResponse<E extends Coordinate> extends ForwardResponse<E> {
 
     private static final long serialVersionUID = 160L;
 
@@ -45,7 +45,7 @@ public class LookupResponse<E extends Element> extends ForwardResponse<E> {
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Request<Coordinate<E>> request,
+    public void setAttributes(Request<Point<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 

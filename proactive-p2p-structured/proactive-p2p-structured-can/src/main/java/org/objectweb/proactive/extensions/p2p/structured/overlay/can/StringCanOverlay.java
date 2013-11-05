@@ -21,14 +21,14 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 /**
- * A {@link CanOverlay} semiskilled for {@link StringElement}s.
+ * A {@link CanOverlay} semiskilled for {@link StringCoordinate}s.
  * 
  * @author lpellegr
  */
-public class StringCanOverlay extends CanOverlay<StringElement> {
+public class StringCanOverlay extends CanOverlay<StringCoordinate> {
 
     public StringCanOverlay() {
         super();
@@ -49,7 +49,7 @@ public class StringCanOverlay extends CanOverlay<StringElement> {
      * {@inheritDoc}
      */
     @Override
-    protected Zone<StringElement> newZone() {
+    protected Zone<StringCoordinate> newZone() {
         return new StringZone();
     }
 

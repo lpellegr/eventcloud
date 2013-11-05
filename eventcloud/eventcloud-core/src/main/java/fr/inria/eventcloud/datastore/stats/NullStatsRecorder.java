@@ -20,7 +20,7 @@ import org.apfloat.Apfloat;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * A Null StatRecorder. It does nothing but it exists to avoid multiple if test
@@ -92,7 +92,7 @@ public class NullStatsRecorder implements StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public SemanticElement computeSplitEstimation(byte dimension) {
+    public SemanticCoordinate computeSplitEstimation(byte dimension) {
         return null;
     }
 

@@ -37,8 +37,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Op
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
@@ -388,15 +388,15 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
     public void testNeighborhood() {
         for (Peer peer : super.getRandomTracker().getPeers()) {
 
-            NeighborTable<StringElement> table =
+            NeighborTable<StringCoordinate> table =
                     CanOperations.getNeighborTable(peer);
 
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
                 for (byte dir = 0; dir < 2; dir++) {
-                    for (NeighborEntry<StringElement> entry : table.get(
+                    for (NeighborEntry<StringCoordinate> entry : table.get(
                             dim, dir).values()) {
-                        Zone<StringElement> zone =
-                                CanOperations.<StringElement> getIdAndZoneResponseOperation(
+                        Zone<StringCoordinate> zone =
+                                CanOperations.<StringCoordinate> getIdAndZoneResponseOperation(
                                         peer)
                                         .getPeerZone();
 
@@ -411,10 +411,10 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         JOIN, LEAVE, ROUTING
     }
 
-    private static OptimalBroadcastRequest<StringElement> createFloodingRequest() {
-        return new OptimalBroadcastRequest<StringElement>(
-                new BroadcastConstraintsValidator<StringElement>(
-                        CoordinateFactory.newStringCoordinate()));
+    private static OptimalBroadcastRequest<StringCoordinate> createFloodingRequest() {
+        return new OptimalBroadcastRequest<StringCoordinate>(
+                new BroadcastConstraintsValidator<StringCoordinate>(
+                        PointFactory.newStringCoordinate()));
     }
 
     private static Peer createCustomPeer() {

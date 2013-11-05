@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.F
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
@@ -35,11 +35,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * structured peer-to-peer network.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
+public class ForwardRequest<E extends Coordinate> extends Request<Point<E>> {
 
     private static final long serialVersionUID = 160L;
 
@@ -47,11 +47,11 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
      * The zone which is managed by the sender. It is used in order to send the
      * response when the keyToReach has been reached.
      */
-    private SerializedValue<Coordinate<E>> senderCoordinate;
+    private SerializedValue<Point<E>> senderCoordinate;
 
-    public ForwardRequest(Coordinate<E> coordinateToReach) {
+    public ForwardRequest(Point<E> coordinateToReach) {
         super(new UnicastConstraintsValidator<E>(coordinateToReach),
-                new ResponseProvider<ForwardResponse<E>, Coordinate<E>>() {
+                new ResponseProvider<ForwardResponse<E>, Point<E>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
@@ -62,8 +62,8 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
     }
 
     public ForwardRequest(
-            Coordinate<E> coordinateToReach,
-            ResponseProvider<? extends Response<Coordinate<E>>, Coordinate<E>> responseProvider) {
+            Point<E> coordinateToReach,
+            ResponseProvider<? extends Response<Point<E>>, Point<E>> responseProvider) {
         super(new UnicastConstraintsValidator<E>(coordinateToReach),
                 responseProvider);
     }
@@ -75,7 +75,7 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
      * @return the key which is managed by the sender in order to send the
      *         response when the keyToReach has been reached.
      */
-    public Coordinate<E> getSenderCoordinate() {
+    public Point<E> getSenderCoordinate() {
         return this.senderCoordinate.getValue();
     }
 
@@ -83,7 +83,7 @@ public class ForwardRequest<E extends Element> extends Request<Coordinate<E>> {
      * {@inheritDoc}
      */
     @Override
-    public Router<ForwardRequest<E>, Coordinate<E>> getRouter() {
+    public Router<ForwardRequest<E>, Point<E>> getRouter() {
         return new UnicastRequestRouter<ForwardRequest<E>, E>();
     }
 

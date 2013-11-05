@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastResponseRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
@@ -29,11 +29,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastCo
  * Response associated to {@link ForwardRequest}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class ForwardResponse<E extends Element> extends Response<Coordinate<E>> {
+public class ForwardResponse<E extends Coordinate> extends Response<Point<E>> {
 
     private static final long serialVersionUID = 160L;
 
@@ -45,7 +45,7 @@ public class ForwardResponse<E extends Element> extends Response<Coordinate<E>> 
      * {@inheritDoc}
      */
     @Override
-    public void setAttributes(Request<Coordinate<E>> request,
+    public void setAttributes(Request<Point<E>> request,
                               StructuredOverlay overlay) {
         super.setAttributes(request, overlay);
 

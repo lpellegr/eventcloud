@@ -20,7 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.RequestRespons
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 
 /**
@@ -29,12 +29,12 @@ import org.objectweb.proactive.extensions.p2p.structured.router.Router;
  * @param <T>
  *            the response type to route.
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class UnicastResponseRouter<T extends Response<Coordinate<E>>, E extends Element>
-        extends Router<T, Coordinate<E>> {
+public class UnicastResponseRouter<T extends Response<Point<E>>, E extends Coordinate>
+        extends Router<T, Point<E>> {
 
     public UnicastResponseRouter() {
         super();

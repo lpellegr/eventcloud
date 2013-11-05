@@ -20,7 +20,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
@@ -31,11 +31,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
  * constraints (i.e. the coordinates to reach).
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author jrochas
  */
-public class OptimalBroadcastRequest<E extends Element> extends
+public class OptimalBroadcastRequest<E extends Coordinate> extends
         MulticastRequest<E> {
 
     private static final long serialVersionUID = 160L;
@@ -52,7 +52,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
 
     // The coordinates that describe the splitting plan (the coordinates that
     // need to be contained by the neighbors that will receive the request).
-    private Element[] splitPlans;
+    private Coordinate[] splitPlans;
 
     /**
      * Constructs a new message with the specified {@code validator} but with no
@@ -77,14 +77,14 @@ public class OptimalBroadcastRequest<E extends Element> extends
      */
     public OptimalBroadcastRequest(
             MulticastConstraintsValidator<E> validator,
-            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> responseProvider) {
+            ResponseProvider<? extends MulticastResponse<E>, Point<E>> responseProvider) {
         super(validator, responseProvider);
     }
 
     public OptimalBroadcastRequest(
             MulticastConstraintsValidator<E> validator,
-            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> provider,
-            MessageId messageId, byte[][] directions, Element[] splitPlans) {
+            ResponseProvider<? extends MulticastResponse<E>, Point<E>> provider,
+            MessageId messageId, byte[][] directions, Coordinate[] splitPlans) {
         super(validator, provider);
 
         // if messageId==null then this is the request
@@ -104,7 +104,7 @@ public class OptimalBroadcastRequest<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends Message<Coordinate<E>>, Coordinate<E>> getRouter() {
+    public Router<? extends Message<Point<E>>, Point<E>> getRouter() {
         return new OptimalBroadcastRequestRouter<OptimalBroadcastRequest<E>, E>();
     }
 
@@ -135,11 +135,11 @@ public class OptimalBroadcastRequest<E extends Element> extends
         return this.directions[i][j];
     }
 
-    public Element[] getSplitPlans() {
+    public Coordinate[] getSplitPlans() {
         return this.splitPlans;
     }
 
-    public Element getSplitPlan(int index) {
+    public Coordinate getSplitPlan(int index) {
         return this.splitPlans[index];
     }
 
@@ -147,11 +147,11 @@ public class OptimalBroadcastRequest<E extends Element> extends
         this.directions = directions;
     }
 
-    public void setSplitPlans(Element[] splitPlans) {
+    public void setSplitPlans(Coordinate[] splitPlans) {
         this.splitPlans = splitPlans;
     }
 
-    public void setSplitPlan(int index, Element splitPlan) {
+    public void setSplitPlan(int index, Coordinate splitPlan) {
         this.splitPlans[index] = splitPlan;
     }
 

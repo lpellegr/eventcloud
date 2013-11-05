@@ -60,8 +60,8 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetSplit
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
@@ -203,7 +203,7 @@ public class Can2dVisualizer extends JFrame {
 
         private static final long serialVersionUID = 160L;
 
-        public Zone<StringElement> zoneClicked = null;
+        public Zone<StringCoordinate> zoneClicked = null;
 
         public Canvas(int width, final int height) {
             super();
@@ -269,22 +269,22 @@ public class Can2dVisualizer extends JFrame {
             });
         }
 
-        public int getXmin(Zone<StringElement> z) {
+        public int getXmin(Zone<StringCoordinate> z) {
             return (int) z.getLowerBound((byte) 0)
                     .normalize(0, this.getWidth());
         }
 
-        public int getXmax(Zone<StringElement> z) {
+        public int getXmax(Zone<StringCoordinate> z) {
             return (int) z.getUpperBound((byte) 0)
                     .normalize(0, this.getWidth());
         }
 
-        public int getYmin(Zone<StringElement> z) {
+        public int getYmin(Zone<StringCoordinate> z) {
             return (int) z.getLowerBound((byte) 1).normalize(
                     0, this.getHeight());
         }
 
-        public int getYmax(Zone<StringElement> z) {
+        public int getYmax(Zone<StringCoordinate> z) {
             return (int) z.getUpperBound((byte) 1).normalize(
                     0, this.getHeight());
         }
@@ -309,7 +309,7 @@ public class Can2dVisualizer extends JFrame {
 
             int xMin, xMax, yMin, yMax;
             for (PeerEntry entry : Can2dVisualizer.this.cache) {
-                Zone<StringElement> zone = entry.getZone();
+                Zone<StringCoordinate> zone = entry.getZone();
                 xMin = this.getXmin(zone);
                 xMax = this.getXmax(zone);
                 yMin = this.getYmin(zone);
@@ -332,7 +332,7 @@ public class Can2dVisualizer extends JFrame {
             g2d.setColor(Color.BLACK);
 
             if (peerClicked != null) {
-                for (Zone<StringElement> z : peerClicked.getNeighbors()) {
+                for (Zone<StringCoordinate> z : peerClicked.getNeighbors()) {
                     xMin = this.getXmin(z);
                     xMax = this.getXmax(z);
                     yMin = this.getYmin(z);
@@ -346,7 +346,7 @@ public class Can2dVisualizer extends JFrame {
             if (Can2dVisualizer.this.displaySplitHistoryCheckbox.getState()) {
                 g2d.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9));
                 for (PeerEntry entry : Can2dVisualizer.this.cache) {
-                    Zone<StringElement> zone = entry.getZone();
+                    Zone<StringCoordinate> zone = entry.getZone();
                     xMin = this.getXmin(zone);
                     yMin = this.getYmin(zone);
 
@@ -373,7 +373,7 @@ public class Can2dVisualizer extends JFrame {
 
     private static class PeerEntry {
 
-        private final Zone<StringElement> zone;
+        private final Zone<StringCoordinate> zone;
 
         private final List<SplitEntry> splitHistory;
 
@@ -381,11 +381,11 @@ public class Can2dVisualizer extends JFrame {
 
         private final Peer stub;
 
-        private final List<Zone<StringElement>> neighbors;
+        private final List<Zone<StringCoordinate>> neighbors;
 
         public PeerEntry(final OverlayId id, final Peer stub,
-                final Zone<StringElement> zone,
-                final List<Zone<StringElement>> neighbors,
+                final Zone<StringCoordinate> zone,
+                final List<Zone<StringCoordinate>> neighbors,
                 List<SplitEntry> splitHistory) {
             this.id = id;
             this.stub = stub;
@@ -398,7 +398,7 @@ public class Can2dVisualizer extends JFrame {
             return this.id;
         }
 
-        public Zone<StringElement> getZone() {
+        public Zone<StringCoordinate> getZone() {
             return this.zone;
         }
 
@@ -406,7 +406,7 @@ public class Can2dVisualizer extends JFrame {
             return this.stub;
         }
 
-        public List<Zone<StringElement>> getNeighbors() {
+        public List<Zone<StringCoordinate>> getNeighbors() {
             return this.neighbors;
         }
 
@@ -453,7 +453,7 @@ public class Can2dVisualizer extends JFrame {
             this.cacheEntries.clear();
         }
 
-        public PeerEntry findBy(Zone<StringElement> zone) {
+        public PeerEntry findBy(Zone<StringCoordinate> zone) {
             this.fixCacheCoherence();
 
             for (PeerEntry entry : this.cacheEntries.values()) {
@@ -479,12 +479,12 @@ public class Can2dVisualizer extends JFrame {
             for (PeerEntry entry : this.cacheEntries.values()) {
                 if (entry.getZone()
                         .contains(
-                                new Coordinate<StringElement>(
-                                        new StringElement(
+                                new Point<StringCoordinate>(
+                                        new StringCoordinate(
                                                 new String(
                                                         Character.toChars((int) (x
                                                                 / scaleWidth + P2PStructuredProperties.CAN_LOWER_BOUND.getValue())))),
-                                        new StringElement(
+                                        new StringCoordinate(
                                                 new String(
                                                         Character.toChars((int) (y
                                                                 / scaleHeight + P2PStructuredProperties.CAN_LOWER_BOUND.getValue()))))))) {
@@ -512,15 +512,15 @@ public class Can2dVisualizer extends JFrame {
         }
 
         private void populate(OverlayId id) {
-            NeighborTable<StringElement> table = null;
-            List<Zone<StringElement>> neighbors =
-                    new ArrayList<Zone<StringElement>>();
+            NeighborTable<StringCoordinate> table = null;
+            List<Zone<StringCoordinate>> neighbors =
+                    new ArrayList<Zone<StringCoordinate>>();
             Peer peerStub = this.stubEntries.get(id);
 
             for (byte dim = 0; dim < 2; dim++) {
                 for (byte dir = 0; dir < 2; dir++) {
                     table = CanOperations.getNeighborTable(peerStub);
-                    for (NeighborEntry<StringElement> entry : table.get(
+                    for (NeighborEntry<StringCoordinate> entry : table.get(
                             dim, dir).values()) {
                         neighbors.add(entry.getZone());
                     }
@@ -528,15 +528,15 @@ public class Can2dVisualizer extends JFrame {
             }
 
             @SuppressWarnings("unchecked")
-            GetSplitHistoryResponseOperation<StringElement> splitHistory =
-                    (GetSplitHistoryResponseOperation<StringElement>) PAFuture.getFutureValue(peerStub.receive(new GetSplitHistoryOperation<StringElement>()));
+            GetSplitHistoryResponseOperation<StringCoordinate> splitHistory =
+                    (GetSplitHistoryResponseOperation<StringCoordinate>) PAFuture.getFutureValue(peerStub.receive(new GetSplitHistoryOperation<StringCoordinate>()));
 
             this.cacheEntries.put(
                     id,
                     new PeerEntry(
                             id,
                             peerStub,
-                            CanOperations.<StringElement> getIdAndZoneResponseOperation(
+                            CanOperations.<StringCoordinate> getIdAndZoneResponseOperation(
                                     peerStub)
                                     .getPeerZone(), neighbors,
                             splitHistory.getSplitHistory()));
@@ -545,24 +545,24 @@ public class Can2dVisualizer extends JFrame {
 
     @SuppressWarnings("unused")
     private static final class PrintSplitHistoryRequest extends
-            MulticastRequest<StringElement> {
+            MulticastRequest<StringCoordinate> {
 
         private static final long serialVersionUID = 160L;
 
         public PrintSplitHistoryRequest() {
-            super(new BroadcastConstraintsValidator<StringElement>(
-                    new Coordinate<StringElement>(null, null)));
+            super(new BroadcastConstraintsValidator<StringCoordinate>(
+                    new Point<StringCoordinate>(null, null)));
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public FloodingBroadcastRequestRouter<MulticastRequest<StringElement>, StringElement> getRouter() {
-            return new FloodingBroadcastRequestRouter<MulticastRequest<StringElement>, StringElement>() {
+        public FloodingBroadcastRequestRouter<MulticastRequest<StringCoordinate>, StringCoordinate> getRouter() {
+            return new FloodingBroadcastRequestRouter<MulticastRequest<StringCoordinate>, StringCoordinate>() {
                 @Override
-                public void onPeerValidatingKeyConstraints(CanOverlay<StringElement> overlay,
-                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest<StringElement> request) {
+                public void onPeerValidatingKeyConstraints(CanOverlay<StringCoordinate> overlay,
+                                                           org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest<StringCoordinate> request) {
                     System.err.println("Peer " + overlay.getZone());
                     for (SplitEntry entry : overlay.getSplitHistory()) {
                         System.err.println("  " + entry);

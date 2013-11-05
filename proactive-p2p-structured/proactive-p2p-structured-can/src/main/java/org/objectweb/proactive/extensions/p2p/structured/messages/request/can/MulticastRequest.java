@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.ReversePathSta
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
@@ -34,11 +34,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
  * constraints (i.e. the coordinates to reach).
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> {
+public class MulticastRequest<E extends Coordinate> extends Request<Point<E>> {
 
     private static final long serialVersionUID = 160L;
 
@@ -67,7 +67,7 @@ public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> 
      */
     public MulticastRequest(
             MulticastConstraintsValidator<E> validator,
-            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> responseProvider) {
+            ResponseProvider<? extends MulticastResponse<E>, Point<E>> responseProvider) {
         super(validator, responseProvider);
 
         this.reversePathStack = new ReversePathStack<E>();
@@ -89,7 +89,7 @@ public class MulticastRequest<E extends Element> extends Request<Coordinate<E>> 
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends Message<Coordinate<E>>, Coordinate<E>> getRouter() {
+    public Router<? extends Message<Point<E>>, Point<E>> getRouter() {
         return new FloodingBroadcastRequestRouter<MulticastRequest<E>, E>();
     }
 

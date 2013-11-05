@@ -37,7 +37,7 @@ import com.hp.hpl.jena.graph.Node;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Defines methods to record statistics about {@link Quadruple}s which are
@@ -94,7 +94,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public SemanticElement computeSplitEstimation(byte dimension) {
+    public SemanticCoordinate computeSplitEstimation(byte dimension) {
         Apfloat estimatedSplitValue = null;
 
         if (this.nbQuadruples.get() == 0) {
@@ -120,7 +120,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
                         "Invalid dimension specified: " + dimension);
         }
 
-        return new SemanticElement(estimatedSplitValue);
+        return new SemanticCoordinate(estimatedSplitValue);
     }
 
     /**

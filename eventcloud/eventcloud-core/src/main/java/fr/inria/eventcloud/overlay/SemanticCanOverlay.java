@@ -41,7 +41,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntr
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +76,7 @@ import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 import fr.inria.eventcloud.load_balancing.criteria.NbQuadrupleStoredCriterion;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 import fr.inria.eventcloud.pubsub.SubscriberConnectionFailure;
@@ -88,7 +88,7 @@ import fr.inria.eventcloud.reasoner.SparqlColander;
  * 
  * @author lpellegr
  */
-public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
+public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
     private static final Logger log =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
@@ -603,7 +603,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    protected Zone<SemanticElement> newZone() {
+    protected Zone<SemanticCoordinate> newZone() {
         return new SemanticZone();
     }
 
@@ -695,7 +695,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<SemanticElement> msg) {
+    public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<SemanticCoordinate> msg) {
         this.getPublishSubscribeOperationsDelayer().flush();
 
         // We have to sync in order to ensure that there is no background
@@ -733,7 +733,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     @SuppressWarnings("unchecked")
     public SemanticData retrieveDataIn(Object interval) {
-        return this.retrieveDataIn((Zone<SemanticElement>) interval, false);
+        return this.retrieveDataIn((Zone<SemanticCoordinate>) interval, false);
     }
 
     /**
@@ -742,10 +742,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
     @Override
     @SuppressWarnings("unchecked")
     public SemanticData removeDataIn(Object interval) {
-        return this.retrieveDataIn((Zone<SemanticElement>) interval, true);
+        return this.retrieveDataIn((Zone<SemanticCoordinate>) interval, true);
     }
 
-    private SemanticData retrieveDataIn(Zone<SemanticElement> zone,
+    private SemanticData retrieveDataIn(Zone<SemanticCoordinate> zone,
                                         boolean remove) {
         List<Quadruple> miscData = this.retrieveMiscDataIn(zone, remove);
 
@@ -755,9 +755,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         return new SemanticData(miscData, subscriptions);
     }
 
-    private List<Quadruple> retrieveMiscDataIn(Zone<SemanticElement> zone,
+    private List<Quadruple> retrieveMiscDataIn(Zone<SemanticCoordinate> zone,
                                                boolean remove) {
-        SemanticElement graph, subject, predicate, object;
+        SemanticCoordinate graph, subject, predicate, object;
 
         List<Quadruple> result = new ArrayList<Quadruple>();
 
@@ -770,10 +770,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
             while (it.hasNext()) {
                 Quadruple quad = it.next();
 
-                graph = new SemanticElement(quad.getGraph());
-                subject = new SemanticElement(quad.getSubject());
-                predicate = new SemanticElement(quad.getPredicate());
-                object = new SemanticElement(quad.getObject());
+                graph = new SemanticCoordinate(quad.getGraph());
+                subject = new SemanticCoordinate(quad.getSubject());
+                predicate = new SemanticCoordinate(quad.getPredicate());
+                object = new SemanticCoordinate(quad.getObject());
 
                 if (graph.compareTo(zone.getLowerBound((byte) 0)) >= 0
                         && graph.compareTo(zone.getUpperBound((byte) 0)) < 0
@@ -799,7 +799,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
         return result;
     }
 
-    private List<Quadruple> retrieveSubscriptionsIn(Zone<SemanticElement> zone,
+    private List<Quadruple> retrieveSubscriptionsIn(Zone<SemanticCoordinate> zone,
                                                     boolean remove) {
         TransactionalDatasetGraph txnGraph =
                 this.subscriptionsDatastore.begin(AccessMode.READ_ONLY);
@@ -825,10 +825,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 Node o = binding.get(Var.alloc("o"));
 
                 // nodes after prefix removal
-                String gwp = SemanticElement.removePrefix(g);
-                String swp = SemanticElement.removePrefix(s);
-                String pwp = SemanticElement.removePrefix(p);
-                String owp = SemanticElement.removePrefix(o);
+                String gwp = SemanticCoordinate.removePrefix(g);
+                String swp = SemanticCoordinate.removePrefix(s);
+                String pwp = SemanticCoordinate.removePrefix(p);
+                String owp = SemanticCoordinate.removePrefix(o);
 
                 boolean gIsVar = isVariable(g);
                 boolean sIsVar = isVariable(s);
@@ -941,7 +941,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                         PublishSubscribeConstants.SUBSCRIPTION_VARIABLE_VALUE);
     }
 
-    private static boolean isSubscriptionManagedByZone(Zone<SemanticElement> zone,
+    private static boolean isSubscriptionManagedByZone(Zone<SemanticCoordinate> zone,
                                                        String gwp, String swp,
                                                        String pwp, String owp,
                                                        boolean gIsVar,
@@ -1019,12 +1019,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    protected HomogenousPair<? extends Zone<SemanticElement>> splitZones(byte dimension) {
+    protected HomogenousPair<? extends Zone<SemanticCoordinate>> splitZones(byte dimension) {
         try {
             if (!EventCloudProperties.isStaticLoadBalancingEnabled()) {
                 return super.splitZones(dimension);
             } else {
-                SemanticElement estimatedMiddle =
+                SemanticCoordinate estimatedMiddle =
                         this.miscDatastore.getStatsRecorder()
                                 .computeSplitEstimation(dimension);
 
@@ -1035,13 +1035,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticElement> {
                 }
 
                 try {
-                    Coordinate<SemanticElement> lowerBoundCopy =
+                    Point<SemanticCoordinate> lowerBoundCopy =
                             super.zone.getLowerBound().clone();
-                    Coordinate<SemanticElement> upperBoundCopy =
+                    Point<SemanticCoordinate> upperBoundCopy =
                             super.zone.getUpperBound().clone();
 
-                    lowerBoundCopy.setElement(dimension, estimatedMiddle);
-                    upperBoundCopy.setElement(dimension, estimatedMiddle);
+                    lowerBoundCopy.setCoordinate(dimension, estimatedMiddle);
+                    upperBoundCopy.setCoordinate(dimension, estimatedMiddle);
 
                     return HomogenousPair.createHomogenous(
                             new SemanticZone(

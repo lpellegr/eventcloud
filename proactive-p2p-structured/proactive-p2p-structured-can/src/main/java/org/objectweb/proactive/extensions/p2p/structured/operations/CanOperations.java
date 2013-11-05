@@ -29,7 +29,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * CanOperations provides several static methods to perform operations on a
@@ -48,48 +48,48 @@ public final class CanOperations {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends Element> GetIdAndZoneResponseOperation<E> getIdAndZoneResponseOperation(Peer peer) {
+    public static <E extends Coordinate> GetIdAndZoneResponseOperation<E> getIdAndZoneResponseOperation(Peer peer) {
         return (GetIdAndZoneResponseOperation<E>) PAFuture.getFutureValue(peer.receive(new GetIdAndZoneOperation<E>()));
     }
 
-    public static <E extends Element> boolean hasNeighbor(Peer peer,
-                                                          OverlayId neighborID) {
+    public static <E extends Coordinate> boolean hasNeighbor(Peer peer,
+                                                             OverlayId neighborID) {
         return ((BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new HasNeighborOperation<E>(
                 neighborID)))).getValue();
     }
 
-    public static <E extends Element> void insertNeighbor(Peer peer,
-                                                          NeighborEntry<E> entry,
-                                                          byte dimension,
-                                                          byte direction) {
+    public static <E extends Coordinate> void insertNeighbor(Peer peer,
+                                                             NeighborEntry<E> entry,
+                                                             byte dimension,
+                                                             byte direction) {
         PAFuture.waitFor(peer.receive(new InsertNeighborOperation<E>(
                 entry, dimension, direction)));
     }
 
-    public static <E extends Element> BooleanResponseOperation removeNeighbor(Peer peer,
-                                                                              OverlayId peerIdentifier) {
+    public static <E extends Coordinate> BooleanResponseOperation removeNeighbor(Peer peer,
+                                                                                 OverlayId peerIdentifier) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
                 peerIdentifier)));
     }
 
-    public static <E extends Element> BooleanResponseOperation removeNeighbor(Peer peer,
-                                                                              OverlayId peerIdentifier,
-                                                                              byte dimension,
-                                                                              byte direction) {
+    public static <E extends Coordinate> BooleanResponseOperation removeNeighbor(Peer peer,
+                                                                                 OverlayId peerIdentifier,
+                                                                                 byte dimension,
+                                                                                 byte direction) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
                 peerIdentifier, dimension, direction)));
     }
 
-    public static <E extends Element> void updateNeighborOperation(Peer peer,
-                                                                   NeighborEntry<E> entry,
-                                                                   byte dimension,
-                                                                   byte direction) {
+    public static <E extends Coordinate> void updateNeighborOperation(Peer peer,
+                                                                      NeighborEntry<E> entry,
+                                                                      byte dimension,
+                                                                      byte direction) {
         PAFuture.waitFor(peer.receive(new UpdateNeighborOperation<E>(
                 entry, dimension, direction)));
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends Element> NeighborTable<E> getNeighborTable(Peer peer) {
+    public static <E extends Coordinate> NeighborTable<E> getNeighborTable(Peer peer) {
         return ((GenericResponseOperation<NeighborTable<E>>) PAFuture.getFutureValue(peer.receive(new GetNeighborTableOperation<E>()))).getValue();
     }
 

@@ -23,15 +23,15 @@ import java.io.ObjectOutputStream;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.UnicastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.overlay.can.SemanticPointFactory;
 
 /**
  * QuadrupleRequest is a request that is used to reach the peer which manages
@@ -40,7 +40,8 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * 
  * @author lpellegr
  */
-public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
+public abstract class QuadrupleRequest extends
+        ForwardRequest<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
@@ -49,20 +50,20 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
     public QuadrupleRequest(Quadruple quad) {
         this(
                 quad,
-                new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
+                new ResponseProvider<ForwardResponse<SemanticCoordinate>, Point<SemanticCoordinate>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
-                    public ForwardResponse<SemanticElement> get() {
-                        return new ForwardResponse<SemanticElement>();
+                    public ForwardResponse<SemanticCoordinate> get() {
+                        return new ForwardResponse<SemanticCoordinate>();
                     }
                 });
     }
 
     public QuadrupleRequest(
             Quadruple quad,
-            ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>> responseProvider) {
-        super(SemanticCoordinateFactory.newSemanticCoordinate(quad),
+            ResponseProvider<ForwardResponse<SemanticCoordinate>, Point<SemanticCoordinate>> responseProvider) {
+        super(SemanticPointFactory.newSemanticCoordinate(quad),
                 responseProvider);
         this.quadruple = quad;
     }
@@ -75,11 +76,11 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    public Router<ForwardRequest<SemanticElement>, Coordinate<SemanticElement>> getRouter() {
-        return new UnicastRequestRouter<ForwardRequest<SemanticElement>, SemanticElement>() {
+    public Router<ForwardRequest<SemanticCoordinate>, Point<SemanticCoordinate>> getRouter() {
+        return new UnicastRequestRouter<ForwardRequest<SemanticCoordinate>, SemanticCoordinate>() {
             @Override
             protected void onDestinationReached(StructuredOverlay overlay,
-                                                ForwardRequest<SemanticElement> msg) {
+                                                ForwardRequest<SemanticCoordinate> msg) {
                 QuadrupleRequest.this.onDestinationReached(
                         overlay, QuadrupleRequest.this.getQuadruple());
             };
@@ -115,8 +116,8 @@ public abstract class QuadrupleRequest extends ForwardRequest<SemanticElement> {
         stream.defaultReadObject();
 
         super.constraintsValidator =
-                new UnicastConstraintsValidator<SemanticElement>(
-                        SemanticCoordinateFactory.newSemanticCoordinate(this.quadruple));
+                new UnicastConstraintsValidator<SemanticCoordinate>(
+                        SemanticPointFactory.newSemanticCoordinate(this.quadruple));
     }
 
 }

@@ -20,22 +20,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 /**
- * Test cases for {@link StringElement}.
+ * Test cases for {@link StringCoordinate}.
  * 
  * @author lpellegr
  */
 public class StringElementTest {
 
-    private StringElement eltA;
+    private StringCoordinate eltA;
 
-    private StringElement eltB;
+    private StringCoordinate eltB;
 
     @Before
     public void setUp() {
-        this.eltA = new StringElement("hello");
-        this.eltB = new StringElement("world");
+        this.eltA = new StringCoordinate("hello");
+        this.eltB = new StringCoordinate("world");
     }
 
     @Test
@@ -88,7 +90,7 @@ public class StringElementTest {
     public void testNormalization1() {
         Assert.assertEquals(
                 1,
-                new StringElement(
+                new StringCoordinate(
                         P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()).normalize(
                         0, 1), 1e-9);
     }
@@ -97,17 +99,17 @@ public class StringElementTest {
     public void testNormalization2() {
         Assert.assertEquals(
                 0,
-                new StringElement(
+                new StringCoordinate(
                         P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()).normalize(
                         0, 1), 1e-9);
     }
 
     @Test
     public void testSplitMiddleRecursively() {
-        StringElement middleElement = this.eltA;
+        StringCoordinate middleElement = this.eltA;
 
         for (int nbSplits = 0; nbSplits < 1e3; nbSplits++) {
-            middleElement = Element.middle(middleElement, this.eltB);
+            middleElement = Coordinate.middle(middleElement, this.eltB);
             Assert.assertTrue(middleElement.compareTo(this.eltB) < 0);
         }
     }

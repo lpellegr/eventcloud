@@ -19,7 +19,7 @@ package fr.inria.eventcloud.messages.request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -27,7 +27,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.messages.response.BooleanForwardResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * A ContainsQuadrupleRequest is a request that is used to know if there is a
@@ -43,16 +43,16 @@ public class ContainsQuadrupleRequest extends QuadrupleRequest {
     public ContainsQuadrupleRequest(final Quadruple quad) {
         super(
                 quad,
-                new ResponseProvider<ForwardResponse<SemanticElement>, Coordinate<SemanticElement>>() {
+                new ResponseProvider<ForwardResponse<SemanticCoordinate>, Point<SemanticCoordinate>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
-                    public ForwardResponse<SemanticElement> get() {
+                    public ForwardResponse<SemanticCoordinate> get() {
                         return new BooleanForwardResponse() {
                             private static final long serialVersionUID = 160L;
 
                             @Override
-                            public void setAttributes(Request<Coordinate<SemanticElement>> request,
+                            public void setAttributes(Request<Point<SemanticCoordinate>> request,
                                                       StructuredOverlay overlay) {
                                 super.setAttributes(request, overlay);
 

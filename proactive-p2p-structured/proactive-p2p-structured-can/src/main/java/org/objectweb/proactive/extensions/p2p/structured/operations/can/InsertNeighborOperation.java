@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * This operation is used to insert a {@link NeighborEntry} at the specified
@@ -29,11 +29,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * message.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class InsertNeighborOperation<E extends Element> extends
+public class InsertNeighborOperation<E extends Coordinate> extends
         JoinNeighborsManagementOperation {
 
     private static final long serialVersionUID = 160L;

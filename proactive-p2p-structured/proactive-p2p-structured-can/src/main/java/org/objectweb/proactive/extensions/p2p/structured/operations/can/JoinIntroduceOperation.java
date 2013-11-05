@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * This operation is used to performed the join introduce phase: it aks to the
@@ -30,14 +30,14 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * updates the neighbors .
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  * 
  * @see CanOverlay#join(Peer)
  * @see CanOverlay#handleJoinIntroduceOperation(JoinIntroduceOperation)
  */
-public class JoinIntroduceOperation<E extends Element> extends
+public class JoinIntroduceOperation<E extends Coordinate> extends
         CallableOperation {
 
     private static final long serialVersionUID = 160L;

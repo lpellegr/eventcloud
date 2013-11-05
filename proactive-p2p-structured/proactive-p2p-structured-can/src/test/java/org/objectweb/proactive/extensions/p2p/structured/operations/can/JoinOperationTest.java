@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActiv
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 /**
  * Test cases associated to {@link CanOverlay#join(Peer)}.
@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * @author lpellegr
  */
 public class JoinOperationTest extends
-        JunitByMethodCanNetworkDeployer<StringElement> {
+        JunitByMethodCanNetworkDeployer<StringCoordinate> {
 
     public JoinOperationTest() {
         super(new StringCanDeploymentDescriptor());

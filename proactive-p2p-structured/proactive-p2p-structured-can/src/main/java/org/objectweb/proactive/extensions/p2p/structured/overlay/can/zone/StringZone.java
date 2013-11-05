@@ -17,23 +17,23 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 
 /**
- * A {@link Zone} semiskilled for {@link StringElement}s.
+ * A {@link Zone} semiskilled for {@link StringCoordinate}s.
  * 
  * @author lpellegr
  */
-public final class StringZone extends UnicodeZone<StringElement> {
+public final class StringZone extends UnicodeZone<StringCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
     public StringZone() {
         super(
-                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
-                CoordinateFactory.newStringCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
+                PointFactory.newStringCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
+                PointFactory.newStringCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
     }
 
     /**
@@ -45,8 +45,8 @@ public final class StringZone extends UnicodeZone<StringElement> {
      * @param upperBound
      *            the upper bound coordinate.
      */
-    public StringZone(Coordinate<StringElement> lowerBound,
-            Coordinate<StringElement> upperBound) {
+    public StringZone(Point<StringCoordinate> lowerBound,
+            Point<StringCoordinate> upperBound) {
         super(lowerBound, upperBound);
     }
 
@@ -54,8 +54,8 @@ public final class StringZone extends UnicodeZone<StringElement> {
      * {@inheritDoc}
      */
     @Override
-    protected UnicodeZone<StringElement> newZone(Coordinate<StringElement> lowerBound,
-                                                 Coordinate<StringElement> upperBound) {
+    protected UnicodeZone<StringCoordinate> newZone(Point<StringCoordinate> lowerBound,
+                                                    Point<StringCoordinate> upperBound) {
         return new StringZone(lowerBound, upperBound);
     }
 

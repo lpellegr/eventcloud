@@ -28,7 +28,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.StringZone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
@@ -37,7 +37,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * @author lpellegr
  */
 public class LeaveOperationTest extends
-        JunitByMethodCanNetworkDeployer<StringElement> {
+        JunitByMethodCanNetworkDeployer<StringCoordinate> {
 
     public LeaveOperationTest() {
         super(new StringCanDeploymentDescriptor());
@@ -45,17 +45,19 @@ public class LeaveOperationTest extends
 
     @Test
     public void testCanMerge() {
-        UnicodeZone<StringElement> z1 = new StringZone();
-        HomogenousPair<UnicodeZone<StringElement>> z1Split = z1.split((byte) 0);
-        UnicodeZone<StringElement> z2 = z1Split.getFirst();
-        UnicodeZone<StringElement> z3 = z1Split.getSecond();
+        UnicodeZone<StringCoordinate> z1 = new StringZone();
+        HomogenousPair<UnicodeZone<StringCoordinate>> z1Split =
+                z1.split((byte) 0);
+        UnicodeZone<StringCoordinate> z2 = z1Split.getFirst();
+        UnicodeZone<StringCoordinate> z3 = z1Split.getSecond();
 
         // two zones: z1, z2
         assertTrue(z2.canMerge(z3, (byte) 0));
 
-        HomogenousPair<UnicodeZone<StringElement>> z3Split = z3.split((byte) 1);
-        UnicodeZone<StringElement> z4 = z3Split.getFirst();
-        UnicodeZone<StringElement> z5 = z3Split.getSecond();
+        HomogenousPair<UnicodeZone<StringCoordinate>> z3Split =
+                z3.split((byte) 1);
+        UnicodeZone<StringCoordinate> z4 = z3Split.getFirst();
+        UnicodeZone<StringCoordinate> z5 = z3Split.getSecond();
 
         // three zones: z2, z4, z5
         assertFalse(z2.canMerge(z4, (byte) 0));

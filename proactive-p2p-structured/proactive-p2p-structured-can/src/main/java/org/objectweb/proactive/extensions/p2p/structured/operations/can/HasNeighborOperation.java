@@ -21,20 +21,21 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOper
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Operation used to know if the peer which handles the operation has a neighbor
  * corresponding to the given UUID.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  * 
  * @see CanOverlay#hasNeighbor(OverlayId)
  */
-public class HasNeighborOperation<E extends Element> extends CallableOperation {
+public class HasNeighborOperation<E extends Coordinate> extends
+        CallableOperation {
 
     private static final long serialVersionUID = 160L;
 

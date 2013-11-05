@@ -23,18 +23,18 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Operation used in order to update a {@link Zone} of a neighbor cached in the
  * {@link NeighborTable} of the peer which handles it.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class UpdateNeighborOperation<E extends Element> extends
+public class UpdateNeighborOperation<E extends Coordinate> extends
         JoinNeighborsManagementOperation {
 
     private static final long serialVersionUID = 160L;
