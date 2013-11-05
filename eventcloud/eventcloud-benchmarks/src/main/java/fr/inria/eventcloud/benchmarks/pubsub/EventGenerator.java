@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentation;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
@@ -39,8 +39,8 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.overlay.can.SemanticPointFactory;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 
 /**
@@ -210,8 +210,8 @@ public class EventGenerator {
                 graphNode, nodes[0], nodes[1], nodes[2], false, false);
     }
 
-    public static Node randomNode(SemanticElement lowerBoundElement,
-                                  SemanticElement upperBoundElement,
+    public static Node randomNode(SemanticCoordinate lowerBoundElement,
+                                  SemanticCoordinate upperBoundElement,
                                   int sequenceNumber, int nodeSize) {
 
         int[] lbCodePoints =
@@ -282,7 +282,7 @@ public class EventGenerator {
         List<SemanticZone> zones = new ArrayList<SemanticZone>();
 
         for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
-            GetIdAndZoneResponseOperation<SemanticElement> response =
+            GetIdAndZoneResponseOperation<SemanticCoordinate> response =
                     CanOperations.getIdAndZoneResponseOperation(p);
             zones.add((SemanticZone) response.getPeerZone());
         }
@@ -311,8 +311,8 @@ public class EventGenerator {
             System.out.println("  "
                     + q.toString(StringRepresentation.CODE_POINTS));
 
-            Coordinate<SemanticElement> sc =
-                    SemanticCoordinateFactory.newSemanticCoordinate(q);
+            Point<SemanticCoordinate> sc =
+                    SemanticPointFactory.newSemanticCoordinate(q);
 
             for (SemanticZone z : zones) {
                 if (z.contains(sc)) {

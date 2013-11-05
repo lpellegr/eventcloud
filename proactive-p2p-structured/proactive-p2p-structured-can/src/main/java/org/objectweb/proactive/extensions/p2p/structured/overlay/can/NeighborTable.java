@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 import com.google.common.collect.ImmutableList;
@@ -36,11 +36,11 @@ import com.google.common.collect.ImmutableList.Builder;
  * CAN where neighbors are in a specified dimension and direction.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class NeighborTable<E extends Element> implements Serializable {
+public class NeighborTable<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 

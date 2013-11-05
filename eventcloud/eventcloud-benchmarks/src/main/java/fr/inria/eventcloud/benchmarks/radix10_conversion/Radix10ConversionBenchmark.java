@@ -38,7 +38,7 @@ import com.google.common.base.Stopwatch;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.sparql.core.Quad;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * A simple benchmark to test the influence of the precision on execution time.
@@ -129,10 +129,10 @@ public class Radix10ConversionBenchmark {
                     statsWithoutPrefixRemoval.addValue(size(quad.getObject()));
                 }
 
-                String g = SemanticElement.removePrefix(quad.getGraph());
-                String s = SemanticElement.removePrefix(quad.getSubject());
-                String p = SemanticElement.removePrefix(quad.getPredicate());
-                String o = SemanticElement.removePrefix(quad.getObject());
+                String g = SemanticCoordinate.removePrefix(quad.getGraph());
+                String s = SemanticCoordinate.removePrefix(quad.getSubject());
+                String p = SemanticCoordinate.removePrefix(quad.getPredicate());
+                String o = SemanticCoordinate.removePrefix(quad.getObject());
 
                 if (this.enableRdfStats) {
                     // compute stats with prefix removal

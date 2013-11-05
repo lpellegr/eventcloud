@@ -23,7 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Mu
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * List used by {@link MulticastRequest} and {@link MulticastResponse} to store
@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class ReversePathStack<E extends Element> extends
+public class ReversePathStack<E extends Coordinate> extends
         LinkedList<ReversePathEntry<E>> {
 
     private static final long serialVersionUID = 160L;

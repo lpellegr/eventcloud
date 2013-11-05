@@ -19,7 +19,7 @@ package fr.inria.eventcloud.messages.response;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.ForwardRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.ForwardResponse;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * A response that may be associated to a {@link ForwardRequest}. The response
@@ -27,7 +27,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * 
  * @author lpellegr
  */
-public class BooleanForwardResponse extends ForwardResponse<SemanticElement> {
+public class BooleanForwardResponse extends ForwardResponse<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 

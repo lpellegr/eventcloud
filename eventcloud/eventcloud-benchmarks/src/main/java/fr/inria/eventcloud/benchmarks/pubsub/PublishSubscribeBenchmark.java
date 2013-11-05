@@ -92,8 +92,8 @@ import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.overlay.can.SemanticPointFactory;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.proxies.PutGetProxy;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
@@ -972,7 +972,7 @@ public class PublishSubscribeBenchmark {
 
                     for (int k = 0; k < zones.length; k++) {
 
-                        if (zones[k].contains(SemanticCoordinateFactory.newSemanticCoordinate(q))) {
+                        if (zones[k].contains(SemanticPointFactory.newSemanticCoordinate(q))) {
                             distribution[k] = distribution[k] + 1;
 
                             belongs = true;
@@ -1049,7 +1049,7 @@ public class PublishSubscribeBenchmark {
         List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
 
         for (int i = 0; i < zones.length; i++) {
-            GetIdAndZoneResponseOperation<SemanticElement> response =
+            GetIdAndZoneResponseOperation<SemanticCoordinate> response =
                     CanOperations.getIdAndZoneResponseOperation(peers.get(i));
             SemanticZone zone = (SemanticZone) response.getPeerZone();
             zones[i] = zone;

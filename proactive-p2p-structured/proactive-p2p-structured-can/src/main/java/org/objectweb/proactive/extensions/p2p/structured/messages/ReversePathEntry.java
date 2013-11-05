@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Mu
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 /**
  * Contains information about {@link Peer}s met while routing a
@@ -30,24 +30,24 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class ReversePathEntry<E extends Element> implements Serializable {
+public class ReversePathEntry<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
     private final OverlayId peerId;
 
-    private final Coordinate<E> peerLowerCoordinate;
+    private final Point<E> peerLowerCoordinate;
 
     public OverlayId getPeerId() {
         return this.peerId;
     }
 
-    public ReversePathEntry(OverlayId peerID, Coordinate<E> peerLowerCoordinate) {
+    public ReversePathEntry(OverlayId peerID, Point<E> peerLowerCoordinate) {
         this.peerId = peerID;
         this.peerLowerCoordinate = peerLowerCoordinate;
     }
 
-    public Coordinate<E> getPeerCoordinate() {
+    public Point<E> getPeerCoordinate() {
         return this.peerLowerCoordinate;
     }
 

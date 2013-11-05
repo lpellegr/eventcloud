@@ -24,18 +24,18 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOper
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.SplitEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Response associated to {@link JoinIntroduceOperation}. This response contains
  * some information that have to be affected to the peer which join the network.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class JoinIntroduceResponseOperation<E extends Element> implements
+public class JoinIntroduceResponseOperation<E extends Coordinate> implements
         ResponseOperation {
 
     private static final long serialVersionUID = 160L;

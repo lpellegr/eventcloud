@@ -22,7 +22,7 @@ import org.apfloat.Apfloat;
 
 import com.hp.hpl.jena.graph.Node;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Defines operation available on any StatsRecorder.
@@ -43,7 +43,7 @@ public interface StatsRecorder extends Serializable {
 
     Apfloat computeObjectEstimation();
 
-    SemanticElement computeSplitEstimation(byte dimension);
+    SemanticCoordinate computeSplitEstimation(byte dimension);
 
     /**
      * Returns the number of quadruples which have been recorded.

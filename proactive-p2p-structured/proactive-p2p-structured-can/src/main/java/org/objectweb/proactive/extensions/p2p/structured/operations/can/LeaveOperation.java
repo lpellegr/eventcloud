@@ -26,18 +26,18 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * {@code LeaveOperation} is used to transfer information from the peer which
  * leaves to the peer which takes over the zone.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LeaveOperation<E extends Element> extends CallableOperation {
+public class LeaveOperation<E extends Coordinate> extends CallableOperation {
 
     private static final long serialVersionUID = 160L;
 

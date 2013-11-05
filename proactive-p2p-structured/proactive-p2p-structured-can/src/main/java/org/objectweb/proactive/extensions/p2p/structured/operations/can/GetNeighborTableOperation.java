@@ -21,18 +21,18 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.GenericRespo
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Operation used to retrieve the {@link NeighborTable} of the peer which
  * handles the message.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class GetNeighborTableOperation<E extends Element> extends
+public class GetNeighborTableOperation<E extends Coordinate> extends
         CallableOperation {
 
     private static final long serialVersionUID = 160L;

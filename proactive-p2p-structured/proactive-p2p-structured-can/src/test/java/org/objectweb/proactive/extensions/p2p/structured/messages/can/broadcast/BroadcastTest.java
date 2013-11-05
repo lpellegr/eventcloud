@@ -20,8 +20,8 @@ import java.io.File;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.logger.JobLogger;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 /**
  * This class runs a local experiment to compare different algorithms that can
@@ -46,9 +46,9 @@ public class BroadcastTest {
      */
     private static int nbDimensions = 4;
     /** The constraint used for the second test */
-    private static final Coordinate<StringElement> constraint =
-            new Coordinate<StringElement>(
-                    new StringElement("j"), new StringElement("j"), null);
+    private static final Point<StringCoordinate> constraint =
+            new Point<StringCoordinate>(
+                    new StringCoordinate("j"), new StringCoordinate("j"), null);
 
     public static void main(String[] args) {
 

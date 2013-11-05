@@ -31,9 +31,9 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.Ef
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
@@ -58,16 +58,16 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
 
     protected int nbPeers;
     protected String logDirectory;
-    protected Coordinate<StringElement> constraint;
+    protected Point<StringCoordinate> constraint;
 
     protected Proxy proxy;
 
     public BroadcastInfrastructure(int nbPeers, String logDirectory,
-            Coordinate<StringElement> constraint, boolean fractalCAN,
+            Point<StringCoordinate> constraint, boolean fractalCAN,
             boolean uniformCAN) {
         super(
                 uniformCAN
-                        ? new CanDeploymentDescriptor<StringElement>(
+                        ? new CanDeploymentDescriptor<StringCoordinate>(
                                 new SerializableProvider<StringCanOverlay>() {
                                     private static final long serialVersionUID =
                                             140L;
@@ -81,7 +81,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                         : fractalCAN
                                 ?
 
-                                new CanDeploymentDescriptor<StringElement>(
+                                new CanDeploymentDescriptor<StringCoordinate>(
                                         new SerializableProvider<StringCanOverlay>() {
                                             private static final long serialVersionUID =
                                                     140L;
@@ -92,7 +92,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
                                             }
                                         }).setInjectionConstraintsProvider(InjectionConstraintsProvider.newFractalInjectionConstraintsProvider())
 
-                                : new CanDeploymentDescriptor<StringElement>(
+                                : new CanDeploymentDescriptor<StringCoordinate>(
                                         new SerializableProvider<StringCanOverlay>() {
                                             private static final long serialVersionUID =
                                                     140L;
@@ -135,16 +135,16 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
     public void measureFloodingBroadcast() throws InterruptedException {
 
         // Sending the broadcast via an AnycastRequest (= flood)
-        Request<Coordinate<StringElement>> request;
+        Request<Point<StringCoordinate>> request;
         if (this.constraint == null) {
             request =
-                    new MulticastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
-                                    CoordinateFactory.newStringCoordinate()));
+                    new MulticastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
+                                    PointFactory.newStringCoordinate()));
         } else {
             request =
-                    new MulticastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
+                    new MulticastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
                                     this.constraint));
         }
         this.printRequestSize(request);
@@ -173,16 +173,16 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
     public void measureEfficientBroadcast() throws InterruptedException {
 
         // Sending the broadcast via an EfficientBroadcastRequest
-        Request<Coordinate<StringElement>> request;
+        Request<Point<StringCoordinate>> request;
         if (this.constraint == null) {
             request =
-                    new EfficientBroadcastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
-                                    CoordinateFactory.newStringCoordinate()));
+                    new EfficientBroadcastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
+                                    PointFactory.newStringCoordinate()));
         } else {
             request =
-                    new EfficientBroadcastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
+                    new EfficientBroadcastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
                                     this.constraint));
         }
         this.printRequestSize(request);
@@ -213,16 +213,16 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
     public void measureOptimalBroadcast() throws InterruptedException {
 
         // Sending the broadcast via an EfficientBroadcastRequest
-        Request<Coordinate<StringElement>> request;
+        Request<Point<StringCoordinate>> request;
         if (this.constraint == null) {
             request =
-                    new OptimalBroadcastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
-                                    CoordinateFactory.newStringCoordinate()));
+                    new OptimalBroadcastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
+                                    PointFactory.newStringCoordinate()));
         } else {
             request =
-                    new OptimalBroadcastRequest<StringElement>(
-                            new BroadcastConstraintsValidator<StringElement>(
+                    new OptimalBroadcastRequest<StringCoordinate>(
+                            new BroadcastConstraintsValidator<StringCoordinate>(
                                     this.constraint));
 
         }
@@ -250,7 +250,7 @@ public class BroadcastInfrastructure extends JunitByClassCanNetworkDeployer {
      * 
      * @param request
      */
-    public void printRequestSize(Request<Coordinate<StringElement>> request) {
+    public void printRequestSize(Request<Point<StringCoordinate>> request) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {

@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.L
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsValidator;
 
 /**
@@ -29,16 +29,16 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.ConstraintsVa
  * {@link LookupResponse}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class UnicastConstraintsValidator<E extends Element> extends
-        ConstraintsValidator<Coordinate<E>> {
+public class UnicastConstraintsValidator<E extends Coordinate> extends
+        ConstraintsValidator<Point<E>> {
 
     private static final long serialVersionUID = 160L;
 
-    public UnicastConstraintsValidator(Coordinate<E> key) {
+    public UnicastConstraintsValidator(Point<E> key) {
         super(key);
     }
 

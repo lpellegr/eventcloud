@@ -23,13 +23,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
@@ -55,23 +55,23 @@ public class AtomicQueryConstraintsValidatorTest {
         P2PStructuredProperties.CAN_NB_DIMENSIONS.setValue((byte) 4);
         this.semanticZone =
                 new SemanticZone(
-                        new Coordinate<SemanticElement>(
-                                new SemanticElement(
+                        new Point<SemanticCoordinate>(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.graph.fr/eventcloud/begin_graph")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.subject.fr/eventcloud/begin_subject")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.predicate.fr/eventcloud/begin_predicate")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.object.fr/eventcloud/begin_object"))),
-                        new Coordinate<SemanticElement>(
-                                new SemanticElement(
+                        new Point<SemanticCoordinate>(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_graph")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_subject")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_predicate")),
-                                new SemanticElement(
+                                new SemanticCoordinate(
                                         NodeFactory.createURI("http://www.unice.fr/eventcloud/stop_object"))));
 
         this.atomicQuery =

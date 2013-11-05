@@ -18,16 +18,16 @@ package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.StringCanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
- * {@link CanDeploymentDescriptor} semiskilled for {@link StringElement}s.
+ * {@link CanDeploymentDescriptor} semiskilled for {@link StringCoordinate}s.
  * 
  * @author lpellegr
  */
 public class StringCanDeploymentDescriptor extends
-        CanDeploymentDescriptor<StringElement> {
+        CanDeploymentDescriptor<StringCoordinate> {
 
     private static final long serialVersionUID = 160L;
 

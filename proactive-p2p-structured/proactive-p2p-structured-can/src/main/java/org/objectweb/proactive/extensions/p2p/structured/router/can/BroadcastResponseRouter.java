@@ -26,7 +26,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborTable;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.UnicastConstraintsValidator;
 import org.slf4j.Logger;
@@ -39,12 +39,12 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            the response type to route.
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends Element>
-        extends Router<MulticastResponse<E>, Coordinate<E>> {
+public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends Coordinate>
+        extends Router<MulticastResponse<E>, Point<E>> {
 
     private static final Logger log =
             LoggerFactory.getLogger(BroadcastResponseRouter.class);
@@ -167,7 +167,8 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends E
         for (; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             direction =
                     canOverlay.getZone().contains(
-                            dimension, response.getKey().getElement(dimension));
+                            dimension,
+                            response.getKey().getCoordinate(dimension));
 
             if (direction == -1) {
                 direction = NeighborTable.DIRECTION_INFERIOR;

@@ -19,7 +19,7 @@ package fr.inria.eventcloud.messages.request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroadcastRequestRouter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
@@ -28,8 +28,8 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
 
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.messages.response.StatelessQuadruplePatternResponse;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinateFactory;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+import fr.inria.eventcloud.overlay.can.SemanticPointFactory;
 
 /**
  * StatelessQuadruplePatternRequest is a {@link QuadruplePattern} that is
@@ -42,7 +42,7 @@ import fr.inria.eventcloud.overlay.can.SemanticElement;
  * @author lpellegr
  */
 public abstract class StatelessQuadruplePatternRequest extends
-        OptimalBroadcastRequest<SemanticElement> {
+        OptimalBroadcastRequest<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
@@ -51,7 +51,7 @@ public abstract class StatelessQuadruplePatternRequest extends
     public StatelessQuadruplePatternRequest(QuadruplePattern quadPattern) {
         this(
                 quadPattern,
-                new ResponseProvider<StatelessQuadruplePatternResponse, Coordinate<SemanticElement>>() {
+                new ResponseProvider<StatelessQuadruplePatternResponse, Point<SemanticCoordinate>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
@@ -63,17 +63,17 @@ public abstract class StatelessQuadruplePatternRequest extends
 
     public StatelessQuadruplePatternRequest(
             QuadruplePattern quadPattern,
-            ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
-        super(new BroadcastConstraintsValidator<SemanticElement>(
-                SemanticCoordinateFactory.newSemanticCoordinate(quadPattern)),
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, Point<SemanticCoordinate>> responseProvider) {
+        super(new BroadcastConstraintsValidator<SemanticCoordinate>(
+                SemanticPointFactory.newSemanticCoordinate(quadPattern)),
                 responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
 
     public StatelessQuadruplePatternRequest(
-            MulticastConstraintsValidator<SemanticElement> validator,
+            MulticastConstraintsValidator<SemanticCoordinate> validator,
             QuadruplePattern quadPattern,
-            ResponseProvider<? extends StatelessQuadruplePatternResponse, Coordinate<SemanticElement>> responseProvider) {
+            ResponseProvider<? extends StatelessQuadruplePatternResponse, Point<SemanticCoordinate>> responseProvider) {
         super(validator, responseProvider);
         this.quadruplePattern = SerializedValue.create(quadPattern);
     }
@@ -85,18 +85,18 @@ public abstract class StatelessQuadruplePatternRequest extends
      * @param overlay
      * @param quadruplePattern
      */
-    public abstract void onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
+    public abstract void onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
                                                         QuadruplePattern quadruplePattern);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
-        return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
+    public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticCoordinate> getRouter() {
+        return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticCoordinate>() {
             @Override
-            public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
-                                                       final MulticastRequest<SemanticElement> request) {
+            public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticCoordinate> overlay,
+                                                       final MulticastRequest<SemanticCoordinate> request) {
                 StatelessQuadruplePatternRequest.this.onPeerValidatingKeyConstraints(
                         overlay,
                         StatelessQuadruplePatternRequest.this.quadruplePattern.getValue());

@@ -25,7 +25,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
@@ -47,7 +47,7 @@ import fr.inria.eventcloud.deployment.cli.converters.EventCloudIdConverter;
 import fr.inria.eventcloud.messages.request.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.messages.response.StatefulQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * This command is used to list subscriptions enabled for a given EC.
@@ -106,7 +106,7 @@ public class ListSubscriptionsCommand extends Command<EventCloudsRegistry> {
         public ListSubscriptionsRequest() {
             super(
                     QuadruplePattern.ANY,
-                    new ResponseProvider<ListSubscriptionsResponse, Coordinate<SemanticElement>>() {
+                    new ResponseProvider<ListSubscriptionsResponse, Point<SemanticCoordinate>>() {
                         private static final long serialVersionUID = 160L;
 
                         @Override
@@ -120,8 +120,8 @@ public class ListSubscriptionsCommand extends Command<EventCloudsRegistry> {
          * {@inheritDoc}
          */
         @Override
-        public Map<String, SubscriptionInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                                                   MulticastRequest<SemanticElement> request,
+        public Map<String, SubscriptionInformation> onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                                                   MulticastRequest<SemanticCoordinate> request,
                                                                                    QuadruplePattern quadruplePattern) {
             TransactionalDatasetGraph txnGraph =
                     ((SemanticCanOverlay) overlay).getSubscriptionsDatastore()

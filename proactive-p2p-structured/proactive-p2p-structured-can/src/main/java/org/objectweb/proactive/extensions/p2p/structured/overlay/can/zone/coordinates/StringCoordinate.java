@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements;
+package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
 
 import org.apfloat.Apfloat;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
@@ -23,27 +23,28 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.StringRepresentat
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 
 /**
- * Embodies a String coordinate element.
+ * Embodies a String coordinate.
  * 
  * @author lpellegr
  */
-public class StringElement extends Element {
+public class StringCoordinate extends Coordinate {
 
     private static final long serialVersionUID = 160L;
 
     protected final String value;
 
     /**
-     * Constructs a new StringElement from specified string {@code value}.
+     * Constructs a new string coordinate from the specified string
+     * {@code value}.
      * 
      * @param value
      *            the value as string.
      */
-    public StringElement(String value) {
+    public StringCoordinate(String value) {
         this.value = value;
     }
 
-    protected StringElement(Apfloat apfloat) {
+    protected StringCoordinate(Apfloat apfloat) {
         this.value = ApfloatUtils.toString(apfloat);
     }
 
@@ -51,15 +52,16 @@ public class StringElement extends Element {
      * {@inheritDoc}
      */
     @Override
-    public StringElement middle(Element elt) {
+    public StringCoordinate middle(Coordinate elt) {
         Apfloat e1 = ApfloatUtils.toFloatRadix10(this.value);
-        Apfloat e2 = ApfloatUtils.toFloatRadix10(((StringElement) elt).value);
+        Apfloat e2 =
+                ApfloatUtils.toFloatRadix10(((StringCoordinate) elt).value);
 
-        return this.newStringElement(e1.add(e2).divide(new Apfloat(2)));
+        return this.newStringCoordinate(e1.add(e2).divide(new Apfloat(2)));
     }
 
-    protected StringElement newStringElement(Apfloat apfloat) {
-        return new StringElement(apfloat);
+    protected StringCoordinate newStringCoordinate(Apfloat apfloat) {
+        return new StringCoordinate(apfloat);
     }
 
     public double normalize(double lowerBound, double upperBound) {
@@ -91,17 +93,17 @@ public class StringElement extends Element {
      * {@inheritDoc}
      */
     @Override
-    public StringElement clone() throws CloneNotSupportedException {
-        return (StringElement) super.clone();
+    public StringCoordinate clone() throws CloneNotSupportedException {
+        return (StringCoordinate) super.clone();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Element elt) {
+    public int compareTo(Coordinate elt) {
         return UnicodeUtils.compareUtf32(
-                this.value, ((StringElement) elt).value);
+                this.value, ((StringCoordinate) elt).value);
     }
 
     /**
@@ -117,8 +119,8 @@ public class StringElement extends Element {
      */
     @Override
     public boolean equals(Object that) {
-        return that instanceof StringElement
-                && this.compareTo((StringElement) that) == 0;
+        return that instanceof StringCoordinate
+                && this.compareTo((StringCoordinate) that) == 0;
     }
 
     public String getValue() {

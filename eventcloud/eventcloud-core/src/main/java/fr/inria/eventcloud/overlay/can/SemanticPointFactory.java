@@ -17,8 +17,8 @@
 package fr.inria.eventcloud.overlay.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_ANY;
@@ -28,51 +28,50 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 
 /**
  * Represents a semantic coordinate element. This kind of element extends
- * {@link StringElement} and removes some prefix which are specific to semantic
- * data in order to improve the load balancing.
+ * {@link StringCoordinate} and removes some prefix which are specific to
+ * semantic data in order to improve the load balancing.
  * 
  * @author lpellegr
  */
-public final class SemanticCoordinateFactory {
+public final class SemanticPointFactory {
 
-    private SemanticCoordinateFactory() {
+    private SemanticPointFactory() {
 
     }
 
     /**
-     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * Creates a {@link Point} containing {@link SemanticCoordinate}s from the
      * specified quadruple pattern.
      * 
      * @param quadruplePattern
      *            the quadruple pattern instance to use in order to create the
-     *            coordinate.
+     *            point.
      * 
-     * @return the coordinate which has been created.
+     * @return the point which has been created.
      */
-    public static Coordinate<SemanticElement> newSemanticCoordinate(QuadruplePattern quadruplePattern) {
-        return newSemanticCoordinate(
+    public static Point<SemanticCoordinate> newSemanticCoordinate(QuadruplePattern quadruplePattern) {
+        return newSemanticPoint(
                 quadruplePattern.getGraph(), quadruplePattern.getSubject(),
                 quadruplePattern.getPredicate(), quadruplePattern.getObject());
     }
 
     /**
-     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * Creates a {@link Point} containing {@link SemanticCoordinate}s from the
      * specified quadruple.
      * 
      * @param quad
-     *            the quadruple instance to use in order to create the
-     *            coordinate.
+     *            the quadruple instance to use in order to create the point.
      * 
-     * @return the coordinate which has been created.
+     * @return the point which has been created.
      */
-    public static Coordinate<SemanticElement> newSemanticCoordinate(Quadruple quad) {
-        return newSemanticCoordinate(
+    public static Point<SemanticCoordinate> newSemanticCoordinate(Quadruple quad) {
+        return newSemanticPoint(
                 quad.getGraph(), quad.getSubject(), quad.getPredicate(),
                 quad.getObject());
     }
 
     /**
-     * Creates a {@link Coordinate} containing {@link SemanticElement}s from the
+     * Creates a {@link Point} containing {@link SemanticCoordinate}s from the
      * specified quadruple components.
      * 
      * @param graph
@@ -86,20 +85,20 @@ public final class SemanticCoordinateFactory {
      * 
      * @return the coordinate which has been created.
      */
-    public static Coordinate<SemanticElement> newSemanticCoordinate(Node graph,
-                                                                    Node subject,
-                                                                    Node predicate,
-                                                                    Node object) {
-        return new Coordinate<SemanticElement>(
-                createSemanticElementWithVars(graph),
-                createSemanticElementWithVars(subject),
-                createSemanticElementWithVars(predicate),
-                createSemanticElementWithVars(object));
+    public static Point<SemanticCoordinate> newSemanticPoint(Node graph,
+                                                             Node subject,
+                                                             Node predicate,
+                                                             Node object) {
+        return new Point<SemanticCoordinate>(
+                createSemanticCoordinateWithVars(graph),
+                createSemanticCoordinateWithVars(subject),
+                createSemanticCoordinateWithVars(predicate),
+                createSemanticCoordinateWithVars(object));
     }
 
-    private static SemanticElement createSemanticElementWithVars(Node n) {
+    private static SemanticCoordinate createSemanticCoordinateWithVars(Node n) {
         if (!isVariable(n)) {
-            return new SemanticElement(n);
+            return new SemanticCoordinate(n);
         }
 
         return null;
@@ -121,15 +120,15 @@ public final class SemanticCoordinateFactory {
         }
     }
 
-    protected static Coordinate<SemanticElement> newSemanticCoordinate(String value) {
-        SemanticElement[] elts =
-                new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    protected static Point<SemanticCoordinate> newSemanticPoint(String value) {
+        SemanticCoordinate[] elts =
+                new SemanticCoordinate[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
-            elts[i] = new SemanticElement(value);
+            elts[i] = new SemanticCoordinate(value);
         }
 
-        return new Coordinate<SemanticElement>(elts);
+        return new Point<SemanticCoordinate>(elts);
     }
 
 }

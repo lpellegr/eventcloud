@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.response.can.MulticastResponse;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.Router;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.EfficientBroadcastRequestRouter;
@@ -32,11 +32,11 @@ import org.objectweb.proactive.extensions.p2p.structured.validator.can.Multicast
  * constraints (i.e. the coordinates to reach).
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author jrochas
  */
-public class EfficientBroadcastRequest<E extends Element> extends
+public class EfficientBroadcastRequest<E extends Coordinate> extends
         MulticastRequest<E> {
 
     private static final long serialVersionUID = 160L;
@@ -71,14 +71,14 @@ public class EfficientBroadcastRequest<E extends Element> extends
      */
     public EfficientBroadcastRequest(
             MulticastConstraintsValidator<E> validator,
-            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> responseProvider) {
+            ResponseProvider<? extends MulticastResponse<E>, Point<E>> responseProvider) {
         super(validator, responseProvider);
     }
 
     public EfficientBroadcastRequest(
             MulticastConstraintsValidator<E> validator,
-            ResponseProvider<? extends MulticastResponse<E>, Coordinate<E>> provider,
-            MessageId messageId, byte[][] directions, Element[] splitPlans) {
+            ResponseProvider<? extends MulticastResponse<E>, Point<E>> provider,
+            MessageId messageId, byte[][] directions, Coordinate[] splitPlans) {
         super(validator, provider);
 
         // if messageId==null then this is the request received by the
@@ -96,7 +96,7 @@ public class EfficientBroadcastRequest<E extends Element> extends
      * {@inheritDoc}
      */
     @Override
-    public Router<? extends Message<Coordinate<E>>, Coordinate<E>> getRouter() {
+    public Router<? extends Message<Point<E>>, Point<E>> getRouter() {
         return new EfficientBroadcastRequestRouter<EfficientBroadcastRequest<E>, E>();
     }
 

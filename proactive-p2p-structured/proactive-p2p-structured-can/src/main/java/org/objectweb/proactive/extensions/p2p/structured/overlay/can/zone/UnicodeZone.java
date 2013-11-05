@@ -18,8 +18,8 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
@@ -28,11 +28,11 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
  * upper bound by {@link P2PStructuredProperties#CAN_UPPER_BOUND}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
+public abstract class UnicodeZone<E extends StringCoordinate> extends Zone<E> {
 
     private static final long serialVersionUID = 160L;
 
@@ -45,7 +45,7 @@ public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
      * @param upperBound
      *            the upper bound coordinate.
      */
-    public UnicodeZone(Coordinate<E> lowerBound, Coordinate<E> upperBound) {
+    public UnicodeZone(Point<E> lowerBound, Point<E> upperBound) {
         super(lowerBound, upperBound);
     }
 
@@ -54,7 +54,7 @@ public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
      */
     @Override
     public HomogenousPair<UnicodeZone<E>> split(byte dimension) {
-        Coordinate<E>[] coords = super.splitCoordinates(dimension);
+        Point<E>[] coords = super.splitCoordinates(dimension);
 
         return HomogenousPair.createHomogenous(this.newZone(
                 coords[0], coords[1]), this.newZone(coords[2], coords[3]));
@@ -65,13 +65,13 @@ public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
      */
     @Override
     public Zone<E> merge(Zone<E> zone) {
-        HomogenousPair<Coordinate<E>> coords = super.mergeCoordinates(zone);
+        HomogenousPair<Point<E>> coords = super.mergeCoordinates(zone);
 
         return this.newZone(coords.getFirst(), coords.getSecond());
     }
 
-    protected abstract UnicodeZone<E> newZone(Coordinate<E> lowerBound,
-                                              Coordinate<E> upperBound);
+    protected abstract UnicodeZone<E> newZone(Point<E> lowerBound,
+                                              Point<E> upperBound);
 
     /**
      * {@inheritDoc}
@@ -83,8 +83,8 @@ public abstract class UnicodeZone<E extends StringElement> extends Zone<E> {
         // find the percentage of the space for each dimension
         for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             area *=
-                    super.upperBound.getElement(i).normalize(0, 1)
-                            - super.lowerBound.getElement(i).normalize(0, 1);
+                    super.upperBound.getCoordinate(i).normalize(0, 1)
+                            - super.lowerBound.getCoordinate(i).normalize(0, 1);
         }
 
         return area;

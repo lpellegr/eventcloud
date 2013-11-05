@@ -21,8 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
 
 /**
@@ -32,7 +32,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroa
  * 
  * @author lpellegr
  */
-public class BroadcastConstraintsValidator<E extends StringElement> extends
+public class BroadcastConstraintsValidator<E extends StringCoordinate> extends
         MulticastConstraintsValidator<E> {
 
     private static final long serialVersionUID = 160L;
@@ -44,7 +44,7 @@ public class BroadcastConstraintsValidator<E extends StringElement> extends
      * @param key
      *            the key to reach.
      */
-    public BroadcastConstraintsValidator(Coordinate<E> key) {
+    public BroadcastConstraintsValidator(Point<E> key) {
         super(checkNotNull(key));
     }
 
@@ -64,9 +64,9 @@ public class BroadcastConstraintsValidator<E extends StringElement> extends
     public final boolean validatesKeyConstraints(Zone<E> zone) {
         for (byte i = 0; i < super.key.getValue().size(); i++) {
             // if coordinate is null we skip the test
-            if (super.key.getValue().getElement(i) != null) {
+            if (super.key.getValue().getCoordinate(i) != null) {
                 // the specified overlay does not contains the key
-                if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {
+                if (zone.contains(i, super.key.getValue().getCoordinate(i)) != 0) {
                     return false;
                 }
             }

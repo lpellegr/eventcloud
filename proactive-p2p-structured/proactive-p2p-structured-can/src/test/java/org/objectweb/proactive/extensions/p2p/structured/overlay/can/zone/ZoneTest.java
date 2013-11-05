@@ -22,8 +22,8 @@ import static org.objectweb.proactive.extensions.p2p.structured.configuration.P2
 import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.CoordinateFactory;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
 /**
@@ -39,11 +39,11 @@ public class ZoneTest {
 
         Assert.assertEquals(
                 zone.getLowerBound(),
-                CoordinateFactory.newStringCoordinate(CAN_LOWER_BOUND.getValueAsString()));
+                PointFactory.newStringCoordinate(CAN_LOWER_BOUND.getValueAsString()));
 
         Assert.assertEquals(
                 zone.getUpperBound(),
-                CoordinateFactory.newStringCoordinate(CAN_UPPER_BOUND.getValueAsString()));
+                PointFactory.newStringCoordinate(CAN_UPPER_BOUND.getValueAsString()));
     }
 
     @Test
@@ -58,13 +58,13 @@ public class ZoneTest {
     public void testSplitAndMerge() {
         StringZone z =
                 new StringZone(
-                        CoordinateFactory.newStringCoordinate("a"),
-                        CoordinateFactory.newStringCoordinate("z"));
+                        PointFactory.newStringCoordinate("a"),
+                        PointFactory.newStringCoordinate("z"));
 
-        HomogenousPair<UnicodeZone<StringElement>> newZones =
+        HomogenousPair<UnicodeZone<StringCoordinate>> newZones =
                 z.split(CanOverlay.getRandomDimension());
 
-        Zone<StringElement> mergedZone =
+        Zone<StringCoordinate> mergedZone =
                 newZones.getFirst().merge(newZones.getSecond());
 
         Assert.assertEquals(z, mergedZone);

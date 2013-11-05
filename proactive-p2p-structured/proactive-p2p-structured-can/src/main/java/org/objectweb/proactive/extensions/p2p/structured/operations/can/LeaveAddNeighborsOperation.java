@@ -22,18 +22,18 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Piggyback peers that are potentially new neighbors of the peer that receive
  * the operation.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LeaveAddNeighborsOperation<E extends Element> extends
+public class LeaveAddNeighborsOperation<E extends Coordinate> extends
         LeaveNeighborsManagementOperation {
 
     private static final long serialVersionUID = 160L;

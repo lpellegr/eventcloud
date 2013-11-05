@@ -26,18 +26,18 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverl
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.SplitEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Operation used to update the zone of a peer that takes over the leaving
  * peer's zone during a leave operation based on splits history.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class LeaveEnlargeZoneOperation<E extends Element> extends
+public class LeaveEnlargeZoneOperation<E extends Coordinate> extends
         LeaveNeighborsManagementOperation {
 
     private static final long serialVersionUID = 160L;

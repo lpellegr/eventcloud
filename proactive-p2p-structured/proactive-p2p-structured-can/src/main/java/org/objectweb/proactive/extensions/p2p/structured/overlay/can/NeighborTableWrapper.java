@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Data structure used to store the neighbors of a peer grouped by dimension and
@@ -33,7 +33,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author acraciun
  */
-public class NeighborTableWrapper<E extends Element> implements Serializable {
+public class NeighborTableWrapper<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 

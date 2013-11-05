@@ -24,7 +24,7 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 
@@ -40,17 +40,17 @@ import com.google.common.math.DoubleMath;
  * space.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public abstract class Zone<E extends Element> implements Serializable {
+public abstract class Zone<E extends Coordinate> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    protected final Coordinate<E> lowerBound;
+    protected final Point<E> lowerBound;
 
-    protected final Coordinate<E> upperBound;
+    protected final Point<E> upperBound;
 
     /**
      * Constructs a new zone by using the specified {@code lowerBound} and
@@ -61,7 +61,7 @@ public abstract class Zone<E extends Element> implements Serializable {
      * @param upperBound
      *            the upper bound coordinate.
      */
-    protected Zone(Coordinate<E> lowerBound, Coordinate<E> upperBound) {
+    protected Zone(Point<E> lowerBound, Point<E> upperBound) {
         this.lowerBound = checkNotNull(lowerBound);
         this.upperBound = checkNotNull(upperBound);
     }
@@ -86,14 +86,14 @@ public abstract class Zone<E extends Element> implements Serializable {
         try {
             currentZoneCopy = (Zone<E>) MakeDeepCopy.makeDeepCopy(this);
 
-            currentZoneCopy.lowerBound.setElement(
-                    neighborDimension, Element.min(
-                            this.lowerBound.getElement(neighborDimension),
+            currentZoneCopy.lowerBound.setCoordinate(
+                    neighborDimension, Coordinate.min(
+                            this.lowerBound.getCoordinate(neighborDimension),
                             zone.getLowerBound(neighborDimension)));
 
-            currentZoneCopy.upperBound.setElement(
-                    neighborDimension, Element.max(
-                            this.upperBound.getElement(neighborDimension),
+            currentZoneCopy.upperBound.setCoordinate(
+                    neighborDimension, Coordinate.max(
+                            this.upperBound.getCoordinate(neighborDimension),
                             zone.getUpperBound(neighborDimension)));
 
             return DoubleMath.fuzzyEquals(
@@ -122,9 +122,9 @@ public abstract class Zone<E extends Element> implements Serializable {
      * @return {@code true} if the coordinate is in the zone managed,
      *         {@code false} otherwise.
      */
-    public boolean contains(Coordinate<E> coordinate) {
+    public boolean contains(Point<E> coordinate) {
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
-            if (this.contains(dim, coordinate.getElement(dim)) != 0) {
+            if (this.contains(dim, coordinate.getCoordinate(dim)) != 0) {
                 return false;
             }
         }
@@ -156,9 +156,9 @@ public abstract class Zone<E extends Element> implements Serializable {
             return 0;
         }
 
-        if (element.compareTo(this.upperBound.getElement(dimension)) >= 0) {
+        if (element.compareTo(this.upperBound.getCoordinate(dimension)) >= 0) {
             return 1;
-        } else if (element.compareTo(this.lowerBound.getElement(dimension)) < 0) {
+        } else if (element.compareTo(this.lowerBound.getCoordinate(dimension)) < 0) {
             return -1;
         }
 
@@ -179,8 +179,8 @@ public abstract class Zone<E extends Element> implements Serializable {
      *         {@code false} otherwise.
      */
     public boolean overlaps(Zone<E> zone, byte dimension) {
-        E a = this.lowerBound.getElement(dimension);
-        E b = this.upperBound.getElement(dimension);
+        E a = this.lowerBound.getCoordinate(dimension);
+        E b = this.upperBound.getCoordinate(dimension);
         E c = zone.getLowerBound(dimension);
         E d = zone.getUpperBound(dimension);
 
@@ -228,9 +228,9 @@ public abstract class Zone<E extends Element> implements Serializable {
      *         current zone.
      */
     public boolean abuts(Zone<E> zone, byte dimension, boolean direction) {
-        return (direction && (this.lowerBound.getElement(dimension).compareTo(
-                zone.getUpperBound(dimension)) == 0))
-                || (!direction && (this.upperBound.getElement(dimension)
+        return (direction && (this.lowerBound.getCoordinate(dimension)
+                .compareTo(zone.getUpperBound(dimension)) == 0))
+                || (!direction && (this.upperBound.getCoordinate(dimension)
                         .compareTo(zone.getLowerBound(dimension)) == 0));
     }
 
@@ -287,8 +287,8 @@ public abstract class Zone<E extends Element> implements Serializable {
      *         zone on the given dimension.
      */
     public byte neighbors(Zone<E> zone, byte dimension) {
-        if (zone.getUpperBound().getElement(dimension).compareTo(
-                this.upperBound.getElement(dimension)) > 0) {
+        if (zone.getUpperBound().getCoordinate(dimension).compareTo(
+                this.upperBound.getCoordinate(dimension)) > 0) {
             return 1;
         }
 
@@ -308,21 +308,21 @@ public abstract class Zone<E extends Element> implements Serializable {
     public abstract HomogenousPair<? extends Zone<E>> split(byte dimension);
 
     @SuppressWarnings("unchecked")
-    protected Coordinate<E>[] splitCoordinates(byte dimension) {
+    protected Point<E>[] splitCoordinates(byte dimension) {
         E middle =
-                Element.middle(
-                        this.lowerBound.getElement(dimension),
-                        this.upperBound.getElement(dimension));
+                Coordinate.middle(
+                        this.lowerBound.getCoordinate(dimension),
+                        this.upperBound.getCoordinate(dimension));
 
         try {
-            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
-            Coordinate<E> upperBoundCopy = this.upperBound.clone();
+            Point<E> lowerBoundCopy = this.lowerBound.clone();
+            Point<E> upperBoundCopy = this.upperBound.clone();
 
-            lowerBoundCopy.setElement(dimension, middle);
-            upperBoundCopy.setElement(dimension, middle);
+            lowerBoundCopy.setCoordinate(dimension, middle);
+            upperBoundCopy.setCoordinate(dimension, middle);
 
             // result={a, b, c, d} where C1={a, b} and C2={c, d}
-            return new Coordinate[] {
+            return new Point[] {
                     this.lowerBound, upperBoundCopy, lowerBoundCopy,
                     this.upperBound};
         } catch (CloneNotSupportedException e) {
@@ -343,23 +343,23 @@ public abstract class Zone<E extends Element> implements Serializable {
     public abstract Zone<E> merge(Zone<E> zone);
 
     public void enlarge(byte dimension, byte direction, E element) {
-        Coordinate<E> bound = direction > 0
+        Point<E> bound = direction > 0
                 ? this.upperBound : this.lowerBound;
 
-        bound.setElement(dimension, element);
+        bound.setCoordinate(dimension, element);
     }
 
-    protected HomogenousPair<Coordinate<E>> mergeCoordinates(Zone<E> zone) {
+    protected HomogenousPair<Point<E>> mergeCoordinates(Zone<E> zone) {
         byte d = this.neighbors(zone);
 
         try {
-            Coordinate<E> lowerBoundCopy = this.lowerBound.clone();
-            Coordinate<E> upperBoundCopy = this.upperBound.clone();
+            Point<E> lowerBoundCopy = this.lowerBound.clone();
+            Point<E> upperBoundCopy = this.upperBound.clone();
 
-            lowerBoundCopy.setElement(d, Element.min(
-                    this.lowerBound.getElement(d), zone.getLowerBound(d)));
-            upperBoundCopy.setElement(d, Element.max(
-                    this.upperBound.getElement(d), zone.getUpperBound(d)));
+            lowerBoundCopy.setCoordinate(d, Coordinate.min(
+                    this.lowerBound.getCoordinate(d), zone.getLowerBound(d)));
+            upperBoundCopy.setCoordinate(d, Coordinate.max(
+                    this.upperBound.getCoordinate(d), zone.getUpperBound(d)));
 
             return HomogenousPair.createHomogenous(
                     lowerBoundCopy, upperBoundCopy);
@@ -368,20 +368,20 @@ public abstract class Zone<E extends Element> implements Serializable {
         }
     }
 
-    public Coordinate<E> getUpperBound() {
+    public Point<E> getUpperBound() {
         return this.upperBound;
     }
 
-    public Coordinate<E> getLowerBound() {
+    public Point<E> getLowerBound() {
         return this.lowerBound;
     }
 
     public E getLowerBound(byte dimension) {
-        return this.lowerBound.getElement(dimension);
+        return this.lowerBound.getCoordinate(dimension);
     }
 
     public E getUpperBound(byte dimension) {
-        return this.upperBound.getElement(dimension);
+        return this.upperBound.getCoordinate(dimension);
     }
 
     /**

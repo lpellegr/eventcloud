@@ -23,7 +23,7 @@ import java.io.Serializable;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.MulticastConstraintsValidator;
 
 import com.hp.hpl.jena.graph.Node;
@@ -41,7 +41,7 @@ import com.hp.hpl.jena.sparql.util.ExprUtils;
 
 import fr.inria.eventcloud.messages.request.SparqlAtomicRequest;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
@@ -53,7 +53,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  * @author mantoine
  */
 public final class AtomicQueryConstraintsValidator extends
-        MulticastConstraintsValidator<SemanticElement> {
+        MulticastConstraintsValidator<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
@@ -79,14 +79,14 @@ public final class AtomicQueryConstraintsValidator extends
      * {@inheritDoc}
      */
     @Override
-    public final boolean validatesKeyConstraints(Zone<SemanticElement> zone) {
+    public final boolean validatesKeyConstraints(Zone<SemanticCoordinate> zone) {
         this.transformer = new FilterTransformer(zone, this.atomicQuery);
         // check fixed parts
         for (byte i = 0; i < super.key.getValue().size(); i++) {
             // if coordinate is null we skip the test
-            if (super.key.getValue().getElement(i) != null) {
+            if (super.key.getValue().getCoordinate(i) != null) {
                 // the specified overlay does not contains the key
-                if (zone.contains(i, super.key.getValue().getElement(i)) != 0) {
+                if (zone.contains(i, super.key.getValue().getCoordinate(i)) != 0) {
                     return false;
                 }
             }
@@ -121,11 +121,11 @@ public final class AtomicQueryConstraintsValidator extends
 
         private AtomicQuery atomicQuery;
 
-        private Zone<SemanticElement> zone;
+        private Zone<SemanticCoordinate> zone;
 
         private boolean finalDecision;
 
-        public FilterTransformer(Zone<SemanticElement> zone,
+        public FilterTransformer(Zone<SemanticCoordinate> zone,
                 AtomicQuery atomicQuery) {
             super();
             this.zone = zone;
@@ -175,11 +175,11 @@ public final class AtomicQueryConstraintsValidator extends
 
                     if (func.getArg1().isConstant()) {
                         constant =
-                                SemanticElement.removePrefix(NodeFactory.createURI(expr1.getConstant()
+                                SemanticCoordinate.removePrefix(NodeFactory.createURI(expr1.getConstant()
                                         .asString()));
                     } else {
                         constant =
-                                SemanticElement.removePrefix(NodeFactory.createURI(expr2.getConstant()
+                                SemanticCoordinate.removePrefix(NodeFactory.createURI(expr2.getConstant()
                                         .asString()));
                     }
 
@@ -187,14 +187,14 @@ public final class AtomicQueryConstraintsValidator extends
                             this.atomicQuery.getVarIndex(variable.getVarName());
 
                     int compareToLowerBound =
-                            SemanticElement.removePrefix(
+                            SemanticCoordinate.removePrefix(
                                     NodeFactory.createURI(this.zone.getLowerBound(
                                             (byte) dimension)
                                             .getValue()))
                                     .compareTo(constant);
 
                     int compareToUpperBound =
-                            SemanticElement.removePrefix(
+                            SemanticCoordinate.removePrefix(
                                     NodeFactory.createURI(this.zone.getUpperBound(
                                             (byte) dimension)
                                             .getValue()))
@@ -386,18 +386,18 @@ public final class AtomicQueryConstraintsValidator extends
         this.transformer = transformer;
     }
 
-    private static Coordinate<SemanticElement> replaceVariablesByNull(AtomicQuery query) {
-        SemanticElement[] tab =
-                new SemanticElement[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+    private static Point<SemanticCoordinate> replaceVariablesByNull(AtomicQuery query) {
+        SemanticCoordinate[] tab =
+                new SemanticCoordinate[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
 
         for (int i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
             if (query.getNode(i) != null && !query.getNode(i).equals(Node.ANY)
                     && !query.getNode(i).isVariable()) {
-                tab[i] = new SemanticElement(query.getNode(i));
+                tab[i] = new SemanticCoordinate(query.getNode(i));
             }
         }
 
-        return new Coordinate<SemanticElement>(tab);
+        return new Point<SemanticCoordinate>(tab);
     }
 
 }

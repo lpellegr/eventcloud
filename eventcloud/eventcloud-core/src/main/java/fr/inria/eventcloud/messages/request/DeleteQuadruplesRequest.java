@@ -30,7 +30,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.messages.response.QuadruplePatternResponseProvider;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Removes all the quadruples that match the given {@code quadruplePattern} and
@@ -55,8 +55,8 @@ public class DeleteQuadruplesRequest extends
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                          MulticastRequest<SemanticElement> request,
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                          MulticastRequest<SemanticCoordinate> request,
                                                           QuadruplePattern quadruplePattern) {
         List<Quadruple> result = null;
 

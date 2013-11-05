@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
 
 /**
@@ -54,7 +54,7 @@ public class RemoveEphemeralSubscriptionRequest extends
      * {@inheritDoc}
      */
     @Override
-    public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
+    public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticCoordinate> overlay,
                                                QuadruplePattern quadruplePattern) {
         SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) overlay;
 

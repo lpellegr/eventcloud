@@ -18,20 +18,22 @@ package fr.inria.eventcloud.overlay.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.UnicodeZone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 /**
+ * Semantic version of a {@link Zone}.
  * 
  * @author lpellegr
  */
-public final class SemanticZone extends UnicodeZone<SemanticElement> {
+public final class SemanticZone extends UnicodeZone<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 
     public SemanticZone() {
         super(
-                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
-                SemanticCoordinateFactory.newSemanticCoordinate(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
+                SemanticPointFactory.newSemanticPoint(P2PStructuredProperties.CAN_LOWER_BOUND.getValueAsString()),
+                SemanticPointFactory.newSemanticPoint(P2PStructuredProperties.CAN_UPPER_BOUND.getValueAsString()));
     }
 
     /**
@@ -43,8 +45,8 @@ public final class SemanticZone extends UnicodeZone<SemanticElement> {
      * @param upperBound
      *            the upper bound coordinate.
      */
-    public SemanticZone(Coordinate<SemanticElement> lowerBound,
-            Coordinate<SemanticElement> upperBound) {
+    public SemanticZone(Point<SemanticCoordinate> lowerBound,
+            Point<SemanticCoordinate> upperBound) {
         super(lowerBound, upperBound);
     }
 
@@ -52,8 +54,8 @@ public final class SemanticZone extends UnicodeZone<SemanticElement> {
      * {@inheritDoc}
      */
     @Override
-    protected UnicodeZone<SemanticElement> newZone(Coordinate<SemanticElement> lowerBound,
-                                                   Coordinate<SemanticElement> upperBound) {
+    protected UnicodeZone<SemanticCoordinate> newZone(Point<SemanticCoordinate> lowerBound,
+                                                      Point<SemanticCoordinate> upperBound) {
         return new SemanticZone(lowerBound, upperBound);
     }
 

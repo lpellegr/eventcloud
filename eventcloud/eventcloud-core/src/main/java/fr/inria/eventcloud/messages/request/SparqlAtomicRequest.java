@@ -34,7 +34,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.messages.response.QuadruplePatternResponseProvider;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 import fr.inria.eventcloud.validator.AtomicQueryConstraintsValidator;
 
@@ -68,8 +68,8 @@ public class SparqlAtomicRequest extends
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                          MulticastRequest<SemanticElement> request,
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                          MulticastRequest<SemanticCoordinate> request,
                                                           fr.inria.eventcloud.api.QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(

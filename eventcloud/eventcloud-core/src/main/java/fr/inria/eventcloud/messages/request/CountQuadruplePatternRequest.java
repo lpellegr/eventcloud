@@ -18,7 +18,7 @@ package fr.inria.eventcloud.messages.request;
 
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.MulticastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.providers.ResponseProvider;
 
 import com.hp.hpl.jena.graph.Node;
@@ -29,7 +29,7 @@ import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.messages.response.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Retrieves the number of quadruples that match the {@link QuadruplePattern}
@@ -49,7 +49,7 @@ public class CountQuadruplePatternRequest extends
     public CountQuadruplePatternRequest(QuadruplePattern quadruplePattern) {
         super(
                 quadruplePattern,
-                new ResponseProvider<CountQuadruplePatternResponse, Coordinate<SemanticElement>>() {
+                new ResponseProvider<CountQuadruplePatternResponse, Point<SemanticCoordinate>>() {
                     private static final long serialVersionUID = 160L;
 
                     @Override
@@ -63,8 +63,8 @@ public class CountQuadruplePatternRequest extends
      * {@inheritDoc}
      */
     @Override
-    public Long onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                               MulticastRequest<SemanticElement> request,
+    public Long onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                               MulticastRequest<SemanticCoordinate> request,
                                                QuadruplePattern quadruplePattern) {
         TransactionalDatasetGraph txnGraph =
                 ((SemanticCanOverlay) overlay).getMiscDatastore().begin(

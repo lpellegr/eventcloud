@@ -20,7 +20,7 @@ import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.function.FunctionBase1;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * This ARQ function is used to remove prefixes from a RDF term as for data that
@@ -40,7 +40,7 @@ public class WithoutPrefixFunction extends FunctionBase1 {
      */
     @Override
     public NodeValue exec(NodeValue v) {
-        return NodeValue.makeString(SemanticElement.removePrefix(v.asNode()));
+        return NodeValue.makeString(SemanticCoordinate.removePrefix(v.asNode()));
     }
 
 }

@@ -16,172 +16,102 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Iterator;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
-import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 
 /**
- * Represents a set of elements (i.e. a set of values for each component of the
- * coordinate) used to determine the position of a point in a {@link Zone}.
- * 
- * @param <E>
- *            the {@link Element}s type contained by the coordinate.
+ * An element represents one component from a {@link Point}.
  * 
  * @author lpellegr
  */
-public final class Coordinate<E extends Element> implements Cloneable,
-        Comparable<Coordinate<E>>, Iterable<E>, Serializable {
+public abstract class Coordinate implements Cloneable, Comparable<Coordinate>,
+        Serializable {
 
     private static final long serialVersionUID = 160L;
 
     /**
-     * The set of elements constituting the coordinate.
-     */
-    private final E[] values;
-
-    /**
-     * Constructs a new coordinate with the specified {@code elements} as
-     * coordinate elements.
+     * Computes and returns a new {@link Coordinate} with a value being the
+     * middle of the current element and the specified element <code>elt</code>.
      * 
-     * @param elements
-     *            the elements composing the coordinate.
-     */
-    public Coordinate(E... elements) {
-        if (elements.length != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
-            throw new AssertionError("The number of coordinate elements ("
-                    + elements.length
-                    + ") is not equals to the number of dimensions ("
-                    + P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()
-                    + ")");
-        }
-
-        this.values = elements;
-    }
-
-    /**
-     * Returns the {@link Element} at the given <code>index</code>.
-     * 
-     * @param index
-     *            the index of the element to return (i.e. the coordinate value
-     *            on the given dimension).
-     * 
-     * @return the {@link Element} at the given <code>index</code>.
-     */
-    public E getElement(byte index) {
-        return this.values[index];
-    }
-
-    /**
-     * Returns the elements composing the coordinate.
-     * 
-     * @return the elements composing the coordinate.
-     */
-    public E[] getElements() {
-        return this.values;
-    }
-
-    /**
-     * Returns the number of coordinate elements contained by this coordinate.
-     * 
-     * @return the number of coordinate elements contained by this coordinate.
-     */
-    public int size() {
-        return this.values.length;
-    }
-
-    /**
-     * Sets the specified index to the given value {@code elt}.
-     * 
-     * @param index
-     *            the element index to edit (i.e. the dimension).
      * @param elt
-     *            the new element to set.
+     *            the element to compute with.
+     * 
+     * @return a new {@link Coordinate} with a value being the middle of the
+     *         current element the specified element <code>elt</code>.
      */
-    public void setElement(int index, E elt) {
-        this.values[index] = elt;
-    }
+    public abstract Coordinate middle(Coordinate elt);
 
     /**
-     * {@inheritDoc}
+     * Returns a boolean indicating if the current element is between
+     * respectively the specified elements <code>e1</code> and <code>e2</code>.
+     * 
+     * @param e1
+     *            the first bound.
+     * 
+     * @param e2
+     *            the second bound.
+     * 
+     * @return <code>true</code> whether <code>e1<0 and this in [e1;e2[</code>
+     *         or <code>e1 > e2 and this in [e2;e1[</code>, <code>false</code>
+     *         otherwise.
      */
-    @Override
-    public String toString() {
-        StringBuffer result = new StringBuffer("(");
-
-        for (int i = 0; i < this.values.length; i++) {
-            result.append(this.values[i]);
-            if (i != this.values.length - 1) {
-                result.append(',');
-            }
+    public boolean isBetween(Coordinate e1, Coordinate e2) {
+        if (e1.compareTo(e2) < 0) {
+            return (this.compareTo(e1) >= 0) && (this.compareTo(e2) < 0);
+        } else if (e1.compareTo(e2) > 0) {
+            return (this.compareTo(e2) >= 0) && (this.compareTo(e1) < 0);
         }
-        result.append(')');
-
-        return result.toString();
+        return false;
     }
 
     /**
-     * {@inheritDoc}
+     * Computes and returns a new {@link Coordinate} which is the middle of the
+     * specified elements {@code e1} and {@code e2}.
+     * 
+     * @param e1
+     *            the lower bound.
+     * @param e2
+     *            the upper bound.
+     * 
+     * @return a new {@link Coordinate} which is the middle of the specified
+     *         elements {@code e1} and {@code e2}.
+     * 
+     * @see Coordinate#middle(Coordinate)
      */
-    @Override
-    public Iterator<E> iterator() {
-        return Arrays.asList(this.values).iterator();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     @SuppressWarnings("unchecked")
-    public Coordinate<E> clone() throws CloneNotSupportedException {
-        try {
-            return (Coordinate<E>) MakeDeepCopy.makeDeepCopy(this);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
+    public static <T extends Coordinate> T middle(T e1, T e2) {
+        return (T) e1.middle(e2);
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the maximum among the specified coordinate elements.
+     * 
+     * @param elt1
+     *            first element.
+     * @param elt2
+     *            second element.
+     * 
+     * @return the maximum among the specified coordinate elements.
      */
-    @Override
-    public int compareTo(Coordinate<E> coord) {
-        if (this.size() != coord.size()) {
-            return -1;
-        }
-
-        for (byte i = 0; i < this.size(); i++) {
-            if (!this.values[i].equals(coord.getElement(i))) {
-                return -1;
-            }
-        }
-
-        return 0;
+    public static <T extends Coordinate> T max(T elt1, T elt2) {
+        return elt1.compareTo(elt2) > 0
+                ? elt1 : elt2;
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the minimum among the specified coordinate elements.
+     * 
+     * @param elt1
+     *            first element.
+     * @param elt2
+     *            second element.
+     * 
+     * @return the minimum among the specified coordinate elements.
      */
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(this.values);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean equals(Object obj) {
-        return obj instanceof Coordinate
-                && this.compareTo((Coordinate<E>) obj) == 0;
+    public static <T extends Coordinate> T min(T elt1, T elt2) {
+        return elt1.compareTo(elt2) < 0
+                ? elt1 : elt2;
     }
 
 }

@@ -20,17 +20,17 @@ import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.SplitEntry;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * Response associated to {@link GetSplitHistoryOperation}.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public class GetSplitHistoryResponseOperation<E extends Element> implements
+public class GetSplitHistoryResponseOperation<E extends Coordinate> implements
         ResponseOperation {
 
     private static final long serialVersionUID = 160L;

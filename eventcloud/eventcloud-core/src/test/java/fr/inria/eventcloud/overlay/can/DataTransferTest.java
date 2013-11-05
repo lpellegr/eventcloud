@@ -94,10 +94,10 @@ public class DataTransferTest {
                 SemanticFactory.newSemanticPeer(new SemanticOverlayProvider(
                         true));
 
-        GetIdAndZoneResponseOperation<SemanticElement> response =
-                CanOperations.<SemanticElement> getIdAndZoneResponseOperation(firstPeer);
+        GetIdAndZoneResponseOperation<SemanticCoordinate> response =
+                CanOperations.<SemanticCoordinate> getIdAndZoneResponseOperation(firstPeer);
 
-        UnicodeZone<SemanticElement> zone =
+        UnicodeZone<SemanticCoordinate> zone =
                 new SemanticZone(
                         response.getPeerZone().getLowerBound(),
                         response.getPeerZone().getUpperBound());
@@ -107,7 +107,7 @@ public class DataTransferTest {
         // we compute the value of the split which will be done on the next join
         // from the third peer in order to create data that will be transfered
         // from a peer to an another
-        HomogenousPair<UnicodeZone<SemanticElement>> res =
+        HomogenousPair<UnicodeZone<SemanticCoordinate>> res =
                 zone.split(dimensionSplit);
 
         // the next two elements will be contained by two different peers on the
@@ -115,13 +115,13 @@ public class DataTransferTest {
         String elt1 =
                 res.getFirst()
                         .getLowerBound()
-                        .getElement(dimensionSplit)
+                        .getCoordinate(dimensionSplit)
                         .getValue();
 
         String elt2 =
                 new String(Character.toChars(res.getSecond()
                         .getLowerBound()
-                        .getElement(dimensionSplit)
+                        .getCoordinate(dimensionSplit)
                         .getValue()
                         .codePointAt(0) + 1));
 
@@ -205,10 +205,10 @@ public class DataTransferTest {
                         this.deployer.getEventCloudsRegistryUrl(),
                         this.eventCloudId);
 
-        GetIdAndZoneResponseOperation<SemanticElement> response =
-                CanOperations.<SemanticElement> getIdAndZoneResponseOperation(firstPeer);
+        GetIdAndZoneResponseOperation<SemanticCoordinate> response =
+                CanOperations.<SemanticCoordinate> getIdAndZoneResponseOperation(firstPeer);
 
-        UnicodeZone<SemanticElement> zone =
+        UnicodeZone<SemanticCoordinate> zone =
                 new SemanticZone(
                         response.getPeerZone().getLowerBound(),
                         response.getPeerZone().getUpperBound());
@@ -221,7 +221,7 @@ public class DataTransferTest {
         // we compute the value of the split which will be done on the next join
         // from the first peer in order to create data that will be transfered
         // from a peer to an another
-        HomogenousPair<UnicodeZone<SemanticElement>> res =
+        HomogenousPair<UnicodeZone<SemanticCoordinate>> res =
                 zone.split(dimension);
 
         // the next two elements will be contained by two different peers on the
@@ -229,7 +229,7 @@ public class DataTransferTest {
         String bound1 =
                 res.getSecond()
                         .getLowerBound()
-                        .getElement(dimension)
+                        .getCoordinate(dimension)
                         .getValue();
 
         // do not use the first zone because low characters are forbidden in

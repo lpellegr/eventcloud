@@ -51,7 +51,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerInternal;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
@@ -68,11 +68,12 @@ import com.google.common.collect.Sets;
  * to manage.
  * 
  * @param <E>
- *            the {@link Element}s type manipulated.
+ *            the {@link Coordinate}s type manipulated.
  * 
  * @author lpellegr
  */
-public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
+public abstract class CanOverlay<E extends Coordinate> extends
+        StructuredOverlay {
 
     private static final Logger log = LoggerFactory.getLogger(CanOverlay.class);
 
@@ -150,10 +151,9 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      *         {@code coordinate} and which contains the specified coordinate on
      *         {@code dimension-1} dimensions.
      * 
-     * @see CanOverlay#neighborsVerifyingDimensions(Collection, Coordinate,
-     *      byte)
+     * @see CanOverlay#neighborsVerifyingDimensions(Collection, Point, byte)
      */
-    public final NeighborEntry<E> nearestNeighbor(Coordinate<E> coordinate,
+    public final NeighborEntry<E> nearestNeighbor(Point<E> coordinate,
                                                   byte dimension, byte direction) {
         List<NeighborEntry<E>> neighbors =
                 this.neighborsVerifyingDimensions(this.neighborTable.get(
@@ -203,7 +203,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      * @return a list of neighbors with the best rank.
      */
     private List<NeighborEntry<E>> neighborsWithBestRank(List<NeighborEntry<E>> neighbors,
-                                                         Coordinate<E> coordinate) {
+                                                         Point<E> coordinate) {
         @SuppressWarnings("unchecked")
         List<NeighborEntry<E>>[] ranks = new List[coordinate.size() + 1];
         int nbEltVerified = 0;
@@ -212,7 +212,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
             nbEltVerified = 0;
             for (byte j = 0; j < coordinate.size(); j++) {
                 if (neighbors.get(i).getZone().contains(
-                        j, coordinate.getElement(j)) == 0) {
+                        j, coordinate.getCoordinate(j)) == 0) {
                     nbEltVerified++;
                 }
             }
@@ -251,7 +251,7 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
      *         {@code dimension}.
      */
     public List<NeighborEntry<E>> neighborsVerifyingDimensions(Collection<NeighborEntry<E>> neighbors,
-                                                               Coordinate<E> coordinate,
+                                                               Point<E> coordinate,
                                                                byte dimension) {
         List<NeighborEntry<E>> result = new ArrayList<NeighborEntry<E>>();
         boolean validatesPrecedingDimensions;
@@ -259,7 +259,8 @@ public abstract class CanOverlay<E extends Element> extends StructuredOverlay {
         for (NeighborEntry<E> entry : neighbors) {
             validatesPrecedingDimensions = true;
             for (byte dim = 0; dim < dimension; dim++) {
-                if (entry.getZone().contains(dim, coordinate.getElement(dim)) != 0) {
+                if (entry.getZone()
+                        .contains(dim, coordinate.getCoordinate(dim)) != 0) {
                     validatesPrecedingDimensions = false;
                     break;
                 }

@@ -36,7 +36,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
 
 /**
@@ -91,8 +91,8 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
      * {@inheritDoc}
      */
     @Override
-    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay,
-                                                          MulticastRequest<SemanticElement> request,
+    public List<Quadruple> onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay,
+                                                          MulticastRequest<SemanticCoordinate> request,
                                                           QuadruplePattern quadruplePattern) {
         Set<HashCode> hashValues = this.hashValuesReceived.getValue();
         List<Quadruple> result = new ArrayList<Quadruple>();

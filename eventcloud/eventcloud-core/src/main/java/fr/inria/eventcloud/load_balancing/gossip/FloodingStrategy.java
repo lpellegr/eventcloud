@@ -25,7 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 import fr.inria.eventcloud.load_balancing.LoadReport;
 import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Basic flooding strategy. The load is spread step by step to all peers by
@@ -44,7 +44,7 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
     }
 
     public static class FloodingLoadRequest extends
-            OptimalBroadcastRequest<SemanticElement> {
+            OptimalBroadcastRequest<SemanticCoordinate> {
 
         private static final long serialVersionUID = 160L;
 
@@ -56,17 +56,17 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
             this.loadReport = SerializedValue.create(loadReport);
         }
 
-        public void onPeerValidatingKeyConstraints(CanOverlay<SemanticElement> overlay) {
+        public void onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay) {
             ((SemanticCanOverlay) overlay).getLoadBalancingManager().save(
                     this.loadReport.getValue());
         }
 
         @Override
-        public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement> getRouter() {
-            return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticElement>() {
+        public OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticCoordinate> getRouter() {
+            return new OptimalBroadcastRequestRouter<StatelessQuadruplePatternRequest, SemanticCoordinate>() {
                 @Override
-                public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticElement> overlay,
-                                                           final MulticastRequest<SemanticElement> request) {
+                public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticCoordinate> overlay,
+                                                           final MulticastRequest<SemanticCoordinate> request) {
                     FloodingLoadRequest.this.onPeerValidatingKeyConstraints(overlay);
                 }
             };

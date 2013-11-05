@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.deployment;
 
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.Element;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
  * All the tests contained by a test case that extends this class are executed
@@ -39,7 +39,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elemen
  * 
  * @author lpellegr
  */
-public class JunitByMethodCanNetworkDeployer<E extends Element> extends
+public class JunitByMethodCanNetworkDeployer<E extends Coordinate> extends
         JunitByMethodNetworkDeployer {
 
     /**

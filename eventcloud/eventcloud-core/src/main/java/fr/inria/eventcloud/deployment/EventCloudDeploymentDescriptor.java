@@ -21,7 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentDe
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
-import fr.inria.eventcloud.overlay.can.SemanticElement;
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
 /**
@@ -30,7 +30,7 @@ import fr.inria.eventcloud.providers.SemanticOverlayProvider;
  * @author lpellegr
  */
 public class EventCloudDeploymentDescriptor extends
-        CanDeploymentDescriptor<SemanticElement> {
+        CanDeploymentDescriptor<SemanticCoordinate> {
 
     private static final long serialVersionUID = 160L;
 

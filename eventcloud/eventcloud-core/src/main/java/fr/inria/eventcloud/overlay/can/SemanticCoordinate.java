@@ -20,18 +20,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apfloat.Apfloat;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.elements.StringElement;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 
 import com.hp.hpl.jena.graph.Node;
 
 /**
- * Represents a semantic coordinate element. This kind of element parses input
- * value and removes some prefix which are specific to semantic data in order to
- * improve the load balancing.
+ * Represents a semantic coordinate. This kind of coordinate parses input value
+ * and removes some prefix which are specific to semantic data in order to
+ * improve load-balancing.
  * 
  * @author lpellegr
  */
-public class SemanticElement extends StringElement {
+public class SemanticCoordinate extends StringCoordinate {
 
     private static final long serialVersionUID = 160L;
 
@@ -39,35 +39,35 @@ public class SemanticElement extends StringElement {
     protected static String EMPTY_STRING_ROUTING_CHARACTER = "\u00A2";
 
     /**
-     * Constructs a new semantic element from the specified {@code value} by
+     * Constructs a new semantic coordinate from the specified {@code value} by
      * trying to remove RDF prefixes.
      * 
      * @param value
      *            the value which is analyzed.
      */
-    public SemanticElement(Node value) {
+    public SemanticCoordinate(Node value) {
         super(removePrefix(value));
     }
 
     /**
-     * Constructs a new semantic element from the specified {@code value}
+     * Constructs a new semantic coordinate from the specified {@code value}
      * representation.
      * 
      * @param value
      *            the value.
      */
-    public SemanticElement(Apfloat value) {
+    public SemanticCoordinate(Apfloat value) {
         super(value);
     }
 
     /**
-     * Constructs a new semantic element from the specified {@code value}
+     * Constructs a new semantic coordinate from the specified {@code value}
      * without trying to remove RDF prefixes. It has to be used with care.
      * 
      * @param value
      *            the value.
      */
-    protected SemanticElement(String value) {
+    protected SemanticCoordinate(String value) {
         super(value);
     }
 
@@ -175,8 +175,8 @@ public class SemanticElement extends StringElement {
      * {@inheritDoc}
      */
     @Override
-    protected StringElement newStringElement(Apfloat apfloat) {
-        return new SemanticElement(apfloat);
+    protected StringCoordinate newStringCoordinate(Apfloat apfloat) {
+        return new SemanticCoordinate(apfloat);
     }
 
 }
