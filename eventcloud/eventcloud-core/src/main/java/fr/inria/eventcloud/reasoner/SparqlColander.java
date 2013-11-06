@@ -43,8 +43,7 @@ import fr.inria.eventcloud.messages.response.QuadruplePatternResponse;
  * values.
  * <p>
  * TODO provide a SemanticDatastorePool in order to have the possibility to
- * filter several queries in parallel. TODO 2 compute filter time and add it to
- * the response.
+ * filter several queries in parallel.
  * 
  * @author lpellegr
  */
