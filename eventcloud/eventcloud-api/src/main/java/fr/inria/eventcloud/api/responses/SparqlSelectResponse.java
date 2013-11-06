@@ -35,10 +35,9 @@ public class SparqlSelectResponse extends SparqlResponse<ResultSetWrapper> {
     private long timeToGetResult, sizeOfIntermediateResultsInBytes;
     private Map<String, Integer> mapSubQueryNbResults;
 
-    public SparqlSelectResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, ResultSetWrapper result) {
-        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
-                result);
+    public SparqlSelectResponse(SparqlQueryStatistics stats,
+            ResultSetWrapper result) {
+        super(stats, result);
     }
 
     public int getNbIntermediateResults() {

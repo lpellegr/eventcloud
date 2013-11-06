@@ -260,7 +260,7 @@ public class MockPutGetProxy implements PutGetApi {
             txnGraph.end();
         }
 
-        return new SparqlAskResponse(0, 0, 0, 0, result);
+        return new SparqlAskResponse(null, result);
     }
 
     /**
@@ -289,7 +289,7 @@ public class MockPutGetProxy implements PutGetApi {
             txnGraph.end();
         }
 
-        return new SparqlConstructResponse(0, 0, 0, 0, result);
+        return new SparqlConstructResponse(null, result);
     }
 
     /**
@@ -326,7 +326,7 @@ public class MockPutGetProxy implements PutGetApi {
             txnGraph.end();
         }
 
-        return new SparqlSelectResponse(0, 0, 0, 0, result);
+        return new SparqlSelectResponse(null, result);
     }
 
     /**

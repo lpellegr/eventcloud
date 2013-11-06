@@ -462,21 +462,19 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                         "ASK { GRAPH ?g { ?s ?p ?o } }");
 
         log.debug(
-                "Measurements returned for a SPARQL ASK query with no data: latency={}, queryDatastoreTime={}, nbInboundHop={}, nbOutboundHop={}",
-                new Object[] {
-                        response.getLatency(),
-                        response.getQueryDatastoreTime(),
-                        response.getInboundHopCount(),
-                        response.getOutboundHopCount()});
+                "Measurements returned for a SPARQL ASK query with no data: {}",
+                response.getStats());
 
         Assert.assertTrue(
-                "Latency is not greater than 0", response.getLatency() > 0);
+                "Cumulated time to execute sub queries is not greater than 0",
+                response.getStats().getCumulativeTimeToExecuteSubQueries() > 0);
         Assert.assertTrue(
-                "The time to query the datastore is not greater than 0",
-                response.getQueryDatastoreTime() > 0);
+                "Cumulated time to query datastores is not greater than 0",
+                response.getStats().getCumulativeTimeToQueryDatastores() > 0);
         Assert.assertEquals(
                 "The number of inbound hop count is not equals to the number of outbound hop count",
-                response.getInboundHopCount(), response.getOutboundHopCount());
+                response.getStats().getCumulativeInboundHopCount(),
+                response.getStats().getCumulativeOutboundHopCount());
     }
 
     private static void assertEquals(ResultSet resultSet, int expectedSize) {

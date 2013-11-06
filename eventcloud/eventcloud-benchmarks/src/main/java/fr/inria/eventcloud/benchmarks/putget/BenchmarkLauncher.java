@@ -230,9 +230,11 @@ public class BenchmarkLauncher {
             }
             Element query =
                     xmlWriter.addQuery(
-                            j + 1, resp.getTimeToGetResult(),
-                            resp.getQueryDatastoreTime(), resp.getLatency(),
-                            resp.getInboundHopCount());
+                            j + 1, resp.getTimeToGetResult(), resp.getStats()
+                                    .getCumulativeTimeToQueryDatastores(),
+                            resp.getStats()
+                                    .getCumulativeTimeToExecuteSubQueries(),
+                            resp.getStats().getCumulativeInboundHopCount());
             xmlWriter.addElement(query, "finalResults", "" + nbResults);
             xmlWriter.addElement(query, "intermediateResults", ""
                     + resp.getNbIntermediateResults());

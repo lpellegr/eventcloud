@@ -33,6 +33,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import fr.inria.eventcloud.api.responses.SparqlAskResponse;
 import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
+import fr.inria.eventcloud.api.responses.SparqlQueryStatistics;
 import fr.inria.eventcloud.api.responses.SparqlResponse;
 import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
 import fr.inria.eventcloud.api.wrappers.ModelWrapper;
@@ -72,41 +73,61 @@ public class SparqlResponseCombiner implements ResponseCombiner {
 
         switch (semanticContext.getQueryType()) {
             case ASK:
+                long beginFiltering = System.currentTimeMillis();
                 Boolean answer =
                         semanticMessageManager.getColander().filterSparqlAsk(
                                 semanticContext.getQuery(), semanticResponses);
+                long endFiltering = System.currentTimeMillis();
 
-                result =
-                        new SparqlAskResponse(
-                                measurements[0], measurements[1],
-                                measurements[2], measurements[3], answer);
+                SparqlQueryStatistics stats =
+                        new SparqlQueryStatistics(
+                                semanticResponses.size(), measurements[0],
+                                measurements[1], measurements[2],
+                                measurements[3], endFiltering - beginFiltering,
+                                endFiltering - measurements[4]);
+
+                result = new SparqlAskResponse(stats, answer);
                 break;
             case CONSTRUCT:
+                beginFiltering = System.currentTimeMillis();
                 Model model =
                         semanticMessageManager.getColander()
                                 .filterSparqlConstruct(
                                         semanticContext.getQuery(),
                                         semanticResponses);
+                endFiltering = System.currentTimeMillis();
+
+                stats =
+                        new SparqlQueryStatistics(
+                                semanticResponses.size(), measurements[0],
+                                measurements[1], measurements[2],
+                                measurements[3], endFiltering - beginFiltering,
+                                endFiltering - measurements[4]);
 
                 result =
-                        new SparqlConstructResponse(
-                                measurements[0], measurements[1],
-                                measurements[2], measurements[3],
-                                new ModelWrapper(model));
+                        new SparqlConstructResponse(stats, new ModelWrapper(
+                                model));
                 break;
 
             case SELECT:
+                beginFiltering = System.currentTimeMillis();
                 ResultSet selectResultSet =
                         semanticMessageManager.getColander()
                                 .filterSparqlSelect(
                                         semanticContext.getQuery(),
                                         semanticResponses);
+                endFiltering = System.currentTimeMillis();
+
+                stats =
+                        new SparqlQueryStatistics(
+                                semanticResponses.size(), measurements[0],
+                                measurements[1], measurements[2],
+                                measurements[3], endFiltering - beginFiltering,
+                                endFiltering - measurements[4]);
 
                 SparqlSelectResponse sparqlSelectResponse =
-                        new SparqlSelectResponse(
-                                measurements[0], measurements[1],
-                                measurements[2], measurements[3],
-                                new ResultSetWrapper(selectResultSet));
+                        new SparqlSelectResponse(stats, new ResultSetWrapper(
+                                selectResultSet));
 
                 if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
                     Map<String, Integer> mapSubQueryNbResults =
@@ -168,6 +189,7 @@ public class SparqlResponseCombiner implements ResponseCombiner {
         long outboundHopCount = 0;
         long latency = 0;
         long queryDatastoreTime = 0;
+        long dispatchTimestamp = 0;
 
         for (QuadruplePatternResponse response : responses) {
             if (response.getLatency() > latency) {
@@ -177,10 +199,16 @@ public class SparqlResponseCombiner implements ResponseCombiner {
             inboundHopCount += response.getInboundHopCount();
             outboundHopCount += response.getOutboundHopCount();
             queryDatastoreTime += response.getActionTime();
+
+            if (dispatchTimestamp == 0
+                    || response.getDispatchTimestamp() < dispatchTimestamp) {
+                dispatchTimestamp = response.getDispatchTimestamp();
+            }
         }
 
         return new long[] {
-                inboundHopCount, outboundHopCount, latency, queryDatastoreTime};
+                inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
+                dispatchTimestamp};
     }
 
     public static SparqlResponseCombiner getInstance() {

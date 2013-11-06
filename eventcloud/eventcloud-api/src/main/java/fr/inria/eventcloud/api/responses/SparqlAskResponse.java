@@ -25,10 +25,8 @@ public class SparqlAskResponse extends SparqlResponse<Boolean> {
 
     private static final long serialVersionUID = 160L;
 
-    public SparqlAskResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, Boolean result) {
-        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
-                result);
+    public SparqlAskResponse(SparqlQueryStatistics stats, Boolean result) {
+        super(stats, result);
     }
 
 }
