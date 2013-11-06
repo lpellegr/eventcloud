@@ -18,6 +18,8 @@ package fr.inria.eventcloud.api.responses;
 
 import java.io.Serializable;
 
+import com.google.common.base.Objects;
+
 /**
  * A SPARQL response that maintain information which are commons to any SPARQL
  * response.
@@ -31,71 +33,23 @@ public abstract class SparqlResponse<T> implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private final long inboundHopCount;
-
-    private final long outboundHopCount;
-
-    private final long latency;
-
-    private final long queryDatastoreTime;
+    private final SparqlQueryStatistics stats;
 
     private final T result;
 
-    public SparqlResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, T result) {
+    public SparqlResponse(SparqlQueryStatistics stats, T result) {
         super();
-        this.inboundHopCount = inboundHopCount;
-        this.outboundHopCount = outboundHopCount;
-        this.latency = latency;
-        this.queryDatastoreTime = queryDatastoreTime;
+        this.stats = stats;
         this.result = result;
     }
 
     /**
-     * Returns the number of peers traversed by the query in the forward
-     * direction.
      * 
-     * @return the number of peers traversed by the query in the forward
-     *         direction.
-     */
-    public long getInboundHopCount() {
-        return this.inboundHopCount;
-    }
-
-    /**
-     * Returns the number of peers traversed by the query in the backward
-     * direction.
      * 
-     * @return the number of peers traversed by the query in the backward
-     *         direction.
+     * @return the stats
      */
-    public long getOutboundHopCount() {
-        return this.outboundHopCount;
-    }
-
-    /**
-     * Returns the time taken (in nanoseconds) to query all the peers. This
-     * value is the sum of the time taken to execute the query on each peer.
-     * Hence, if you have a disjunctive query, it is possible to have a
-     * {@code queryDatastoreTime} greater than the query latency because a
-     * disjunction is decomposed into sub-queries and each sub-query is handled
-     * in parallel.
-     * 
-     * @return the time taken to query all the peers
-     */
-    public long getQueryDatastoreTime() {
-        return this.queryDatastoreTime;
-    }
-
-    /**
-     * Returns the take taken (in ms) to send the request and to receive the
-     * response.
-     * 
-     * @return the take taken (in ms) to send the request and to receive the
-     *         response.
-     */
-    public long getLatency() {
-        return this.latency;
+    public SparqlQueryStatistics getStats() {
+        return this.stats;
     }
 
     /**
@@ -112,9 +66,9 @@ public abstract class SparqlResponse<T> implements Serializable {
      */
     @Override
     public String toString() {
-        return "SparqlResponse [inboundHopCount=" + this.inboundHopCount
-                + ", outboundHopCount=" + this.outboundHopCount + ", latency="
-                + this.latency + "]";
+        return Objects.toStringHelper(this)
+                .add("stats", this.stats.toString())
+                .toString();
     }
 
 }

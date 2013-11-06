@@ -28,10 +28,9 @@ public class SparqlDescribeResponse extends SparqlResponse<ModelWrapper> {
 
     private static final long serialVersionUID = 160L;
 
-    public SparqlDescribeResponse(long inboundHopCount, long outboundHopCount,
-            long latency, long queryDatastoreTime, ModelWrapper result) {
-        super(inboundHopCount, outboundHopCount, latency, queryDatastoreTime,
-                result);
+    public SparqlDescribeResponse(SparqlQueryStatistics stats,
+            ModelWrapper result) {
+        super(stats, result);
     }
 
 }
