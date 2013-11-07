@@ -23,13 +23,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -74,6 +78,9 @@ import fr.inria.eventcloud.utils.RDFReader;
  */
 public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
         PutGetProxyAttributeController {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(PutGetProxyImpl.class);
 
     /**
      * ADL name of the put/get proxy component.
@@ -312,20 +319,36 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
     @MemberOf("parallelNotSelfCompatible")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
             throws MalformedSparqlQueryException {
+        Stopwatch stopwatch = null;
+
+        if (log.isTraceEnabled()) {
+            stopwatch = Stopwatch.createStarted();
+        }
+
         sparqlQuery = sparqlQuery.trim();
 
+        SparqlResponse<?> result;
+
         if (sparqlQuery.startsWith("ASK")) {
-            return this.executeSparqlAsk(sparqlQuery);
+            result = this.executeSparqlAsk(sparqlQuery);
         } else if (sparqlQuery.startsWith("CONSTRUCT")) {
-            return this.executeSparqlConstruct(sparqlQuery);
+            result = this.executeSparqlConstruct(sparqlQuery);
         } else if (sparqlQuery.startsWith("DESCRIBE")) {
-            return this.executeSparqlDescribe(sparqlQuery);
+            result = this.executeSparqlDescribe(sparqlQuery);
         } else if (sparqlQuery.startsWith("SELECT")) {
-            return this.executeSparqlSelect(sparqlQuery);
+            result = this.executeSparqlSelect(sparqlQuery);
         } else {
             throw new IllegalArgumentException("Unknow query form for query: "
                     + sparqlQuery);
         }
+
+        if (log.isTraceEnabled()) {
+            log.trace("It took " + stopwatch.elapsed(TimeUnit.MILLISECONDS)
+                    + " ms to execute '" + sparqlQuery + "', "
+                    + result.getStats());
+        }
+
+        return result;
     }
 
     /**
