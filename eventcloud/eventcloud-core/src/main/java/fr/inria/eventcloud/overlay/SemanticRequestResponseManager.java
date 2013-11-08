@@ -30,9 +30,11 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanRequestR
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import fr.inria.eventcloud.api.QuadruplePattern;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
+import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.reasoner.SparqlColander;
 
 /**
@@ -80,7 +82,13 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
     }
 
     public SparqlColander getColander() {
-        return this.colander;
+        // TODO: rework, that's a temporary enhancement
+        if (EventCloudProperties.COLANDER_IN_MEMORY.getValue()) {
+            return new SparqlColander(
+                    new TransactionalTdbDatastoreBuilder().build());
+        } else {
+            return this.colander;
+        }
     }
 
     @Override
