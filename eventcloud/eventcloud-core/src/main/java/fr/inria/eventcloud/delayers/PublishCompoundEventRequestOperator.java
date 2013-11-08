@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
@@ -181,37 +180,53 @@ public class PublishCompoundEventRequestOperator extends
                         && matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing.contains(result.getSecond())) {
                     // the overall subscription is verified
                     // we have to notify the subscriber about the solution
-                    SubscribeProxy subscriber =
-                            subscription.getSubscriberProxy();
 
                     String source =
                             PAActiveObject.getUrl(this.overlay.getStub());
 
                     Node metaGraphNode = quadruple.createMetaGraphNode();
 
-                    switch (subscription.getType()) {
-                        case BINDING:
-                            subscriber.receiveSbce3(new BindingNotification(
-                                    subscription.getOriginalId(),
-                                    metaGraphNode, source, result.getFirst()));
-                            break;
-                        case COMPOUND_EVENT:
-                            subscriber.receiveSbce3(new QuadruplesNotification(
-                                    subscription.getOriginalId(),
-                                    metaGraphNode, source, compoundEvent));
-                            break;
-                        case SIGNAL:
-                            subscriber.receiveSbce3(new SignalNotification(
-                                    subscription.getOriginalId(),
-                                    metaGraphNode, source));
-                            break;
-                    }
+                    try {
+                        SubscribeProxy subscriber =
+                                subscription.getSubscriberProxy();
 
-                    log.debug(
-                            "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
-                            compoundEvent.getGraph(),
-                            matchingResult.subscriptionId,
-                            super.overlay.getId());
+                        switch (subscription.getType()) {
+                            case BINDING:
+                                subscriber.receiveSbce3(new BindingNotification(
+                                        subscription.getOriginalId(),
+                                        metaGraphNode, source,
+                                        result.getFirst()));
+                                break;
+                            case COMPOUND_EVENT:
+                                subscriber.receiveSbce3(new QuadruplesNotification(
+                                        subscription.getOriginalId(),
+                                        metaGraphNode, source, compoundEvent));
+                                break;
+                            case SIGNAL:
+                                subscriber.receiveSbce3(new SignalNotification(
+                                        subscription.getOriginalId(),
+                                        metaGraphNode, source));
+                                break;
+                        }
+
+                        log.debug(
+                                "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
+                                compoundEvent.getGraph(),
+                                matchingResult.subscriptionId,
+                                super.overlay.getId());
+                    } catch (Throwable t) {
+                        PublishSubscribeUtils.logSubscribeProxyNotReachable(
+                                metaGraphNode.toString(),
+                                subscription.getOriginalId(),
+                                subscription.getSubscriberUrl());
+
+                        // This could be due to a subscriber which has left
+                        // without unsubscribing or a temporary network outage.
+                        // In that case the subscription could be removed after
+                        // some attempts and/or time
+                        PublishSubscribeUtils.handleSubscriberConnectionFailure(
+                                this.overlay, subscription);
+                    }
                 } else {
                     if (log.isTraceEnabled()) {
                         String reason;
@@ -242,17 +257,6 @@ public class PublishCompoundEventRequestOperator extends
             // values returned by the following method call
             this.findAndHandleEphemeralSubscriptions(
                     txnGraph, extendedCompoundEvents);
-
-        } catch (ExecutionException e) {
-            log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
-                    + subscription.getSubscriberUrl());
-
-            // This could be due to a subscriber which has left
-            // without unsubscribing or a temporary network outage.
-            // In that case the subscription could be removed after some
-            // attempts and/or time
-            PublishSubscribeUtils.handleSubscriberConnectionFailure(
-                    this.overlay, subscription);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -302,10 +306,15 @@ public class PublishCompoundEventRequestOperator extends
                                         PAActiveObject.getUrl(this.overlay.getStub()),
                                         extendedCompoundEvent.compoundEvent);
 
-                        Subscription.SUBSCRIBE_PROXIES_CACHE.get(subscriberURL)
-                                .receiveSbce2(n);
-
-                        result.add(metaGraphNode);
+                        try {
+                            Subscription.SUBSCRIBE_PROXIES_CACHE.get(
+                                    subscriberURL).receiveSbce2(n);
+                            result.add(metaGraphNode);
+                        } catch (Throwable t) {
+                            PublishSubscribeUtils.logSubscribeProxyNotReachable(
+                                    metaGraphNode.toString(), subscriptionId,
+                                    subscriberURL);
+                        }
 
                         break;
                     }

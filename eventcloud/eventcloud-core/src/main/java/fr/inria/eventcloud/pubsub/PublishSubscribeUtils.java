@@ -617,9 +617,11 @@ public final class PublishSubscribeUtils {
                     "Notification sent for graph {} because subscription {} satisfied on peer {}",
                     quadruple.getGraph(), subscription.getId(),
                     semanticCanOverlay.getId());
-        } catch (ExecutionException e) {
-            log.warn("Notification cannot be sent because no SubscribeProxy found under URL: "
-                    + subscription.getSubscriberUrl());
+        } catch (Throwable t) {
+            PublishSubscribeUtils.logSubscribeProxyNotReachable(
+                    quadruple.createMetaGraphNode().toString(),
+                    subscription.getOriginalId(),
+                    subscription.getSubscriberUrl());
 
             // This could be due to a subscriber which has left
             // without unsubscribing or a temporary network outage.
@@ -718,6 +720,14 @@ public final class PublishSubscribeUtils {
                             quadruple.getSubject(), quadruple.getPredicate(),
                             quadruple.getObject(),});
         }
+    }
+
+    public static void logSubscribeProxyNotReachable(String notificationId,
+                                                     SubscriptionId subscriptionId,
+                                                     String subscriberURL) {
+        log.warn(
+                "Notification for CE {} matching subscription {} cannot be sent to {}. Proxy not reachable.",
+                notificationId, subscriptionId, subscriberURL);
     }
 
     /**
