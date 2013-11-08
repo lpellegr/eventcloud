@@ -27,6 +27,7 @@ import com.beust.jcommander.ParameterException;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.deployment.cli.CommandLineReader;
 import fr.inria.eventcloud.deployment.cli.commands.Command;
 import fr.inria.eventcloud.deployment.cli.commands.CreateEventCloudCommand;
@@ -51,6 +52,8 @@ public class EventCloudsRegistryReader {
 
     public static void main(String[] args) {
         LoggerUtils.disableLoggers();
+
+        EventCloudProperties.loadConfiguration();
 
         new EventCloudsRegistryReader().run(args);
     }
