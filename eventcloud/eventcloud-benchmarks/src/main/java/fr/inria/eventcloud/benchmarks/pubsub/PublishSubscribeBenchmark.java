@@ -364,7 +364,7 @@ public class PublishSubscribeBenchmark {
                                         PublishSubscribeBenchmark.this.nbPeers,
                                         PublishSubscribeBenchmark.this.nbPublishers,
                                         PublishSubscribeBenchmark.this.nbSubscribers,
-                                        1);
+                                        0);
 
                         componentPoolManager.start();
 
