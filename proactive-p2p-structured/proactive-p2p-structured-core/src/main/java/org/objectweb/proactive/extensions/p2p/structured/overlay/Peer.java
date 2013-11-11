@@ -50,25 +50,21 @@ public interface Peer extends Comparable<Peer>, Serializable {
     OverlayType getType();
 
     /**
-     * Returns a boolean indicating the current peer is activated (i.e. it has
-     * already joined a network and has not yet left).
+     * Returns the status of the peer.
      * 
-     * @return {@code true} if the peer has already joined a network and has not
-     *         yet left, {@code false} otherwise.
+     * @return the status of the peer.
      */
-    boolean isActivated();
+    Status getStatus();
 
     /**
      * This method is used to initialize the state of the peer in the special
      * case where it is the first peer on the network.
      * 
-     * @return a boolean indicating if the operation has succeeded or not.
-     * 
      * @throws NetworkAlreadyJoinedException
      *             if the peer has already joined or created an existing
      *             network.
      */
-    boolean create() throws NetworkAlreadyJoinedException;
+    void create() throws NetworkAlreadyJoinedException;
 
     /**
      * Forces the current peer to join an existing network by using the

@@ -61,11 +61,7 @@ public abstract class StructuredOverlay implements DataHandler {
 
     protected MutualExclusionManager mutualExclusionManager;
 
-    /**
-     * Indicates whether the current peer is activated (i.e. if the peer has
-     * already joined a network or not).
-     */
-    protected boolean activated;
+    protected Status status;
 
     // the ProActive stub reference to the outer peer active object.
     protected Peer stub;
@@ -76,11 +72,11 @@ public abstract class StructuredOverlay implements DataHandler {
     protected SerializableProvider<? extends StructuredOverlay> overlayProvider;
 
     protected StructuredOverlay() {
-        this.activated = false;
         this.id = new OverlayId();
         this.mutualExclusionManager = new RicartAgrawalaManager(this);
         this.maintenanceSequencer = 0;
         this.messageSequencer = new AtomicLong();
+        this.status = Status.NOT_ACTIVATED;
     }
 
     protected StructuredOverlay(RequestResponseManager messageManager) {
@@ -104,19 +100,6 @@ public abstract class StructuredOverlay implements DataHandler {
     public abstract OverlayType getType();
 
     public abstract String dump();
-
-    /**
-     * Returns a boolean indicating whether the current overlay is activated
-     * (i.e. if the overlay has handled a join operation but not yet a leave
-     * operation).
-     * 
-     * @return {@code true} if the overlay is activated (i.e. if the overlay has
-     *         handled a join operation but not yet a leave operation).
-     *         {@code false} otherwise.
-     */
-    public boolean isActivated() {
-        return this.activated;
-    }
 
     /**
      * Returns the unique identifier associated to the overlay.
@@ -152,6 +135,10 @@ public abstract class StructuredOverlay implements DataHandler {
 
     public String getPeerURL() {
         return this.url;
+    }
+
+    public Status getStatus() {
+        return this.status;
     }
 
     /**
