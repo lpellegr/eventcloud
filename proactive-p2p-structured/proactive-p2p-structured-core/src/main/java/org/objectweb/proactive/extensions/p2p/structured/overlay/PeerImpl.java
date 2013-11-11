@@ -198,22 +198,23 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("commonObjectMethods")
-    public boolean isActivated() {
-        return this.overlay.activated;
+    public Status getStatus() {
+        return this.overlay.status;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean create() throws NetworkAlreadyJoinedException {
-        if (this.overlay.isActivated()) {
+    public void create() throws NetworkAlreadyJoinedException {
+        if (this.overlay.status != Status.NOT_ACTIVATED) {
             throw new NetworkAlreadyJoinedException();
-        } else {
-            this.overlay.create();
-            return this.overlay.activated = true;
         }
+
+        this.overlay.status = Status.PERFORMING_CREATE;
+        this.overlay.create();
+        this.overlay.status = Status.ACTIVATED;
+
     }
 
     /**
@@ -230,17 +231,17 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
 
     private void _join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException {
-        if (this.overlay.isActivated()) {
+        if (this.overlay.status != Status.NOT_ACTIVATED) {
             throw new NetworkAlreadyJoinedException();
         }
 
-        if (!landmarkPeer.isActivated()) {
+        if (landmarkPeer.getStatus() == Status.NOT_ACTIVATED) {
             throw new PeerNotActivatedException(landmarkPeer.getId());
         }
 
+        this.overlay.status = Status.PERFORMING_JOIN;
         this.overlay.join(landmarkPeer);
-
-        this.overlay.activated = true;
+        this.overlay.status = Status.ACTIVATED;
     }
 
     /**
@@ -255,12 +256,13 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     }
 
     private void _leave() throws NetworkNotJoinedException {
-        if (this.overlay.isActivated()) {
-            this.overlay.leave();
-            this.overlay.activated = false;
-        } else {
+        if (this.overlay.status != Status.ACTIVATED) {
             throw new NetworkNotJoinedException();
         }
+
+        this.overlay.status = Status.PERFORMING_LEAVE;
+        this.overlay.leave();
+        this.overlay.status = Status.NOT_ACTIVATED;
     }
 
     /**
@@ -271,7 +273,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     public void reassign(Peer landmarkPeer) throws NetworkNotJoinedException {
         this.overlay.maintenanceId = this.overlay.newMaintenanceId();
 
-        if (this.overlay.isActivated()) {
+        if (this.overlay.status == Status.ACTIVATED) {
             this._leave();
         }
 
@@ -282,6 +284,8 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
         } catch (PeerNotActivatedException e) {
             throw new IllegalStateException(e);
         }
+
+        this.overlay.maintenanceId = null;
     }
 
     /**
