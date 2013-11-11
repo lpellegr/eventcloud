@@ -239,7 +239,7 @@ public interface Tracker extends Serializable {
     Peer getRandomPeer();
 
     /**
-     * Removes a peer reference maitained by the tracker at random.
+     * Removes a peer reference maintained by the tracker at random.
      * 
      * @return the peer reference which has been removed.
      */

@@ -35,27 +35,7 @@ public abstract class RunnableOperation implements Operation {
      */
     public abstract void handle(StructuredOverlay overlay);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithJoin() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithReassign() {
+    public boolean isCompatible(RunnableOperation other) {
         return false;
     }
 
@@ -65,31 +45,6 @@ public abstract class RunnableOperation implements Operation {
     @Override
     public boolean isCompatibleWithRouting() {
         return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isJoinOperation() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isLeaveOperation() {
-        return false;
-    }
-
-    public boolean isMutualExclusionOperation() {
-        return false;
-    }
-
-    public boolean isCompatible(RunnableOperation other) {
-        return this.isMutualExclusionOperation()
-                && other.isMutualExclusionOperation();
     }
 
 }

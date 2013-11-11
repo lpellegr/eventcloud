@@ -19,6 +19,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.util.Collection;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -41,7 +42,9 @@ public class LeaveAddNeighborsOperation<E extends Coordinate> extends
     private final Collection<NeighborEntry<E>> possibleNewNeighbors;
 
     public LeaveAddNeighborsOperation(
-            Collection<NeighborEntry<E>> possibleNewNeighbors) {
+            Collection<NeighborEntry<E>> possibleNewNeighbors,
+            MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.possibleNewNeighbors = possibleNewNeighbors;
     }
 
@@ -62,11 +65,8 @@ public class LeaveAddNeighborsOperation<E extends Coordinate> extends
                         canOverlay.getZone().neighbors(
                                 entry.getZone(), abutDimension);
 
-                if (!canOverlay.getNeighborTable().contains(
-                        entry.getId(), abutDimension, abutDirection)) {
-                    canOverlay.getNeighborTable().add(
-                            entry, abutDimension, abutDirection);
-                }
+                canOverlay.getNeighborTable().putIfAbsent(
+                        entry, abutDimension, abutDirection);
             }
         }
 

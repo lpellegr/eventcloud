@@ -17,32 +17,21 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 
 /**
  * 
  * 
  * @author lpellegr
  */
-public class LeaveNeighborsManagementOperation extends CallableOperation {
+public abstract class LeaveNeighborsManagementOperation extends
+        MaintenanceOperation {
 
     private static final long serialVersionUID = 160L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResponseOperation handle(StructuredOverlay overlay) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
+    public LeaveNeighborsManagementOperation(MaintenanceId maintenanceId) {
+        super(maintenanceId);
     }
 
     /**
@@ -58,15 +47,8 @@ public class LeaveNeighborsManagementOperation extends CallableOperation {
      */
     @Override
     public boolean isCompatible(CallableOperation other) {
-        return other instanceof JoinIntroduceOperation;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isLeaveOperation() {
-        return true;
+        return false;
+        // return other instanceof JoinIntroduceOperation;
     }
 
 }

@@ -17,7 +17,9 @@
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,12 +37,15 @@ import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActiv
 import org.objectweb.proactive.extensions.p2p.structured.factories.PeerFactory;
 import org.objectweb.proactive.extensions.p2p.structured.messages.request.can.OptimalBroadcastRequest;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
+import org.objectweb.proactive.extensions.p2p.structured.utils.SystemUtils;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,14 +62,19 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     private static final Logger log = LoggerFactory.getLogger(CanTest.class);
 
+    private static final int INITIAL_NUMBER_OF_PEERS = 10;
+
     public CanTest() {
-        super(new StringCanDeploymentDescriptor(), 1, 10);
+        super(new StringCanDeploymentDescriptor(), 1, INITIAL_NUMBER_OF_PEERS);
     }
 
     @Test
     public void testConcurrentJoinRequests() throws InterruptedException {
-        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
-        final Peer[] peers = new Peer[34];
+        final int NB_PEERS_TO_INJECT = 50;
+
+        final ExecutorService threadPool =
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
+        final Peer[] peers = new Peer[NB_PEERS_TO_INJECT];
 
         log.info("Preallocating {} peers", peers.length);
 
@@ -109,12 +119,35 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
             Assert.fail("Concurrent joins timeout");
         }
+
+        for (Peer p : peers) {
+            this.deployer.getRandomTracker().internalStorePeer(p);
+        }
+
+        Set<OverlayId> ids = new HashSet<OverlayId>();
+
+        for (Peer p : CanTest.this.deployer.getRandomTracker().getPeers()) {
+            NeighborTable<Coordinate> neighborTable =
+                    CanOperations.getNeighborTable(p);
+
+            for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                for (byte direction = 0; direction < 2; direction++) {
+                    for (NeighborEntry<?> entry : neighborTable.get(
+                            dim, direction).values()) {
+                        ids.add(entry.getId());
+                    }
+                }
+            }
+        }
+
+        Assert.assertEquals(
+                INITIAL_NUMBER_OF_PEERS + NB_PEERS_TO_INJECT, ids.size());
     }
 
     @Test
     public void testConcurrentLeaveRequests() throws InterruptedException,
             NetworkAlreadyJoinedException {
-        final Peer[] extraPeers = new Peer[35];
+        final Peer[] extraPeers = new Peer[70];
 
         log.info("Inserting {} additional peers", extraPeers.length);
 
@@ -124,9 +157,11 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         log.info("Performing concurrent leaves");
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        // final ExecutorService threadPool = Executors.newFixedThreadPool(1);
+        final ExecutorService threadPool =
+                Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
 
-        for (int i = 0; i < extraPeers.length - 1; i++) {
+        for (int i = 0; i < extraPeers.length; i++) {
             threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -146,6 +181,41 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         if (!threadPool.awaitTermination(30, TimeUnit.SECONDS)) {
             Assert.fail("Concurrent leaves timeout");
         }
+
+        Assert.assertEquals(
+                INITIAL_NUMBER_OF_PEERS, this.deployer.getRandomTracker()
+                        .getPeers()
+                        .size());
+
+        Set<OverlayId> ids = new HashSet<OverlayId>();
+
+        for (Peer p : this.deployer.getRandomTracker().getPeers()) {
+            NeighborTable<Coordinate> neighborTable =
+                    CanOperations.getNeighborTable(p);
+
+            for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
+                for (byte direction = 0; direction < 2; direction++) {
+                    for (NeighborEntry<?> entry : neighborTable.get(
+                            dim, direction).values()) {
+                        ids.add(entry.getId());
+                    }
+                }
+            }
+        }
+
+        // log.debug("Peer identifiers that are correct:");
+        //
+        // for (Peer p : this.deployer.getRandomTracker().getPeers()) {
+        // log.debug("  - {}", p.getId());
+        // }
+        //
+        // log.debug("Peer identifiers found by checking neighbors:");
+        //
+        // for (OverlayId id : ids) {
+        // log.debug("  - {}", id);
+        // }
+
+        Assert.assertEquals(INITIAL_NUMBER_OF_PEERS, ids.size());
     }
 
     @Test
@@ -273,11 +343,11 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
                 new ConcurrentLinkedQueue<Peer>();
 
-        for (int i = 0; i < 34; i++) {
+        for (int i = 0; i < 94; i++) {
             super.getRandomTracker().inject(createCustomPeer());
         }
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
         for (int i = 0; i < preAllocatedPeers.size(); i++) {
 
@@ -354,7 +424,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                         switch (requests[k]) {
                             case JOIN:
                                 preAllocatedPeers.poll().join(
-                                        CanTest.this.getRandomPeer());
+                                        CanTest.this.deployer.getPeer(0));
                                 break;
                             case LEAVE:
                                 CanTest.this.getRandomTracker()

@@ -19,8 +19,9 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -37,7 +38,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * 
  * @author lpellegr
  */
-public class LeaveOperation<E extends Coordinate> extends CallableOperation {
+public class LeaveOperation<E extends Coordinate> extends MaintenanceOperation {
 
     private static final long serialVersionUID = 160L;
 
@@ -50,7 +51,9 @@ public class LeaveOperation<E extends Coordinate> extends CallableOperation {
     private final Serializable data;
 
     public LeaveOperation(OverlayId peerLeavingId, Zone<E> peerLeavingZone,
-            Set<NeighborEntry<E>> newNeighborsToSet, Serializable data) {
+            Set<NeighborEntry<E>> newNeighborsToSet, Serializable data,
+            MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerLeavingId = peerLeavingId;
         this.peerLeavingZone = peerLeavingZone;
         this.newNeighborsToSet = newNeighborsToSet;
@@ -80,14 +83,6 @@ public class LeaveOperation<E extends Coordinate> extends CallableOperation {
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay<E>) overlay).processLeave(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isLeaveOperation() {
-        return true;
     }
 
 }

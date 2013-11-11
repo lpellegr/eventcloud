@@ -17,6 +17,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 
 /**
  * Abstract class defining compatibility for neighbors management operations.
@@ -24,24 +26,12 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOper
  * @author lpellegr
  */
 public abstract class JoinNeighborsManagementOperation extends
-        CallableOperation {
+        MaintenanceOperation {
 
     private static final long serialVersionUID = 160L;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithRouting() {
-        return true;
+    public JoinNeighborsManagementOperation(MaintenanceId maintenanceId) {
+        super(maintenanceId);
     }
 
     /**
@@ -49,15 +39,6 @@ public abstract class JoinNeighborsManagementOperation extends
      */
     @Override
     public boolean isCompatible(CallableOperation other) {
-        return other instanceof JoinIntroduceOperation;
+        return other.getClass() == JoinIntroduceOperation.class;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isJoinOperation() {
-        return true;
-    }
-
 }

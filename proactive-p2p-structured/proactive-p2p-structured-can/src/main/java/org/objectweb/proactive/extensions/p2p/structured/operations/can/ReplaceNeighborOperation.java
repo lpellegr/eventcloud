@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -45,8 +46,8 @@ public class ReplaceNeighborOperation<E extends Coordinate> extends
     private final NeighborEntry<E> entry;
 
     public ReplaceNeighborOperation(OverlayId peerIdToReplace,
-            NeighborEntry<E> entry) {
-        super();
+            NeighborEntry<E> entry, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerIdToReplace = peerIdToReplace;
         this.entry = entry;
     }

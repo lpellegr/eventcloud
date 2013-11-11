@@ -29,16 +29,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
  */
 public interface Operation extends Serializable {
 
-    boolean isCompatibleWithJoin();
-
-    boolean isCompatibleWithLeave();
-
-    boolean isCompatibleWithReassign();
-
     boolean isCompatibleWithRouting();
-
-    boolean isJoinOperation();
-
-    boolean isLeaveOperation();
 
 }

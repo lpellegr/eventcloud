@@ -51,4 +51,15 @@ public class GetNeighborTableOperation<E extends Coordinate> extends
                 ((CanOverlay<E>) overlay).getNeighborTable());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(CallableOperation op) {
+        Class<? extends CallableOperation> opClass = op.getClass();
+
+        return opClass == GetNeighborTableOperation.class
+                || opClass == JoinIntroduceOperation.class;
+    }
+
 }

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.RicartAgrawalaReply;
 import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.RicartAgrawalaRequest;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.slf4j.Logger;
@@ -48,29 +49,39 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
 
     private List<Peer> repliesDeferred;
 
-    private RicartAgrawalaReply genericReply = new RicartAgrawalaReply();
+    private final RicartAgrawalaReply deferredReply;
+
+    private final RicartAgrawalaReply nonDeferredReply;
+
+    private boolean deferred;
 
     public RicartAgrawalaManager(StructuredOverlay overlay) {
         this.nbRepliesMissing = 0;
         this.overlay = overlay;
         this.repliesDeferred = new ArrayList<Peer>();
         this.requestingCS = false;
+
+        this.deferred = false;
+        this.deferredReply = new RicartAgrawalaReply(true);
+        this.nonDeferredReply = new RicartAgrawalaReply(false);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void requestCriticalSection(Collection<Peer> processes) {
+    public synchronized boolean requestCriticalSection(Collection<Peer> processes,
+                                                       MaintenanceId maintenanceId) {
         log.trace("Requesting critical section on {}", this.overlay.getId());
 
         this.requestingCS = true;
         this.nbRepliesMissing = processes.size();
+        this.deferred = false;
         this.localTimestamp = System.currentTimeMillis();
 
         for (Peer process : processes) {
             process.receive(new RicartAgrawalaRequest(
-                    this.overlay.getStub(), this.localTimestamp));
+                    this.overlay.getStub(), maintenanceId, this.localTimestamp));
         }
 
         this.overlay.incrementExtraActiveRequestCount(1);
@@ -87,6 +98,8 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
         }
 
         this.overlay.decrementExtraActiveRequestCount(1);
+
+        return !this.deferred;
     }
 
     public synchronized void receiveRequest(Peer requestSource, long timestamp) {
@@ -96,10 +109,10 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
                 this.localTimestamp);
 
         if (!this.requestingCS) {
-            requestSource.receive(this.getGenericReply());
+            requestSource.receive(this.nonDeferredReply);
             log.trace("  replying CASE 1");
         } else if (this.requestingCS && timestamp < this.localTimestamp) {
-            requestSource.receive(this.getGenericReply());
+            requestSource.receive(this.nonDeferredReply);
             log.trace("  replying CASE 2");
         } else if (this.requestingCS && timestamp == this.localTimestamp
                 && requestSource.getId().compareTo(this.overlay.getId()) < 0) {
@@ -109,7 +122,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
             // probability only. Or we could update the identifier of peers to
             // assign a unique identifier based on the split history but it
             // implies a refactoring of the peer identifier
-            requestSource.receive(this.getGenericReply());
+            requestSource.receive(this.nonDeferredReply);
             log.trace("  replying CASE 3");
         } else {
             this.repliesDeferred.add(requestSource);
@@ -117,11 +130,12 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
         }
     }
 
-    public synchronized void receiveReply() {
+    public synchronized void receiveReply(boolean deferred) {
         log.trace("Received CS reply on {}", this.overlay.getId());
 
         if (this.nbRepliesMissing > 0) {
             this.nbRepliesMissing--;
+            this.deferred |= deferred;
             if (this.nbRepliesMissing == 0) {
                 log.trace("  all expected replies received, entering critical section");
                 this.notifyAll();
@@ -144,21 +158,9 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
         Iterator<Peer> it = this.repliesDeferred.iterator();
         while (it.hasNext()) {
             Peer peer = it.next();
-            peer.receive(this.getGenericReply());
+            peer.receive(this.deferredReply);
             it.remove();
         }
-    }
-
-    /*
-     * This method does not required to be synchronized since all the methods 
-     * that use it are already synchronized on the current object.
-     */
-    public RicartAgrawalaReply getGenericReply() {
-        if (this.genericReply == null) {
-            this.genericReply = new RicartAgrawalaReply();
-        }
-
-        return this.genericReply;
     }
 
 }

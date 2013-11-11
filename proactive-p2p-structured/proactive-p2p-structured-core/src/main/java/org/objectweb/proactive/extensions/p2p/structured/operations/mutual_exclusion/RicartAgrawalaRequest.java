@@ -17,6 +17,7 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion;
 
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
@@ -33,8 +34,12 @@ public class RicartAgrawalaRequest extends MutualExclusionOperation {
 
     private final long timestamp;
 
-    public RicartAgrawalaRequest(Peer source, long timestamp) {
+    private final MaintenanceId maintenanceId;
+
+    public RicartAgrawalaRequest(Peer source, MaintenanceId maintenanceId,
+            long timestamp) {
         this.source = source;
+        this.maintenanceId = maintenanceId;
         this.timestamp = timestamp;
     }
 
@@ -45,6 +50,10 @@ public class RicartAgrawalaRequest extends MutualExclusionOperation {
     public void handle(StructuredOverlay overlay) {
         ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveRequest(
                 this.source, this.timestamp);
+    }
+
+    public MaintenanceId getMaintenanceId() {
+        return this.maintenanceId;
     }
 
 }

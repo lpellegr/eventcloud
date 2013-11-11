@@ -19,8 +19,9 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
@@ -39,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * @author lpellegr
  */
 public class JoinWelcomeOperation<E extends Coordinate> extends
-        CallableOperation {
+        MaintenanceOperation {
 
     private static final long serialVersionUID = 160L;
 
@@ -55,7 +56,8 @@ public class JoinWelcomeOperation<E extends Coordinate> extends
 
     public JoinWelcomeOperation(OverlayId peerId, Zone<E> zone,
             LinkedList<SplitEntry> splitHistory, NeighborTable<E> neighbors,
-            Serializable data) {
+            Serializable data, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerId = peerId;
         this.zone = zone;
         this.splitHistory = splitHistory;
@@ -90,30 +92,6 @@ public class JoinWelcomeOperation<E extends Coordinate> extends
     @SuppressWarnings("unchecked")
     public ResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay<E>) overlay).handleJoinWelcomeOperation(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithJoin() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithReassign() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isJoinOperation() {
-        return true;
     }
 
 }
