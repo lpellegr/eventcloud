@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion;
 
 import java.util.Collection;
 
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 /**
@@ -33,12 +34,15 @@ public interface MutualExclusionManager {
      * @param processes
      *            the processes that are part of the distributed mutual
      *            exclusion algorithm.
+     * @return {@code true} if critical section has been acquired without
+     *         waiting for others to complete, {@code false} otherwise.
      */
-    void requestCriticalSection(Collection<Peer> processes);
+    boolean requestCriticalSection(Collection<Peer> processes,
+                                   MaintenanceId maintenanceId);
 
     /**
      * Releases the critical section previously obtained through a call to
-     * {@link #requestCriticalSection(Collection)}.
+     * {@link #requestCriticalSection(Collection, MaintenanceId)}.
      */
     void releaseCriticalSection();
 

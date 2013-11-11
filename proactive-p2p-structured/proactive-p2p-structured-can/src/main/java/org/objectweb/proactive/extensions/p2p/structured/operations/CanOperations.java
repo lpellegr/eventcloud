@@ -25,6 +25,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.can.HasNeigh
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.InsertNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.RemoveNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -61,31 +62,35 @@ public final class CanOperations {
     public static <E extends Coordinate> void insertNeighbor(Peer peer,
                                                              NeighborEntry<E> entry,
                                                              byte dimension,
-                                                             byte direction) {
+                                                             byte direction,
+                                                             MaintenanceId maintenanceId) {
         PAFuture.waitFor(peer.receive(new InsertNeighborOperation<E>(
-                entry, dimension, direction)));
+                entry, dimension, direction, maintenanceId)));
     }
 
     public static <E extends Coordinate> BooleanResponseOperation removeNeighbor(Peer peer,
-                                                                                 OverlayId peerIdentifier) {
+                                                                                 OverlayId peerIdentifier,
+                                                                                 MaintenanceId maintenanceId) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
-                peerIdentifier)));
+                peerIdentifier, maintenanceId)));
     }
 
     public static <E extends Coordinate> BooleanResponseOperation removeNeighbor(Peer peer,
                                                                                  OverlayId peerIdentifier,
                                                                                  byte dimension,
-                                                                                 byte direction) {
+                                                                                 byte direction,
+                                                                                 MaintenanceId maintenanceId) {
         return (BooleanResponseOperation) PAFuture.getFutureValue(peer.receive(new RemoveNeighborOperation<E>(
-                peerIdentifier, dimension, direction)));
+                peerIdentifier, dimension, direction, maintenanceId)));
     }
 
     public static <E extends Coordinate> void updateNeighborOperation(Peer peer,
                                                                       NeighborEntry<E> entry,
                                                                       byte dimension,
-                                                                      byte direction) {
+                                                                      byte direction,
+                                                                      MaintenanceId maintenanceId) {
         PAFuture.waitFor(peer.receive(new UpdateNeighborOperation<E>(
-                entry, dimension, direction)));
+                entry, dimension, direction, maintenanceId)));
     }
 
     @SuppressWarnings("unchecked")

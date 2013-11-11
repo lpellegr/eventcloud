@@ -49,7 +49,7 @@ public class PeerTest {
             new CanMockOverlayProvider();
 
     @Test
-    public void testConcurrentJoinOperations() throws InterruptedException,
+    public void testConcurrentLockOperations() throws InterruptedException,
             NetworkAlreadyJoinedException, ExecutionException {
         final Peer p = PeerFactory.newPeer(OVERLAY_PROVIDER);
         p.create();
@@ -57,7 +57,7 @@ public class PeerTest {
         ExecutorService threadPool =
                 Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads() + 1);
 
-        int nbReceives = 10;
+        int nbReceives = 100;
 
         final CountDownLatch doneSignal = new CountDownLatch(nbReceives);
 

@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -69,7 +70,8 @@ public class RemoveNeighborOperation<E extends Coordinate> extends
      *            the direction in which the neighbor to remove is.
      */
     public RemoveNeighborOperation(OverlayId peerIdentifier, byte dimension,
-            byte direction) {
+            byte direction, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerIdentifier = peerIdentifier;
         this.dimension = dimension;
         this.direction = direction;
@@ -83,7 +85,9 @@ public class RemoveNeighborOperation<E extends Coordinate> extends
      * @param peerIdentifier
      *            the identifier pointing to the neighbor to remove.
      */
-    public RemoveNeighborOperation(OverlayId peerIdentifier) {
+    public RemoveNeighborOperation(OverlayId peerIdentifier,
+            MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerIdentifier = peerIdentifier;
         this.dimension = -1;
         this.direction = -1;

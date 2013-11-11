@@ -397,6 +397,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
     @Override
     @MemberOf("parallel")
     public Peer removeRandomPeer() {
+        // TODO random
         Peer p = this.peers.remove(0);
         PAGroup.waitAll(this.untypedGroupView.internalRemovePeer(p));
         return p;

@@ -66,6 +66,7 @@ public interface PeerInternal {
      * @param requests
      *            the requests to inject.
      */
-    void inject(List<org.objectweb.proactive.core.body.request.Request> requests);
+    void inject(List<org.objectweb.proactive.core.body.request.Request> requests,
+                MaintenanceId maintenanceId);
 
 }

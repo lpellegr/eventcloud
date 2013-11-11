@@ -25,6 +25,8 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.MutualExclusionManager;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
@@ -42,7 +44,16 @@ public abstract class StructuredOverlay implements DataHandler {
 
     protected UniqueID bodyId;
 
-    private final AtomicLong sequencer;
+    // sequencer used to generate message identifiers
+    private final AtomicLong messageSequencer;
+
+    // sequencer used to generate maintenance identifiers
+    private long maintenanceSequencer;
+
+    // identifier used to identify a set of related maintenance requests and
+    // operations triggered for a join, a leave or a reassign invocation
+    // which is currently being handled
+    protected MaintenanceId maintenanceId;
 
     protected RequestResponseManager messageManager;
 
@@ -56,14 +67,10 @@ public abstract class StructuredOverlay implements DataHandler {
      */
     protected boolean activated;
 
-    /**
-     * The ProActive stub reference to the outer peer active object.
-     */
+    // the ProActive stub reference to the outer peer active object.
     protected Peer stub;
 
-    /**
-     * Stub URL
-     */
+    // stub URL
     protected String url;
 
     protected SerializableProvider<? extends StructuredOverlay> overlayProvider;
@@ -72,7 +79,8 @@ public abstract class StructuredOverlay implements DataHandler {
         this.activated = false;
         this.id = new OverlayId();
         this.mutualExclusionManager = new RicartAgrawalaManager(this);
-        this.sequencer = new AtomicLong();
+        this.maintenanceSequencer = 0;
+        this.messageSequencer = new AtomicLong();
     }
 
     protected StructuredOverlay(RequestResponseManager messageManager) {
@@ -82,6 +90,13 @@ public abstract class StructuredOverlay implements DataHandler {
 
     public abstract void create();
 
+    /**
+     * Forces the current peer to join a peer that is already member of a
+     * network.
+     * 
+     * @param landmarkPeer
+     *            the landmark node to join.
+     */
     public abstract void join(Peer landmarkPeer);
 
     public abstract void leave();
@@ -110,6 +125,16 @@ public abstract class StructuredOverlay implements DataHandler {
      */
     public OverlayId getId() {
         return this.id;
+    }
+
+    /**
+     * Returns the maintenance id that being handled.
+     * 
+     * @return the maintenanceId being handled or {@code null} if no maintenance
+     *         operation is executing.
+     */
+    public MaintenanceId getMaintenanceId() {
+        return this.maintenanceId;
     }
 
     /**
@@ -144,8 +169,13 @@ public abstract class StructuredOverlay implements DataHandler {
         return this.messageManager;
     }
 
+    public MaintenanceId newMaintenanceId() {
+        return new MaintenanceId(this.id, this.maintenanceSequencer++);
+    }
+
     public MessageId newMessageId() {
-        return new MessageId(this.bodyId, this.sequencer.getAndIncrement());
+        return new MessageId(
+                this.bodyId, this.messageSequencer.getAndIncrement());
     }
 
     /**
@@ -197,6 +227,35 @@ public abstract class StructuredOverlay implements DataHandler {
         if (this.messageManager != null) {
             this.messageManager.close();
         }
+    }
+
+    /*
+     * Multi-active objects compatibilities. These methods have to be overridden 
+     * in the concrete overlay implementation when required.
+     */
+
+    protected boolean isCompatibleWithJoin(CallableOperation op) {
+        return false;
+    }
+
+    protected boolean isCompatibleWithLeave(CallableOperation op) {
+        return false;
+    }
+
+    protected boolean isCompatibleWithReassign(CallableOperation op) {
+        return false;
+    }
+
+    protected boolean isCompatibleWithJoin(RunnableOperation op) {
+        return false;
+    }
+
+    protected boolean isCompatibleWithLeave(RunnableOperation op) {
+        return false;
+    }
+
+    protected boolean isCompatibleWithReassign(RunnableOperation op) {
+        return false;
     }
 
     /*

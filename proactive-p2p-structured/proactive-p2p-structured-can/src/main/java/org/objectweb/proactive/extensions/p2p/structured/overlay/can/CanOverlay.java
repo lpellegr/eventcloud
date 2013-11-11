@@ -34,16 +34,25 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.body.request.Request;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetNeighborTableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinNeighborsManagementOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveAddNeighborsOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveEnlargeZoneOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveNeighborsManagementOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.LeaveUpdateNeighborsOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.ReplaceNeighborOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.UpdateNeighborOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.MutualExclusionOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.RicartAgrawalaRequest;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayType;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -380,8 +389,34 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<E> op) {
-        super.getMutualExclusionManager().requestCriticalSection(
-                this.neighborTable.getStubs());
+        Collection<Peer> firstTwoLevelsNeighbors =
+                this.neighborTable.getFirstTwoLevelsNeighbors(super.id);
+        List<Peer> neighbors =
+                new ArrayList<Peer>(firstTwoLevelsNeighbors.size() + 1);
+        neighbors.addAll(firstTwoLevelsNeighbors);
+        neighbors.add(op.getRemotePeer());
+
+        @SuppressWarnings("unused")
+        boolean rcs = false;
+        rcs =
+                super.mutualExclusionManager.requestCriticalSection(
+                        neighbors, op.getMaintenanceId());
+
+        // while (!(rcs =
+        // super.mutualExclusionManager.requestCriticalSection(
+        // neighbors, op.getMaintenanceId()))) {
+        // log.debug(
+        // "Request critical section, immediate={}, peer={}. mID={}",
+        // rcs, super.id, op.getMaintenanceId());
+        // super.mutualExclusionManager.releaseCriticalSection();
+        //
+        // neighbors.clear();
+        // neighbors.addAll(this.neighborTable.getFirstTwoLevelsNeighbors(super.id));
+        // neighbors.add(op.getRemotePeer());
+        // }
+        // log.debug(
+        // "Request critical section, immediate={}, peer={}. mID={}",
+        // rcs, super.id, op.getMaintenanceId());
 
         byte dimension = 0;
         // TODO: choose the direction according to the number of
@@ -462,7 +497,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
                 new JoinWelcomeOperation<E>(
                         super.id, newZones.get(directionInv),
                         historyToTransfert, pendingNewNeighborhood,
-                        this.removeDataIn(newZones.get(directionInv)))));
+                        this.removeDataIn(newZones.get(directionInv)),
+                        op.getMaintenanceId())));
 
         // removes the current peer from the neighbors that are back
         // the new peer which joins, and updates the zone maintained by
@@ -485,21 +521,24 @@ public abstract class CanOverlay<E extends Coordinate> extends
                     if (dim == dimension && dir == directionInv) {
                         CanOperations.removeNeighbor(
                                 entry.getStub(), super.id, dim,
-                                getOppositeDirection(dir));
+                                getOppositeDirection(dir),
+                                op.getMaintenanceId());
                         it.remove();
                     } else if (entry.getZone().neighbors(this.zone) == -1) {
                         // the old neighbor does not neighbors us with the new
                         // zone affected
                         CanOperations.removeNeighbor(
                                 entry.getStub(), super.id, dim,
-                                getOppositeDirection(dir));
+                                getOppositeDirection(dir),
+                                op.getMaintenanceId());
                         it.remove();
                     } else {
                         // the neighbors have to update the zone associated to
                         // our id
                         CanOperations.updateNeighborOperation(
                                 entry.getStub(), this.getNeighborEntry(), dim,
-                                getOppositeDirection(dir));
+                                getOppositeDirection(dir),
+                                op.getMaintenanceId());
                     }
                 }
             }
@@ -570,7 +609,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
     @Override
     public void join(Peer landmarkPeer) {
         PAFuture.waitFor(landmarkPeer.receive(new JoinIntroduceOperation<E>(
-                super.id, super.stub)));
+                super.id, super.stub, super.maintenanceId)), 5000, true);
 
         // once the join introduce operation has returned we should have our
         // zone updated through a join welcome message which has been received
@@ -586,7 +625,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                             dim, dir).values()) {
                         CanOperations.insertNeighbor(
                                 entry.getStub(), this.getNeighborEntry(), dim,
-                                getOppositeDirection(dir));
+                                getOppositeDirection(dir), super.maintenanceId);
                     }
                 }
             }
@@ -602,14 +641,41 @@ public abstract class CanOverlay<E extends Coordinate> extends
             return;
         }
 
-        this.leaveBasedOnSplitHistory();
+        Collection<Peer> neighbors =
+                this.neighborTable.getFirstTwoLevelsNeighbors(super.id);
 
-        // TODO uncomment once load balancing issues are fixed
+        @SuppressWarnings("unused")
+        boolean rcs = false;
+        rcs =
+                this.mutualExclusionManager.requestCriticalSection(
+                        neighbors, this.maintenanceId);
+
+        // while (!(rcs =
+        // this.mutualExclusionManager.requestCriticalSection(
+        // neighbors, this.maintenanceId))) {
+        // log.debug(
+        // "Request critical section, immediate={}, peer={}. mID={}",
+        // rcs, super.id, super.maintenanceId);
+        //
+        // this.mutualExclusionManager.releaseCriticalSection();
+        // neighbors.clear();
+        // neighbors.addAll(this.neighborTable.getFirstTwoLevelsNeighbors(super.id));
+        // }
+        // log.debug(
+        // "Request critical section, immediate={}, peer={}. mID={}", rcs,
+        // super.id, super.maintenanceId);
+
+        ConcurrentMap<OverlayId, NeighborEntry<E>> reassignmentNeighbors =
+                this.leaveBasedOnSplitHistory();
+
+        this.transferPendingRequests(reassignmentNeighbors);
+
+        this.mutualExclusionManager.releaseCriticalSection();
+
         // super.messageManager.clear();
     }
 
-    private void leaveBasedOnSplitHistory() {
-        this.mutualExclusionManager.requestCriticalSection(this.neighborTable.getStubs());
+    private ConcurrentMap<OverlayId, NeighborEntry<E>> leaveBasedOnSplitHistory() {
 
         byte oppositeReassignmentDirection = 0;
         byte reassignmentDimension = 0;
@@ -660,7 +726,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                     new LeaveEnlargeZoneOperation<E>(
                             this.splitHistory.getLast().getTimestamp(),
                             reassignmentDimension, reassignmentDirection,
-                            element, dataToTransfer)));
+                            element, dataToTransfer, super.maintenanceId)));
         }
 
         // updates neighbor's pointers of each neighbor in the opposite
@@ -674,7 +740,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
                             new LeaveUpdateNeighborsOperation<E>(
                                     this.getId(), this.neighborTable.get(
                                             reassignmentDimension,
-                                            reassignmentDirection))));
+                                            reassignmentDirection),
+                                    super.maintenanceId)));
                 }
             }
         }
@@ -695,16 +762,16 @@ public abstract class CanOverlay<E extends Coordinate> extends
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : this.neighborTable.get(
                         dimension, direction).values()) {
-                    PAFuture.waitFor(entry.getStub().receive(
-                            new LeaveAddNeighborsOperation<E>(
-                                    neighborsNotReassigned)));
+                    PAFuture.waitFor(entry.getStub()
+                            .receive(
+                                    new LeaveAddNeighborsOperation<E>(
+                                            neighborsNotReassigned,
+                                            super.maintenanceId)));
                 }
             }
         }
 
-        this.mutualExclusionManager.releaseCriticalSection();
-
-        this.transferPendingRequests(reassignmentNeighbors);
+        return reassignmentNeighbors;
     }
 
     private void transferPendingRequests(ConcurrentMap<OverlayId, NeighborEntry<E>> reassignmentNeighbors) {
@@ -721,25 +788,23 @@ public abstract class CanOverlay<E extends Coordinate> extends
         // e.printStackTrace();
         // }
         //
-        // System.err.println("CanOverlay.transferPendingRequests() B " +
-        // this.id);
-        //
         // try {
         // controller.stopFc();
         // } catch (IllegalLifeCycleException e) {
         // e.printStackTrace();
         // }
-        //
-        // System.err.println("CanOverlay.transferPendingRequests() C " +
-        // this.id);
-        //
+
         // remove and transfer pending requesting from the request queue
         List<Request> pendingRequests = new ArrayList<Request>();
 
         synchronized (this.multiActiveService.getRequestExecutor()) {
-            pendingRequests.addAll(this.multiActiveService.getRequestExecutor()
+            for (Request request : this.multiActiveService.getRequestExecutor()
                     .getRequestQueue()
-                    .getInternalQueue());
+                    .getInternalQueue()) {
+                if (!this.isJoinLeaveReassignOrMaintenance(request)) {
+                    pendingRequests.add(request);
+                }
+            }
 
             this.multiActiveService.getRequestExecutor()
                     .getRequestQueue()
@@ -747,7 +812,9 @@ public abstract class CanOverlay<E extends Coordinate> extends
 
             for (RunnableRequest runnableRequest : this.multiActiveService.getPriorityConstraints()
                     .clear()) {
-                pendingRequests.add(runnableRequest.getRequest());
+                if (!this.isJoinLeaveReassignOrMaintenance(runnableRequest.getRequest())) {
+                    pendingRequests.add(runnableRequest.getRequest());
+                }
             }
         }
 
@@ -756,7 +823,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
             ((PeerInternal) reassignmentNeighbors.values()
                     .iterator()
                     .next()
-                    .getStub()).inject(pendingRequests);
+                    .getStub()).inject(pendingRequests, super.maintenanceId);
         }
 
         // // restarts the component activity to handle new join or create
@@ -769,6 +836,16 @@ public abstract class CanOverlay<E extends Coordinate> extends
         //
         // System.err.println("CanOverlay.transferPendingRequests() F " +
         // this.id);
+    }
+
+    private boolean isJoinLeaveReassignOrMaintenance(Request request) {
+        int nbParameters = request.getMethodCall().getParameters().length;
+
+        return (nbParameters == 1 && (request.getParameter(0) instanceof MaintenanceOperation
+                || request.getMethodName().equals("join") || request.getMethodName()
+                .equals("reassign")))
+                || (nbParameters == 0 && request.getMethodName()
+                        .equals("leave"));
     }
 
     @SuppressWarnings("unused")
@@ -791,7 +868,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
             PAFuture.waitFor(suitableNeighbor.getStub().receive(
                     new LeaveOperation<E>(
                             super.id, this.zone, neighbors,
-                            this.retrieveAllData())));
+                            this.retrieveAllData(), super.maintenanceId)));
 
             // updates neighbors NeighborTable
             for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
@@ -802,7 +879,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
                                 && dir != neighborDimDir.getSecond()) {
                             entry.getStub().receive(
                                     new ReplaceNeighborOperation<E>(
-                                            super.id, entry));
+                                            super.id, entry,
+                                            super.maintenanceId));
                         }
                     }
                 }
@@ -866,7 +944,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
                     it.next().getStub().receive(
                             new UpdateNeighborOperation<E>(
                                     this.getNeighborEntry(), dimension,
-                                    getOppositeDirection(direction)));
+                                    getOppositeDirection(direction),
+                                    super.maintenanceId));
                 }
             }
         }
@@ -1006,6 +1085,79 @@ public abstract class CanOverlay<E extends Coordinate> extends
                 e.printStackTrace();
             }
         }
+    }
+
+    /*
+     * Multi-active objects compatibilities
+     */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean isCompatibleWithJoin(CallableOperation op) {
+        if (op instanceof JoinNeighborsManagementOperation) {
+            return true;
+        }
+
+        if (op instanceof MaintenanceOperation) {
+            MaintenanceId maintenanceId =
+                    ((MaintenanceOperation) op).getMaintenanceId();
+
+            if (op.getClass() == JoinWelcomeOperation.class) {
+                return this.maintenanceId.equals(maintenanceId);
+            }
+        }
+
+        Class<? extends CallableOperation> opClass = op.getClass();
+
+        if (opClass == GetNeighborTableOperation.class) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean isCompatibleWithJoin(RunnableOperation op) {
+        if (op.getClass() == RicartAgrawalaRequest.class) {
+            // we manage this case because the new peer that joins the network
+            // is also a member of the group of processes that requests the
+            // critical section
+            return super.maintenanceId.equals(((RicartAgrawalaRequest) op).getMaintenanceId());
+        }
+
+        return false;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean isCompatibleWithLeave(CallableOperation op) {
+        if (op instanceof LeaveNeighborsManagementOperation) {
+            return true;
+        }
+
+        Class<? extends CallableOperation> opClass = op.getClass();
+
+        if (opClass == GetNeighborTableOperation.class) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean isCompatibleWithLeave(RunnableOperation op) {
+        return op instanceof MutualExclusionOperation;
     }
 
 }

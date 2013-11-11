@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -64,7 +65,8 @@ public class InsertNeighborOperation<E extends Coordinate> extends
      *            the direction of the neighbor to remove
      */
     public InsertNeighborOperation(NeighborEntry<E> neighborEntry,
-            byte dimension, byte direction) {
+            byte dimension, byte direction, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.entry = neighborEntry;
         this.dimension = dimension;
         this.direction = direction;

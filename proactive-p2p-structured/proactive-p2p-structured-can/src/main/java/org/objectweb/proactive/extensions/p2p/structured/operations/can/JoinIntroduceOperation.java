@@ -18,6 +18,8 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -38,7 +40,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * @see CanOverlay#handleJoinIntroduceOperation(JoinIntroduceOperation)
  */
 public class JoinIntroduceOperation<E extends Coordinate> extends
-        CallableOperation {
+        MaintenanceOperation {
 
     private static final long serialVersionUID = 160L;
 
@@ -46,8 +48,9 @@ public class JoinIntroduceOperation<E extends Coordinate> extends
 
     private final Peer remotePeer;
 
-    public JoinIntroduceOperation(OverlayId peerID, Peer remotePeer) {
-        super();
+    public JoinIntroduceOperation(OverlayId peerID, Peer remotePeer,
+            MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.peerID = peerID;
         this.remotePeer = remotePeer;
     }
@@ -73,8 +76,9 @@ public class JoinIntroduceOperation<E extends Coordinate> extends
      * {@inheritDoc}
      */
     @Override
-    public boolean isJoinOperation() {
-        return true;
-    };
+    public boolean isCompatible(CallableOperation other) {
+        return (other instanceof JoinNeighborsManagementOperation)
+                || other.getClass() == GetNeighborTableOperation.class;
+    }
 
 }

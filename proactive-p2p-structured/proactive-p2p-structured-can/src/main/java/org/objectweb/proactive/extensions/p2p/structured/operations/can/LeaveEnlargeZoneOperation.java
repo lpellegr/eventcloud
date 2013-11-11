@@ -19,9 +19,11 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -54,7 +56,8 @@ public class LeaveEnlargeZoneOperation<E extends Coordinate> extends
 
     public LeaveEnlargeZoneOperation(long splitEntryTimestamp,
             byte reassignmentDimension, byte reassignmentDirection, E element,
-            Serializable dataToTransfert) {
+            Serializable dataToTransfert, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.splitEntryTimestamp = splitEntryTimestamp;
         this.reassignmentDimension = reassignmentDimension;
         this.reassignmentDirection = reassignmentDirection;
@@ -93,12 +96,13 @@ public class LeaveEnlargeZoneOperation<E extends Coordinate> extends
                         .values()) {
                     if (dimension != this.reassignmentDimension
                             || direction != CanOverlay.getOppositeDirection(this.reassignmentDirection)) {
-                        entry.getStub().receive(
+                        PAFuture.waitFor(entry.getStub().receive(
                                 new LeaveUpdateNeighborsOperation<E>(
                                         new NeighborEntry<E>(
                                                 overlay.getId(),
                                                 overlay.getStub(),
-                                                canOverlay.getZone())));
+                                                canOverlay.getZone()),
+                                        super.maintenanceId)));
                     }
                 }
             }
@@ -111,16 +115,8 @@ public class LeaveEnlargeZoneOperation<E extends Coordinate> extends
      * {@inheritDoc}
      */
     @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isCompatible(CallableOperation other) {
-        return other instanceof JoinIntroduceOperation;
+        return false;
     }
 
 }

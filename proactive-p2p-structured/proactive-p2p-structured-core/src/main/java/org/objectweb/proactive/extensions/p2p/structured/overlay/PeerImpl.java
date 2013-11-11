@@ -38,13 +38,14 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.FinalResponseR
 import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Request;
 import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombiner;
-import org.objectweb.proactive.extensions.p2p.structured.multiactivies.PeerServingPolicy;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.MutualExclusionOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
+import org.objectweb.proactive.multiactivity.policy.DefaultServingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,14 +78,14 @@ import org.slf4j.LoggerFactory;
         @Compatible(value = {"commonObjectMethods", "receiveRunnableOperation"}),
         @Compatible(value = {"commonObjectMethods", "routing"}),
         // callable operations compatibility
-        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "isCompatibleWithJoin"),
-        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "isCompatibleWithLeave"),
-        @Compatible(value = {"receiveCallableOperation", "reassign"}, condition = "isCompatibleWithReassign"),
+        @Compatible(value = {"receiveCallableOperation", "join"}, condition = "this.isCallableOperationCompatibleWithJoin"),
+        @Compatible(value = {"receiveCallableOperation", "leave"}, condition = "this.isCallableOperationCompatibleWithLeave"),
+        @Compatible(value = {"receiveCallableOperation", "reassign"}, condition = "this.isCallableOperationCompatibleWithReassign"),
         @Compatible(value = {"receiveCallableOperation", "routing"}, condition = "isCompatibleWithRouting"),
         // runnable operation compatibility
-        @Compatible(value = {"receiveRunnableOperation", "join"}, condition = "isCompatibleWithJoin"),
-        @Compatible(value = {"receiveRunnableOperation", "leave"}, condition = "isCompatibleWithLeave"),
-        @Compatible(value = {"receiveRunnableOperation", "reassign"}, condition = "isCompatibleWithReassign"),
+        @Compatible(value = {"receiveRunnableOperation", "join"}, condition = "this.isRunnableOperationCompatibleWithJoin"),
+        @Compatible(value = {"receiveRunnableOperation", "leave"}, condition = "this.isRunnableOperationCompatibleWithLeave"),
+        @Compatible(value = {"receiveRunnableOperation", "reassign"}, condition = "this.isRunnableOperationCompatibleWithReassign"),
         @Compatible(value = {"receiveRunnableOperation", "routing"}, condition = "isCompatibleWithRouting"),
         // callable and runnable operations are compatible under some conditions
         @Compatible(value = {
@@ -140,7 +141,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
         this.multiActiveService.policyServing(
-                new PeerServingPolicy(), null,
+                new DefaultServingPolicy(), null,
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
     }
@@ -222,6 +223,13 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     @MemberOf("join")
     public void join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
             PeerNotActivatedException {
+        this.overlay.maintenanceId = this.overlay.newMaintenanceId();
+        this._join(landmarkPeer);
+        this.overlay.maintenanceId = null;
+    }
+
+    private void _join(Peer landmarkPeer) throws NetworkAlreadyJoinedException,
+            PeerNotActivatedException {
         if (this.overlay.isActivated()) {
             throw new NetworkAlreadyJoinedException();
         }
@@ -231,6 +239,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
         }
 
         this.overlay.join(landmarkPeer);
+
         this.overlay.activated = true;
     }
 
@@ -240,6 +249,12 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     @Override
     @MemberOf("leave")
     public void leave() throws NetworkNotJoinedException {
+        this.overlay.maintenanceId = this.overlay.newMaintenanceId();
+        this._leave();
+        this.overlay.maintenanceId = null;
+    }
+
+    private void _leave() throws NetworkNotJoinedException {
         if (this.overlay.isActivated()) {
             this.overlay.leave();
             this.overlay.activated = false;
@@ -254,10 +269,14 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     @Override
     @MemberOf("reassign")
     public void reassign(Peer landmarkPeer) throws NetworkNotJoinedException {
-        this.leave();
+        this.overlay.maintenanceId = this.overlay.newMaintenanceId();
+
+        if (this.overlay.isActivated()) {
+            this._leave();
+        }
 
         try {
-            this.join(landmarkPeer);
+            this._join(landmarkPeer);
         } catch (NetworkAlreadyJoinedException e) {
             throw new IllegalStateException(e);
         } catch (PeerNotActivatedException e) {
@@ -340,7 +359,8 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      * {@inheritDoc}
      */
     @Override
-    public void inject(List<org.objectweb.proactive.core.body.request.Request> requests) {
+    public void inject(List<org.objectweb.proactive.core.body.request.Request> requests,
+                       MaintenanceId maintenanceId) {
         Body body = PAActiveObject.getBodyOnThis();
 
         for (org.objectweb.proactive.core.body.request.Request request : requests) {
@@ -389,7 +409,31 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
 
     protected boolean areCompatible(CallableOperation callableOperation,
                                     RunnableOperation runnableOperation) {
-        return runnableOperation.isMutualExclusionOperation();
+        return runnableOperation instanceof MutualExclusionOperation;
+    }
+
+    protected boolean isCallableOperationCompatibleWithJoin(CallableOperation callableOperation) {
+        return this.overlay.isCompatibleWithJoin(callableOperation);
+    }
+
+    protected boolean isCallableOperationCompatibleWithLeave(CallableOperation callableOperation) {
+        return this.overlay.isCompatibleWithLeave(callableOperation);
+    }
+
+    protected boolean isCallableOperationCompatibleWithReassign(CallableOperation callableOperation) {
+        return this.overlay.isCompatibleWithReassign(callableOperation);
+    }
+
+    protected boolean isRunnableOperationCompatibleWithJoin(RunnableOperation runnableOperation) {
+        return this.overlay.isCompatibleWithJoin(runnableOperation);
+    }
+
+    protected boolean isRunnableOperationCompatibleWithLeave(RunnableOperation runnableOperation) {
+        return this.overlay.isCompatibleWithLeave(runnableOperation);
+    }
+
+    protected boolean isRunnableOperationCompatibleWithReassign(RunnableOperation runnableOperation) {
+        return this.overlay.isCompatibleWithReassign(runnableOperation);
     }
 
 }

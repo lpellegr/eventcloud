@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
@@ -60,7 +61,8 @@ public class UpdateNeighborOperation<E extends Coordinate> extends
      *            the direction on which the neighbor to update is.
      */
     public UpdateNeighborOperation(NeighborEntry<E> entry, byte dimension,
-            byte direction) {
+            byte direction, MaintenanceId maintenanceId) {
+        super(maintenanceId);
         this.entry = entry;
         this.dimension = dimension;
         this.direction = direction;

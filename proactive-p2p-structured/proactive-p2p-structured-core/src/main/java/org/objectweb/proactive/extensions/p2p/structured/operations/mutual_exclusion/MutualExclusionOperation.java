@@ -32,40 +32,16 @@ public abstract class MutualExclusionOperation extends RunnableOperation {
      * {@inheritDoc}
      */
     @Override
-    public boolean isCompatibleWithJoin() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithReassign() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isCompatibleWithRouting() {
-        return true;
+        return false;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isMutualExclusionOperation() {
-        return true;
+    public boolean isCompatible(RunnableOperation other) {
+        return other instanceof MutualExclusionOperation;
     }
 
 }

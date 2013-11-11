@@ -14,36 +14,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion;
+package org.objectweb.proactive.extensions.p2p.structured.operations;
 
-import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 
 /**
- * Reply operation associated to the Ricart Agrawala algorithm.
+ * Operation extended by all operations related to overlay maintenance (i.e.
+ * join or leave).
  * 
  * @author lpellegr
  */
-public class RicartAgrawalaReply extends MutualExclusionOperation {
+public abstract class MaintenanceOperation extends CallableOperation {
 
     private static final long serialVersionUID = 160L;
 
-    private final boolean deferred;
+    protected final MaintenanceId maintenanceId;
 
-    public RicartAgrawalaReply(boolean deferred) {
-        this.deferred = deferred;
+    public MaintenanceOperation(MaintenanceId maintenanceId) {
+        super();
+        this.maintenanceId = maintenanceId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handle(StructuredOverlay overlay) {
-        ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveReply(this.deferred);
-    }
-
-    public boolean wasDeferred() {
-        return this.deferred;
+    public MaintenanceId getMaintenanceId() {
+        return this.maintenanceId;
     }
 
 }

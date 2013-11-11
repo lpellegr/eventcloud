@@ -38,32 +38,8 @@ public abstract class CallableOperation implements Operation {
     public abstract ResponseOperation handle(StructuredOverlay overlay);
 
     /*
-     * The following methods are used to check the method compatibilities in PeerImpl
+     * The following methods are used to check methods compatibilities in PeerImpl
      */
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithJoin() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithLeave() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithReassign() {
-        return false;
-    }
 
     /**
      * {@inheritDoc}
@@ -74,22 +50,6 @@ public abstract class CallableOperation implements Operation {
     }
 
     public boolean isCompatible(CallableOperation other) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isJoinOperation() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isLeaveOperation() {
         return false;
     }
 
