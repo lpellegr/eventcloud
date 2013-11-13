@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.Body;
+import org.objectweb.proactive.annotation.multiactivity.Compatible;
+import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
+import org.objectweb.proactive.annotation.multiactivity.DefineRules;
+import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
@@ -76,6 +80,8 @@ import fr.inria.eventcloud.utils.RDFReader;
  * 
  * @see ProxyFactory
  */
+@DefineGroups({@Group(name = "executeSparqlQuery", selfCompatible = true)})
+@DefineRules({@Compatible(value = {"executeSparqlQuery", "receive"})})
 public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
         PutGetProxyAttributeController {
 
@@ -316,7 +322,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallelNotSelfCompatible")
+    @MemberOf("executeSparqlQuery")
     public SparqlResponse<?> executeSparqlQuery(String sparqlQuery)
             throws MalformedSparqlQueryException {
         Stopwatch stopwatch = null;
@@ -355,7 +361,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallelNotSelfCompatible")
+    @MemberOf("executeSparqlQuery")
     public SparqlAskResponse executeSparqlAsk(String sparqlAskQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
@@ -374,7 +380,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallelNotSelfCompatible")
+    @MemberOf("executeSparqlQuery")
     public SparqlConstructResponse executeSparqlConstruct(String sparqlConstructQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
@@ -394,7 +400,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallelNotSelfCompatible")
+    @MemberOf("executeSparqlQuery")
     public SparqlDescribeResponse executeSparqlDescribe(String sparqlDescribeQuery) {
         throw new UnsupportedOperationException();
     }
@@ -403,7 +409,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
      * {@inheritDoc}
      */
     @Override
-    @MemberOf("parallelNotSelfCompatible")
+    @MemberOf("executeSparqlQuery")
     public SparqlSelectResponse executeSparqlSelect(String sparqlSelectQuery)
             throws MalformedSparqlQueryException {
         List<SparqlAtomicRequest> requests =
