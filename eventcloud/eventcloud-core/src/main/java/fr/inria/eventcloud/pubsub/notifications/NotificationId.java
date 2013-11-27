@@ -22,8 +22,8 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.infinispan.marshall.AdvancedExternalizer;
-import org.infinispan.util.Util;
+import org.infinispan.commons.marshall.AdvancedExternalizer;
+import org.infinispan.commons.util.Util;
 
 import com.google.common.base.Objects;
 import com.hp.hpl.jena.graph.Node;
