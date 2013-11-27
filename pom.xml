@@ -62,16 +62,6 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>oss-sonatype</id>
-			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-1010</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
 	<developers>
