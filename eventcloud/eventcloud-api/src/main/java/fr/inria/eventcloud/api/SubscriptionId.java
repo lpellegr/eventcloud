@@ -22,9 +22,9 @@ import java.io.ObjectOutput;
 import java.util.Set;
 import java.util.UUID;
 
-import org.infinispan.marshall.AdvancedExternalizer;
-import org.infinispan.marshall.SerializeWith;
-import org.infinispan.util.Util;
+import org.infinispan.commons.marshall.AdvancedExternalizer;
+import org.infinispan.commons.marshall.SerializeWith;
+import org.infinispan.commons.util.Util;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;

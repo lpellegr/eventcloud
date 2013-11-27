@@ -1070,12 +1070,13 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
         private org.infinispan.Cache<NotificationId, SubscriptionId> createCache() {
             ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.loaders()
+            builder.persistence()
                     .passivation(true)
-                    .addFileCacheStore()
+                    .addSingleFileStore()
                     .location(super.diskStorePath)
                     .purgeOnStartup(true)
                     .async()
+                    .enable()
                     .eviction()
                     .maxEntries(
                             EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
