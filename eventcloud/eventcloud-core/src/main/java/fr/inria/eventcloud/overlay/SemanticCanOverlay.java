@@ -334,9 +334,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         return this.lastMaintenanceTimestamp;
     }
 
+    public boolean isLoadBalancingClaimed() {
+        return this.loadBalancingManager != null;
+    }
+
     public boolean isLoadBalancingEnabled() {
-        return this.loadBalancingManager != null
-                || this.loadBalancingManager.isRunning();
+        return this.isLoadBalancingClaimed()
+                && this.loadBalancingManager.isRunning();
     }
 
     public LoadBalancingManager getLoadBalancingManager() {
@@ -683,7 +687,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
         super.create();
 
-        if (this.isLoadBalancingEnabled()) {
+        if (this.isLoadBalancingClaimed()) {
             this.loadBalancingManager.start();
         }
     }
@@ -706,7 +710,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
         this.miscDatastore.getStatsRecorder().sync();
 
-        if (this.isLoadBalancingEnabled()) {
+        if (this.isLoadBalancingClaimed()) {
             this.loadBalancingManager.start();
         }
 
@@ -794,7 +798,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public void leave() {
-        if (this.isLoadBalancingEnabled()) {
+        if (this.isLoadBalancingClaimed()) {
             this.loadBalancingManager.stop();
         }
 
