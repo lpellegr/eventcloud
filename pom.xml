@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -54,6 +55,16 @@
 		<repository>
 			<id>petalslink-public-research</id>
 			<url>http://maven.petalslink.com/public-research/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>oss-sonatype</id>
+			<url>https://oss.sonatype.org/content/repositories/orgobjectwebproactive-1010</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -276,7 +287,7 @@
 			<dependency>
 				<groupId>org.objectweb.proactive</groupId>
 				<artifactId>proactive-programming-mao-bundle</artifactId>
-				<version>5.4.1</version>
+				<version>5.4.2</version>
 				<exclusions>
 					<exclusion>
 						<groupId>log4j</groupId>

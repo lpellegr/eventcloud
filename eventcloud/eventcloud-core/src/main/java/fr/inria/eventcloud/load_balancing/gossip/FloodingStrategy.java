@@ -23,6 +23,7 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroad
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.load_balancing.LoadReport;
+import fr.inria.eventcloud.load_balancing.UniformLoadBalancingService;
 import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
@@ -57,8 +58,8 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
         }
 
         public void onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay) {
-            ((SemanticCanOverlay) overlay).getLoadBalancingManager().save(
-                    this.loadReport.getValue());
+            ((UniformLoadBalancingService) ((SemanticCanOverlay) overlay).getLoadBalancingManager()
+                    .getLoadBalancingService()).save(this.loadReport.getValue());
         }
 
         @Override

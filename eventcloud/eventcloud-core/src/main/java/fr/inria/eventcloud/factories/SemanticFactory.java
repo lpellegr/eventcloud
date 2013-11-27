@@ -723,7 +723,8 @@ public final class SemanticFactory extends AbstractFactory {
             if (deploymentConfiguration != null) {
                 peerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
             }
-            peerAttributeController.initAttributes(peer, overlayProvider);
+            peerAttributeController.initAttributes(
+                    peer, deploymentConfiguration, overlayProvider);
 
             if (EventCloudProperties.SOCIAL_FILTER_URL.getValue() != null) {
                 RelationshipStrengthEngineManager socialFilter =

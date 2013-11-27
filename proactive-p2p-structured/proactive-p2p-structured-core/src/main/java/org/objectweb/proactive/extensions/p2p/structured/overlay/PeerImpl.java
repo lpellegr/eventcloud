@@ -30,6 +30,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.security.exceptions.RenegotiateSessionException;
 import org.objectweb.proactive.extensions.p2p.structured.AbstractComponent;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkNotJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
@@ -41,11 +42,9 @@ import org.objectweb.proactive.extensions.p2p.structured.messages.ResponseCombin
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.MutualExclusionOperation;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
-import org.objectweb.proactive.multiactivity.policy.DefaultServingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ import org.slf4j.LoggerFactory;
         @Group(name = "join", selfCompatible = false),
         @Group(name = "leave", selfCompatible = false),
         @Group(name = "reassign", selfCompatible = false),
-        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "isCompatible"),
+        @Group(name = "receiveCallableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation", condition = "this.areCompatible"),
         @Group(name = "receiveRunnableOperation", selfCompatible = true, parameter = "org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation", condition = "isCompatible"),
         @Group(name = "routing", selfCompatible = true)})
 @DefineRules({
@@ -141,8 +140,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
         this.multiActiveService.policyServing(
-                // new PeerServingPolicy(this)
-                new DefaultServingPolicy(), null,
+                new PeerServingPolicy(this), null,
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
     }
@@ -152,12 +150,14 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      */
     @Override
     public void initAttributes(Peer stub,
+                               DeploymentConfiguration deploymentConfiguration,
                                SerializableProvider<? extends StructuredOverlay> overlayProvider) {
         assert !this.initialized;
 
         this.overlay = overlayProvider.get();
         this.overlay.bodyId = PAActiveObject.getBodyOnThis().getID();
         this.overlay.multiActiveService = this.multiActiveService;
+        this.overlay.deploymentConfiguration = deploymentConfiguration;
         this.overlay.overlayProvider = overlayProvider;
         this.overlay.stub = stub;
         this.overlay.url = PAActiveObject.getUrl(stub);
@@ -199,6 +199,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
      * {@inheritDoc}
      */
     @Override
+    @MemberOf("commonObjectMethods")
     public Status getStatus() {
         return this.overlay.status;
     }
@@ -412,9 +413,13 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
         return this.overlay.toString();
     }
 
+    protected boolean areCompatible(CallableOperation op1, CallableOperation op2) {
+        return this.overlay.areCompatible(op1, op2);
+    }
+
     protected boolean areCompatible(CallableOperation callableOperation,
                                     RunnableOperation runnableOperation) {
-        return runnableOperation instanceof MutualExclusionOperation;
+        return false;
     }
 
     protected boolean isCallableOperationCompatibleWithJoin(CallableOperation callableOperation) {

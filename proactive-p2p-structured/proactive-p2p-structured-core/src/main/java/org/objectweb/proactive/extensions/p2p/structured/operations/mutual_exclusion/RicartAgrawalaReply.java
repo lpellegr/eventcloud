@@ -17,6 +17,8 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion;
 
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
 /**
@@ -38,8 +40,9 @@ public class RicartAgrawalaReply extends MutualExclusionOperation {
      * {@inheritDoc}
      */
     @Override
-    public void handle(StructuredOverlay overlay) {
-        ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveReply(this.deferred);
+    public ResponseOperation handle(StructuredOverlay overlay) {
+        ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveReply(this);
+        return EmptyResponseOperation.getInstance();
     }
 
     public boolean wasDeferred() {

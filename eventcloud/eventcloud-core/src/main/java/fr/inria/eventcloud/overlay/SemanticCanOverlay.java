@@ -38,6 +38,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -74,8 +75,6 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
-import fr.inria.eventcloud.load_balancing.criteria.Criterion;
-import fr.inria.eventcloud.load_balancing.criteria.NbQuadrupleStoredCriterion;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -109,12 +108,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
     private final PublishSubscribeOperationsDelayer publishSubscribeOperationsDelayer;
 
-    private final LoadBalancingManager loadBalancingManager;
+    private LoadBalancingManager loadBalancingManager;
 
     /*
-     * Timestamp that indicates at which time the peer has performed a join operation. 
+     * Timestamp that indicates at which time the last maintenance operation has started. 
      */
-    private long joinTime;
+    private long lastMaintenanceTimestamp;
 
     /**
      * Constructs a new overlay with the specified datastore instances.
@@ -222,16 +221,6 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         this.publishSubscribeOperationsDelayer =
                 new PublishSubscribeOperationsDelayer(this);
 
-        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
-            this.loadBalancingManager =
-                    new LoadBalancingManager(
-                            this,
-                            new Criterion[] {new NbQuadrupleStoredCriterion(
-                                    this.miscDatastore.getStatsRecorder())});
-        } else {
-            this.loadBalancingManager = null;
-        }
-
         if (EventCloudProperties.EXPOSE_JMX_STATISTICS.getValue()) {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
@@ -337,12 +326,17 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     }
 
     /**
-     * Returns the time at which the peer has performed the last join operation.
+     * Returns the time at which the last maintenance operation has started.
      * 
-     * @return the time at which the peer has performed the last join operation.
+     * @return the time at which the last maintenance operation has started.
      */
-    public long getJoinTime() {
-        return this.joinTime;
+    public long getLastMaintenanceTimestamp() {
+        return this.lastMaintenanceTimestamp;
+    }
+
+    public boolean isLoadBalancingEnabled() {
+        return this.loadBalancingManager != null
+                || this.loadBalancingManager.isRunning();
     }
 
     public LoadBalancingManager getLoadBalancingManager() {
@@ -599,6 +593,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         return result.toString();
     }
 
+    public void setLoadBalancingManager(LoadBalancingManager loadBalancingManager) {
+        this.loadBalancingManager = loadBalancingManager;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -616,16 +614,31 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public void assignDataReceived(Serializable dataReceived) {
+        boolean isTraceEnabled = log.isTraceEnabled();
+        long startTime = 0;
+
+        if (isTraceEnabled) {
+            startTime = System.currentTimeMillis();
+        }
+
         SemanticData semanticDataReceived = ((SemanticData) dataReceived);
 
-        store(this.miscDatastore, semanticDataReceived.getMiscData());
-        store(
+        this.store(this.miscDatastore, semanticDataReceived.getMiscData());
+        this.store(
                 this.subscriptionsDatastore,
                 semanticDataReceived.getSubscriptions());
+
+        if (isTraceEnabled) {
+            log.trace(
+                    "Assign data {} (misc={}, subscriptions={}) has required {} ms",
+                    this.maintenanceId, semanticDataReceived.getMiscData()
+                            .size(), semanticDataReceived.getSubscriptions()
+                            .size(), System.currentTimeMillis() - startTime);
+        }
     }
 
-    private static void store(TransactionalTdbDatastore datastore,
-                              Collection<Quadruple> quadruples) {
+    private void store(TransactionalTdbDatastore datastore,
+                       Collection<Quadruple> quadruples) {
         if (quadruples == null || quadruples.size() == 0) {
             return;
         }
@@ -666,11 +679,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public void create() {
+        this.lastMaintenanceTimestamp = System.currentTimeMillis();
+
         super.create();
 
-        this.joinTime = System.currentTimeMillis();
-
-        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+        if (this.isLoadBalancingEnabled()) {
             this.loadBalancingManager.start();
         }
     }
@@ -680,15 +693,30 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public void join(Peer landmarkPeer) {
+        this.lastMaintenanceTimestamp = System.currentTimeMillis();
+
+        boolean isTraceEnabled = log.isTraceEnabled();
+        if (isTraceEnabled) {
+            log.trace(
+                    "Join {} T1 is {}", this.maintenanceId,
+                    this.lastMaintenanceTimestamp);
+        }
+
         super.join(landmarkPeer);
 
         this.miscDatastore.getStatsRecorder().sync();
-        this.joinTime = System.currentTimeMillis();
 
-        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+        if (this.isLoadBalancingEnabled()) {
             this.loadBalancingManager.start();
         }
 
+        if (isTraceEnabled) {
+            long endTime = System.currentTimeMillis();
+
+            log.trace("Join {} T6 is {}", this.maintenanceId, endTime);
+            log.trace("Join {} has required {} ms", this.maintenanceId, endTime
+                    - this.lastMaintenanceTimestamp);
+        }
     }
 
     /**
@@ -696,6 +724,16 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<SemanticCoordinate> msg) {
+        this.maintenanceId = msg.getMaintenanceId();
+
+        boolean isTraceEnabled = log.isTraceEnabled();
+        long startTime = 0;
+
+        if (isTraceEnabled) {
+            startTime = System.currentTimeMillis();
+            log.trace("Join {} T2 is {}", this.maintenanceId, startTime);
+        }
+
         this.getPublishSubscribeOperationsDelayer().flush();
 
         // We have to sync in order to ensure that there is no background
@@ -710,6 +748,17 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
         this.miscDatastore.getStatsRecorder().sync();
 
+        if (isTraceEnabled) {
+            long endTime = System.currentTimeMillis();
+
+            log.trace("Join {} T3 is {}", this.maintenanceId, endTime);
+            log.trace(
+                    "JoinIntroduce {} has required {} ms", this.maintenanceId,
+                    endTime - startTime);
+        }
+
+        this.maintenanceId = null;
+
         return response;
     }
 
@@ -717,8 +766,35 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      * {@inheritDoc}
      */
     @Override
+    public EmptyResponseOperation handleJoinWelcomeOperation(JoinWelcomeOperation<SemanticCoordinate> op) {
+        boolean isTraceEnabled = log.isTraceEnabled();
+        long startTime = 0;
+
+        if (isTraceEnabled) {
+            startTime = System.currentTimeMillis();
+            log.trace("Join {} T4 is {}", this.maintenanceId, startTime);
+        }
+
+        EmptyResponseOperation result = super.handleJoinWelcomeOperation(op);
+
+        if (isTraceEnabled) {
+            long endTime = System.currentTimeMillis();
+
+            log.trace("Join {} T5 is {}", this.maintenanceId, endTime);
+            log.trace(
+                    "JoinWelcome {} has required {} ms", this.maintenanceId,
+                    endTime - startTime);
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void leave() {
-        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+        if (this.isLoadBalancingEnabled()) {
             this.loadBalancingManager.stop();
         }
 
@@ -927,6 +1003,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
                             PublishSubscribeConstants.QUADRUPLE_MATCHES_SUBSCRIPTION_NODE,
                             Node.ANY);
                 }
+                txnGraph.commit();
             } finally {
                 txnGraph.end();
             }
@@ -1075,9 +1152,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         this.subscriptionsCache.invalidateAll();
         this.subscriberConnectionFailures.invalidateAll();
 
-        if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
-            this.loadBalancingManager.clear();
-        }
+        // if (EventCloudProperties.isDynamicLoadBalancingEnabled()) {
+        // this.loadBalancingManager.clear();
+        // }
     }
 
     /**

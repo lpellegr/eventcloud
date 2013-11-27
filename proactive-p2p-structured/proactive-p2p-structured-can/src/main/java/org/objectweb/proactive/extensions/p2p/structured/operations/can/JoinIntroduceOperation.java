@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
@@ -70,15 +69,6 @@ public class JoinIntroduceOperation<E extends Coordinate> extends
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         return ((CanOverlay<E>) overlay).handleJoinIntroduceOperation(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(CallableOperation other) {
-        return (other instanceof JoinNeighborsManagementOperation)
-                || other.getClass() == GetNeighborTableOperation.class;
     }
 
 }

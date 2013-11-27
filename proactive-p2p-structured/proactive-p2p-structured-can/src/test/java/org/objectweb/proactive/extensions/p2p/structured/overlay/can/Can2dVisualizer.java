@@ -65,6 +65,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points
 import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.extensions.p2p.structured.router.can.FloodingBroadcastRequestRouter;
+import org.objectweb.proactive.extensions.p2p.structured.utils.CanHelper;
+import org.objectweb.proactive.extensions.p2p.structured.utils.CanHelper.Neighborhoods;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
 import org.objectweb.proactive.extensions.p2p.structured.validator.can.BroadcastConstraintsValidator;
 import org.slf4j.Logger;
@@ -590,9 +592,20 @@ public class Can2dVisualizer extends JFrame {
         CanNetworkDeployer deployer =
                 new CanNetworkDeployer(
                         new StringCanDeploymentDescriptor().setInjectionConstraintsProvider(injectionConstraintsProvider));
+
         deployer.deploy(100);
 
         final List<Peer> peers = deployer.getRandomTracker().getPeers();
+
+        Neighborhoods neighborhoods = CanHelper.checkNeighborhood(peers);
+
+        log.info(
+                "Neighborhood has been checked, valid? {}",
+                neighborhoods.areValid());
+
+        if (!neighborhoods.areValid()) {
+            log.info("identified errors are:\n{}", neighborhoods);
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override

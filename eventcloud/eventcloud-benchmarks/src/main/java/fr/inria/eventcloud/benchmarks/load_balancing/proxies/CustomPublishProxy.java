@@ -14,23 +14,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.operations.can;
+package fr.inria.eventcloud.benchmarks.load_balancing.proxies;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
+import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.proxies.PublishProxy;
 
 /**
- * Abstract class defining compatibility for neighbors management operations.
+ * Custom publish proxy interface for benchmark purposes.
  * 
  * @author lpellegr
  */
-public abstract class JoinNeighborsManagementOperation extends
-        MaintenanceOperation {
+public interface CustomPublishProxy extends PublishProxy {
 
-    private static final long serialVersionUID = 160L;
+    boolean assignEvents(Event[] events);
 
-    public JoinNeighborsManagementOperation(MaintenanceId maintenanceId) {
-        super(maintenanceId);
-    }
+    void publish();
+
+    boolean clear();
 
 }

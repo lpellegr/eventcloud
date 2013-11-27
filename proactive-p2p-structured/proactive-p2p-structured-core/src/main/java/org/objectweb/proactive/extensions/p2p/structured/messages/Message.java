@@ -224,4 +224,9 @@ public abstract class Message<K> implements Routable<K>, Serializable {
         stream.writeObject(this.constraintsValidator);
     }
 
+    @SuppressWarnings("unused")
+    private boolean isCompatible(Message<K> other) {
+        return true;
+    }
+
 }

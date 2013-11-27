@@ -18,6 +18,7 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay;
 
 import org.objectweb.fractal.api.control.AttributeController;
 import org.objectweb.proactive.extensions.p2p.structured.CommonAttributeController;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
 import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 
 /**
@@ -32,11 +33,14 @@ public interface PeerAttributeController extends CommonAttributeController {
      * 
      * @param stub
      *            the remote peer reference.
+     * @param deploymentConfiguration
+     *            the deployment configuration used to initialize the peer.
      * @param overlayProvider
      *            the provider to use for getting the {@link StructuredOverlay}
      *            embedded by the peer.
      */
     void initAttributes(Peer stub,
+                        DeploymentConfiguration deploymentConfiguration,
                         SerializableProvider<? extends StructuredOverlay> overlayProvider);
 
 }

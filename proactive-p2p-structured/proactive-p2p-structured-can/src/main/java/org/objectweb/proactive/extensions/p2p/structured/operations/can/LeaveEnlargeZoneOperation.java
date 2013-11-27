@@ -21,7 +21,6 @@ import java.util.Iterator;
 
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
@@ -109,14 +108,6 @@ public class LeaveEnlargeZoneOperation<E extends Coordinate> extends
         }
 
         return EmptyResponseOperation.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(CallableOperation other) {
-        return false;
     }
 
 }

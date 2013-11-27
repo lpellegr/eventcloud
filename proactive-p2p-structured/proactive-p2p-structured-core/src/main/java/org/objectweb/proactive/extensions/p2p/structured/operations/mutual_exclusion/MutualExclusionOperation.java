@@ -16,7 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 
 /**
  * Mutual exclusion operation. It overrides some compatibility methods to avoid
@@ -24,7 +24,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOper
  * 
  * @author lpellegr
  */
-public abstract class MutualExclusionOperation extends RunnableOperation {
+public abstract class MutualExclusionOperation extends CallableOperation {
 
     private static final long serialVersionUID = 160L;
 
@@ -33,15 +33,7 @@ public abstract class MutualExclusionOperation extends RunnableOperation {
      */
     @Override
     public boolean isCompatibleWithRouting() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(RunnableOperation other) {
-        return other instanceof MutualExclusionOperation;
+        return true;
     }
 
 }
