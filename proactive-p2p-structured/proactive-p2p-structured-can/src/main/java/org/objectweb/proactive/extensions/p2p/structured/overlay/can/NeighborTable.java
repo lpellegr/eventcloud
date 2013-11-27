@@ -18,15 +18,11 @@ package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
@@ -130,49 +126,23 @@ public class NeighborTable<E extends Coordinate> implements Serializable {
         }
     }
 
-    public List<Peer> getFirstLevelNeighbors() {
-        List<Peer> result = new ArrayList<Peer>();
+    /**
+     * Returns the neighbor entries sorted by {@link OverlayId}s.
+     * 
+     * @return the neighbor entries sorted by {@link OverlayId}s.
+     */
+    public List<NeighborEntry<E>> getFirstLevelNeighbors() {
+        List<NeighborEntry<E>> result = new ArrayList<NeighborEntry<E>>();
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : this.entries[dim][direction].values()) {
-                    result.add(entry.getStub());
+                    result.add(entry);
                 }
             }
         }
 
         return result;
-    }
-
-    public Collection<Peer> getFirstTwoLevelsNeighbors(OverlayId currentOverlayId) {
-        Map<OverlayId, Peer> entries = new HashMap<OverlayId, Peer>();
-
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> entry : this.entries[dimension][direction].values()) {
-                    Peer neighbor = entry.getStub();
-
-                    entries.put(entry.getId(), neighbor);
-
-                    NeighborTable<E> table =
-                            CanOperations.getNeighborTable(neighbor);
-
-                    for (byte dimension2 = 0; dimension2 < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension2++) {
-                        for (byte direction2 = 0; direction2 < 2; direction2++) {
-                            for (NeighborEntry<E> entry2 : table.get(
-                                    dimension2, direction2).values()) {
-                                entries.put(entry2.getId(), entry2.getStub());
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
-        entries.remove(currentOverlayId);
-
-        return entries.values();
     }
 
     /**
@@ -274,6 +244,16 @@ public class NeighborTable<E extends Coordinate> implements Serializable {
     public boolean contains(OverlayId peerIdentifier, byte dimension,
                             byte direction) {
         return this.entries[dimension][direction].containsKey(peerIdentifier);
+    }
+
+    public static <E extends Coordinate> List<Peer> filter(List<NeighborEntry<E>> neighborEntries) {
+        List<Peer> result = new ArrayList<Peer>(neighborEntries.size());
+
+        for (NeighborEntry<E> entry : neighborEntries) {
+            result.add(entry.getStub());
+        }
+
+        return result;
     }
 
     public boolean putIfAbsent(NeighborEntry<E> entry, byte dimension,

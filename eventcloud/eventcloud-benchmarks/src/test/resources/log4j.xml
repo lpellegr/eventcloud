@@ -12,7 +12,7 @@
 	</logger>
 
 	<logger name="proactive.multiactivity">
-		<level value="trace" />
+		<level value="off" />
 	</logger>
 
 	<logger name="proactive.mop">

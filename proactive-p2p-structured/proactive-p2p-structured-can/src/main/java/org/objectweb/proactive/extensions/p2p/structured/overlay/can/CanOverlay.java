@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -389,18 +390,16 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @SuppressWarnings("unchecked")
     public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<E> op) {
-        Collection<Peer> firstTwoLevelsNeighbors =
-                this.neighborTable.getFirstTwoLevelsNeighbors(super.id);
-        List<Peer> neighbors =
-                new ArrayList<Peer>(firstTwoLevelsNeighbors.size() + 1);
-        neighbors.addAll(firstTwoLevelsNeighbors);
-        neighbors.add(op.getRemotePeer());
+        List<NeighborEntry<E>> neighbors =
+                this.neighborTable.getFirstLevelNeighbors();
+        neighbors.add(new NeighborEntry<E>(
+                op.getPeerID(), op.getRemotePeer(), null));
+        Collections.sort(neighbors);
 
         @SuppressWarnings("unused")
-        boolean rcs = false;
-        rcs =
+        boolean rcs =
                 super.mutualExclusionManager.requestCriticalSection(
-                        neighbors, op.getMaintenanceId());
+                        NeighborTable.filter(neighbors), op.getMaintenanceId());
 
         // while (!(rcs =
         // super.mutualExclusionManager.requestCriticalSection(
@@ -410,13 +409,16 @@ public abstract class CanOverlay<E extends Coordinate> extends
         // rcs, super.id, op.getMaintenanceId());
         // super.mutualExclusionManager.releaseCriticalSection();
         //
-        // neighbors.clear();
+        // // neighbors.clear();
+        // //
         // neighbors.addAll(this.neighborTable.getFirstTwoLevelsNeighbors(super.id));
-        // neighbors.add(op.getRemotePeer());
+        // // if (!neighbors.contains(op.getRemotePeer())) {
+        // // neighbors.add(op.getRemotePeer());
+        // // }
         // }
         // log.debug(
-        // "Request critical section, immediate={}, peer={}. mID={}",
-        // rcs, super.id, op.getMaintenanceId());
+        // "Request critical section, immediate={}, peer={}. mID={}", rcs,
+        // super.id, op.getMaintenanceId());
 
         byte dimension = 0;
         // TODO: choose the direction according to the number of
@@ -609,7 +611,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
     @Override
     public void join(Peer landmarkPeer) {
         PAFuture.waitFor(landmarkPeer.receive(new JoinIntroduceOperation<E>(
-                super.id, super.stub, super.maintenanceId)), 5000, true);
+                super.id, super.stub, super.maintenanceId)));
 
         // once the join introduce operation has returned we should have our
         // zone updated through a join welcome message which has been received
@@ -641,14 +643,14 @@ public abstract class CanOverlay<E extends Coordinate> extends
             return;
         }
 
-        Collection<Peer> neighbors =
-                this.neighborTable.getFirstTwoLevelsNeighbors(super.id);
+        List<NeighborEntry<E>> neighbors =
+                this.neighborTable.getFirstLevelNeighbors();
+        Collections.sort(neighbors);
 
         @SuppressWarnings("unused")
-        boolean rcs = false;
-        rcs =
+        boolean rcs =
                 this.mutualExclusionManager.requestCriticalSection(
-                        neighbors, this.maintenanceId);
+                        NeighborTable.filter(neighbors), this.maintenanceId);
 
         // while (!(rcs =
         // this.mutualExclusionManager.requestCriticalSection(
@@ -1090,6 +1092,13 @@ public abstract class CanOverlay<E extends Coordinate> extends
     /*
      * Multi-active objects compatibilities
      */
+    @Override
+    protected boolean areCompatible(CallableOperation op1, CallableOperation op2) {
+        return (op2 instanceof MutualExclusionOperation && op1.getClass() == JoinIntroduceOperation.class)
+                || (op1.getClass() == GetNeighborTableOperation.class && op2.getClass() == JoinIntroduceOperation.class)
+                || (op1.getClass() == JoinIntroduceOperation.class && op2 instanceof JoinNeighborsManagementOperation)
+                || (op2.getClass() == JoinIntroduceOperation.class && op1 instanceof JoinNeighborsManagementOperation);
+    }
 
     /**
      * {@inheritDoc}
@@ -1115,6 +1124,10 @@ public abstract class CanOverlay<E extends Coordinate> extends
             return true;
         }
 
+        if (opClass == RicartAgrawalaRequest.class) {
+            return true;
+        }
+
         return false;
     }
 
@@ -1123,13 +1136,6 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @Override
     protected boolean isCompatibleWithJoin(RunnableOperation op) {
-        if (op.getClass() == RicartAgrawalaRequest.class) {
-            // we manage this case because the new peer that joins the network
-            // is also a member of the group of processes that requests the
-            // critical section
-            return super.maintenanceId.equals(((RicartAgrawalaRequest) op).getMaintenanceId());
-        }
-
         return false;
 
     }
@@ -1139,7 +1145,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @Override
     protected boolean isCompatibleWithLeave(CallableOperation op) {
-        if (op instanceof LeaveNeighborsManagementOperation) {
+        if (op instanceof LeaveNeighborsManagementOperation
+                || op instanceof MutualExclusionOperation) {
             return true;
         }
 
@@ -1157,7 +1164,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @Override
     protected boolean isCompatibleWithLeave(RunnableOperation op) {
-        return op instanceof MutualExclusionOperation;
+        return false;
     }
 
 }

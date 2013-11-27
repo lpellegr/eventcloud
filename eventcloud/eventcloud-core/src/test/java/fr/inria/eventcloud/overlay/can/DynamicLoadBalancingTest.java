@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.overlay.can;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -147,14 +146,15 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
                                                                               QuadruplePattern quadruplePattern) {
             SemanticCanOverlay customOverlay = (SemanticCanOverlay) overlay;
 
-            Map<OverlayId, LoadInformation> result =
-                    new HashMap<OverlayId, LoadInformation>();
-            result.put(overlay.getId(), new LoadInformation(
-                    customOverlay.getLoadBalancingManager().getLocalLoad(),
-                    customOverlay.getLoadBalancingManager()
-                            .getAverageOverlayLoad()));
+            // Map<OverlayId, LoadInformation> result =
+            // new HashMap<OverlayId, LoadInformation>();
+            // result.put(overlay.getId(), new LoadInformation(
+            // customOverlay.getLoadBalancingManager().getLocalLoad(),
+            // customOverlay.getLoadBalancingManager()
+            // .getAverageOverlayLoad()));
 
-            return result;
+            // return result;
+            return null;
         }
 
     }
@@ -198,6 +198,7 @@ public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
 
         public double systemLoad;
 
+        @SuppressWarnings("unused")
         public LoadInformation(double localLoad, double systemLoad) {
             this.localLoad = localLoad;
             this.systemLoad = systemLoad;

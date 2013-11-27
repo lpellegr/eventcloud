@@ -101,7 +101,6 @@ public class EventGenerator {
     }
 
     public static CompoundEvent randomCompoundEvent(SemanticZone[] zones,
-                                                    int eventIndex,
                                                     int nbQuadruples,
                                                     int nodeSize,
                                                     boolean shuffle) {

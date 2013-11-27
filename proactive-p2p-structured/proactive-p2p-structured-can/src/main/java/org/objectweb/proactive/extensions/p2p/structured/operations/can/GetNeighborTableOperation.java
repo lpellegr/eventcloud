@@ -55,11 +55,8 @@ public class GetNeighborTableOperation<E extends Coordinate> extends
      * {@inheritDoc}
      */
     @Override
-    public boolean isCompatible(CallableOperation op) {
-        Class<? extends CallableOperation> opClass = op.getClass();
-
-        return opClass == GetNeighborTableOperation.class
-                || opClass == JoinIntroduceOperation.class;
+    public boolean isCompatibleWithRouting() {
+        return true;
     }
 
 }

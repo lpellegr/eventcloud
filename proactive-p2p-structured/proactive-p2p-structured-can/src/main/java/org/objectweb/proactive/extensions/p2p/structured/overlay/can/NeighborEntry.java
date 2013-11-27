@@ -34,7 +34,8 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
  * 
  * @author lpellegr
  */
-public class NeighborEntry<E extends Coordinate> implements Serializable {
+public class NeighborEntry<E extends Coordinate> implements
+        Comparable<NeighborEntry<E>>, Serializable {
 
     private static final long serialVersionUID = 160L;
 
@@ -105,6 +106,14 @@ public class NeighborEntry<E extends Coordinate> implements Serializable {
     public String toString() {
         return "NeighborEntry[peerId=" + this.neighborIdentifier + ", zone="
                 + this.neighborZone + "]";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(NeighborEntry<E> other) {
+        return this.neighborIdentifier.compareTo(other.neighborIdentifier);
     }
 
 }

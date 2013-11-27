@@ -24,10 +24,14 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerImpl;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.PeerServingPolicy;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.providers.SerializableProvider;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
-import org.objectweb.proactive.multiactivity.policy.DefaultServingPolicy;
 import org.objectweb.proactive.multiactivity.priority.PriorityConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +44,16 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.SemanticFactory;
+import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
+import fr.inria.eventcloud.load_balancing.ThresholdLoadBalancingService;
+import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
+import fr.inria.eventcloud.load_balancing.configuration.ThresholdLoadBalancingConfiguration;
 import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.PublishCompoundEventRequest;
 import fr.inria.eventcloud.messages.request.PublishQuadrupleRequest;
 import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
@@ -104,6 +113,29 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
      * {@inheritDoc}
      */
     @Override
+    public void initAttributes(Peer stub,
+                               DeploymentConfiguration deploymentConfiguration,
+                               SerializableProvider<? extends StructuredOverlay> overlayProvider) {
+        super.initAttributes(stub, deploymentConfiguration, overlayProvider);
+
+        LoadBalancingConfiguration loadBalancingConfiguration =
+                ((SemanticOverlayProvider) overlayProvider).getLoadBalancingConfiguration();
+
+        if (loadBalancingConfiguration != null) {
+            LoadBalancingManager loadBalancingManager =
+                    new LoadBalancingManager(
+                            new ThresholdLoadBalancingService(
+                                    (SemanticCanOverlay) super.overlay,
+                                    (ThresholdLoadBalancingConfiguration) loadBalancingConfiguration));
+
+            ((SemanticCanOverlay) super.overlay).setLoadBalancingManager(loadBalancingManager);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
 
@@ -122,8 +154,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         }
 
         this.multiActiveService.policyServing(
-                // new PeerServingPolicy(this)
-                new DefaultServingPolicy(), priorityConstraints,
+                new PeerServingPolicy(this), priorityConstraints,
                 P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
                 false);
     }

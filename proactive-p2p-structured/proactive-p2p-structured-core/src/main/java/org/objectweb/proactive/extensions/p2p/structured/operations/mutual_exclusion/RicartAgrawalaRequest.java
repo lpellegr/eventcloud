@@ -17,7 +17,10 @@
 package org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion;
 
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.RicartAgrawalaManager;
+import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 
@@ -30,30 +33,45 @@ public class RicartAgrawalaRequest extends MutualExclusionOperation {
 
     private static final long serialVersionUID = 160L;
 
-    private final Peer source;
-
-    private final long timestamp;
+    private final Peer requester;
 
     private final MaintenanceId maintenanceId;
 
-    public RicartAgrawalaRequest(Peer source, MaintenanceId maintenanceId,
-            long timestamp) {
-        this.source = source;
+    private final OverlayId requesterId;
+
+    private final long requesterSequenceNumber;
+
+    public RicartAgrawalaRequest(MaintenanceId maintenanceId, Peer requester,
+            OverlayId requesterId, long requesterSequenceNumber) {
+        this.requester = requester;
         this.maintenanceId = maintenanceId;
-        this.timestamp = timestamp;
+        this.requesterId = requesterId;
+        this.requesterSequenceNumber = requesterSequenceNumber;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handle(StructuredOverlay overlay) {
-        ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveRequest(
-                this.source, this.timestamp);
+    public ResponseOperation handle(StructuredOverlay overlay) {
+        ((RicartAgrawalaManager) overlay.getMutualExclusionManager()).receiveRequest(this);
+        return EmptyResponseOperation.getInstance();
     }
 
     public MaintenanceId getMaintenanceId() {
         return this.maintenanceId;
+    }
+
+    public Peer getRequester() {
+        return this.requester;
+    }
+
+    public OverlayId getRequesterId() {
+        return this.requesterId;
+    }
+
+    public long getRequesterSequenceNumber() {
+        return this.requesterSequenceNumber;
     }
 
 }

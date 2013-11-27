@@ -18,7 +18,6 @@ package org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.mutual_exclusion.RicartAgrawalaReply;
@@ -30,7 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Distributed mutual exclusion manager based on the Ricart Agrawala algorithm.
+ * Distributed mutual exclusion manager based on the Ricart-Agrawala algorithm.
+ * 
+ * http://dl.acm.org/citation.cfm?doid=358527.358537
  * 
  * @author lpellegr
  */
@@ -39,11 +40,15 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
     private static final Logger log =
             LoggerFactory.getLogger(RicartAgrawalaManager.class);
 
+    // egrep "Requesting|Waiting|Entering|Received|CS reply|Releasing|Critical"
+
     private final StructuredOverlay overlay;
 
     private boolean requestingCS;
 
-    private long localTimestamp;
+    private long sequenceNumber;
+
+    private long highestSequenceNumber;
 
     private int nbRepliesMissing;
 
@@ -56,94 +61,113 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
     private boolean deferred;
 
     public RicartAgrawalaManager(StructuredOverlay overlay) {
-        this.nbRepliesMissing = 0;
-        this.overlay = overlay;
-        this.repliesDeferred = new ArrayList<Peer>();
         this.requestingCS = false;
+        this.sequenceNumber = 0;
+        this.highestSequenceNumber = 0;
+        this.nbRepliesMissing = 0;
 
         this.deferred = false;
         this.deferredReply = new RicartAgrawalaReply(true);
         this.nonDeferredReply = new RicartAgrawalaReply(false);
+        this.overlay = overlay;
+        this.repliesDeferred = new ArrayList<Peer>();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized boolean requestCriticalSection(Collection<Peer> processes,
-                                                       MaintenanceId maintenanceId) {
-        log.trace("Requesting critical section on {}", this.overlay.getId());
+    public boolean requestCriticalSection(Collection<Peer> processes,
+                                          MaintenanceId maintenanceId) {
+        log.trace(
+                "Requesting critical section on {} with {} processes {}",
+                this.overlay.getId(), processes.size(), processes);
 
-        this.requestingCS = true;
+        synchronized (this) {
+            this.requestingCS = true;
+            this.sequenceNumber = this.highestSequenceNumber + 1;
+        }
+
         this.nbRepliesMissing = processes.size();
-        this.deferred = false;
-        this.localTimestamp = System.currentTimeMillis();
 
         for (Peer process : processes) {
             process.receive(new RicartAgrawalaRequest(
-                    this.overlay.getStub(), maintenanceId, this.localTimestamp));
+                    maintenanceId, this.overlay.getStub(),
+                    this.overlay.getId(), this.sequenceNumber));
         }
 
         this.overlay.incrementExtraActiveRequestCount(1);
 
         log.trace(
-                "  waiting for {} replies on {}", this.nbRepliesMissing,
+                "Waiting for {} replies on {}", this.nbRepliesMissing,
                 this.overlay.getId());
-        while (this.nbRepliesMissing != 0) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+        synchronized (this) {
+            while (this.nbRepliesMissing != 0) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         this.overlay.decrementExtraActiveRequestCount(1);
 
+        log.trace("Entering critical section on {}", this.overlay.getId());
+
         return !this.deferred;
     }
 
-    public synchronized void receiveRequest(Peer requestSource, long timestamp) {
-        log.trace(
-                "Received CS request on {}, requestingCS={}, timestampReceived={}, localTimestamp={}",
-                this.overlay.getId(), this.requestingCS, timestamp,
-                this.localTimestamp);
+    public void receiveRequest(RicartAgrawalaRequest request) {
+        long k = request.getRequesterSequenceNumber();
 
-        if (!this.requestingCS) {
-            requestSource.receive(this.nonDeferredReply);
-            log.trace("  replying CASE 1");
-        } else if (this.requestingCS && timestamp < this.localTimestamp) {
-            requestSource.receive(this.nonDeferredReply);
-            log.trace("  replying CASE 2");
-        } else if (this.requestingCS && timestamp == this.localTimestamp
-                && requestSource.getId().compareTo(this.overlay.getId()) < 0) {
-            // TODO: Ideally we should use another local information that
-            // guarantees a total order (e.g. the lower zone coordinate for a
-            // CAN network) because the identifier is unique with a high
-            // probability only. Or we could update the identifier of peers to
-            // assign a unique identifier based on the split history but it
-            // implies a refactoring of the peer identifier
-            requestSource.receive(this.nonDeferredReply);
-            log.trace("  replying CASE 3");
+        log.trace(
+                "Received CS request on {}, requestingCS={}, highestSN={}, requesterSN={}, requesterID={}",
+                this.overlay.getId(), this.requestingCS,
+                this.highestSequenceNumber, k, request.getRequesterId());
+
+        this.highestSequenceNumber = Math.max(this.highestSequenceNumber, k);
+
+        // deferReply will be true if we have priority over node identified by
+        // request.getRequesterId()
+        boolean deferReply;
+
+        synchronized (this) {
+            deferReply =
+                    this.requestingCS
+                            && ((k > this.sequenceNumber) || (k == this.sequenceNumber && request.getRequesterId()
+                                    .compareTo(this.overlay.getId()) > 0));
+        }
+
+        if (deferReply) {
+            this.repliesDeferred.add(request.getRequester());
+            log.trace(
+                    "CS reply deferred on {} for requesterSN={} and requesterID={}",
+                    this.overlay.getId(), k, request.getRequesterId());
         } else {
-            this.repliesDeferred.add(requestSource);
-            log.trace("  reply deferred");
+            request.getRequester().receive(this.nonDeferredReply);
+            log.trace(
+                    "CS reply sent from {} to {} for requesterSN={} and requesterID={}",
+                    this.overlay.getId(), request.getRequesterId(), k,
+                    request.getRequesterId());
         }
     }
 
-    public synchronized void receiveReply(boolean deferred) {
+    public void receiveReply(RicartAgrawalaReply reply) {
         log.trace("Received CS reply on {}", this.overlay.getId());
-
-        if (this.nbRepliesMissing > 0) {
+        synchronized (this) {
             this.nbRepliesMissing--;
-            this.deferred |= deferred;
+            this.deferred |= reply.wasDeferred();
+
             if (this.nbRepliesMissing == 0) {
-                log.trace("  all expected replies received, entering critical section");
+                log.trace(
+                        "All replies received for CS on {}",
+                        this.overlay.getId());
+
                 this.notifyAll();
-            } else {
-                log.trace("  waiting for {} more reply", this.nbRepliesMissing);
             }
-        } else {
-            log.trace("  no reply expected");
+
         }
     }
 
@@ -151,16 +175,17 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void releaseCriticalSection() {
+    public void releaseCriticalSection() {
         log.trace("Releasing critical section on {}", this.overlay.getId());
+
         this.requestingCS = false;
 
-        Iterator<Peer> it = this.repliesDeferred.iterator();
-        while (it.hasNext()) {
-            Peer peer = it.next();
-            peer.receive(this.deferredReply);
-            it.remove();
+        for (Peer requester : this.repliesDeferred) {
+            requester.receive(this.deferredReply);
         }
+        this.repliesDeferred.clear();
+
+        log.trace("Critical section released on {}", this.overlay.getId());
     }
 
 }

@@ -52,6 +52,9 @@ public class ReplaceNeighborOperation<E extends Coordinate> extends
         this.entry = entry;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressWarnings("unchecked")
     public ResponseOperation handle(StructuredOverlay overlay) {

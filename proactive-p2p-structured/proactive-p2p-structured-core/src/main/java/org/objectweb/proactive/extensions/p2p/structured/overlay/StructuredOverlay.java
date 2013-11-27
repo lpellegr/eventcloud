@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.proactive.core.UniqueID;
 import org.objectweb.proactive.core.component.body.ComponentEndActive;
+import org.objectweb.proactive.extensions.p2p.structured.deployment.DeploymentConfiguration;
+import org.objectweb.proactive.extensions.p2p.structured.messages.Message;
 import org.objectweb.proactive.extensions.p2p.structured.messages.MessageId;
 import org.objectweb.proactive.extensions.p2p.structured.messages.RequestResponseManager;
 import org.objectweb.proactive.extensions.p2p.structured.mutual_exclusion.MutualExclusionManager;
@@ -71,6 +73,8 @@ public abstract class StructuredOverlay implements DataHandler {
 
     protected SerializableProvider<? extends StructuredOverlay> overlayProvider;
 
+    protected DeploymentConfiguration deploymentConfiguration;
+
     protected StructuredOverlay() {
         this.id = new OverlayId();
         this.mutualExclusionManager = new RicartAgrawalaManager(this);
@@ -100,6 +104,10 @@ public abstract class StructuredOverlay implements DataHandler {
     public abstract OverlayType getType();
 
     public abstract String dump();
+
+    public DeploymentConfiguration getDeploymentConfiguration() {
+        return this.deploymentConfiguration;
+    }
 
     /**
      * Returns the unique identifier associated to the overlay.
@@ -220,6 +228,25 @@ public abstract class StructuredOverlay implements DataHandler {
      * Multi-active objects compatibilities. These methods have to be overridden 
      * in the concrete overlay implementation when required.
      */
+
+    protected boolean areCompatible(CallableOperation op1, CallableOperation op2) {
+        return false;
+    }
+
+    protected boolean areCompatibleCallableOperationRunnableOperation(CallableOperation callableOperation,
+                                                                      RunnableOperation runnableOperation) {
+        return false;
+    }
+
+    protected boolean areCompatibleCallableOperationMessage(CallableOperation callableOperation,
+                                                            Message<?> message) {
+        return false;
+    }
+
+    protected boolean areCompatibleRunnableOperationMessage(RunnableOperation runnableOperation,
+                                                            Message<?> message) {
+        return false;
+    }
 
     protected boolean isCompatibleWithJoin(CallableOperation op) {
         return false;

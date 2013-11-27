@@ -27,6 +27,7 @@ import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastoreBuilder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
+import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -39,11 +40,20 @@ public class SemanticOverlayProvider extends
 
     private static final long serialVersionUID = 160L;
 
+    private final LoadBalancingConfiguration loadBalancingConfiguration;
+
     private final boolean inMemory;
 
     private String streamURL;
 
     public SemanticOverlayProvider(boolean inMemory) {
+        this(null, inMemory);
+    }
+
+    public SemanticOverlayProvider(
+            LoadBalancingConfiguration loadBalancingConfiguration,
+            boolean inMemory) {
+        this.loadBalancingConfiguration = loadBalancingConfiguration;
         this.inMemory = inMemory;
     }
 
@@ -128,7 +138,8 @@ public class SemanticOverlayProvider extends
     }
 
     private void enableStatsRecording(TransactionalTdbDatastoreBuilder miscDatastoreBuilder) {
-        if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()) {
+        if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()
+                || this.loadBalancingConfiguration != null) {
             try {
                 miscDatastoreBuilder.recordStats((StatsRecorder) EventCloudProperties.STATS_RECORDER_CLASS.getValue()
                         .newInstance());
@@ -136,6 +147,10 @@ public class SemanticOverlayProvider extends
                 throw new IllegalStateException(e);
             }
         }
+    }
+
+    public LoadBalancingConfiguration getLoadBalancingConfiguration() {
+        return this.loadBalancingConfiguration;
     }
 
     public void setStreamURL(String streamURL) {

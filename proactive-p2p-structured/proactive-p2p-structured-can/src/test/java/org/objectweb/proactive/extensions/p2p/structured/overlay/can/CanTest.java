@@ -57,7 +57,6 @@ import com.google.common.collect.Lists;
  * 
  * @author lpellegr
  */
-@Ignore
 public class CanTest extends JunitByClassCanNetworkDeployer {
 
     private static final Logger log = LoggerFactory.getLogger(CanTest.class);
@@ -70,6 +69,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
     @Test
     public void testConcurrentJoinRequests() throws InterruptedException {
+
         final int NB_PEERS_TO_INJECT = 50;
 
         final ExecutorService threadPool =
@@ -126,7 +126,10 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         Set<OverlayId> ids = new HashSet<OverlayId>();
 
-        for (Peer p : CanTest.this.deployer.getRandomTracker().getPeers()) {
+        List<Peer> networkMembers =
+                CanTest.this.deployer.getRandomTracker().getPeers();
+
+        for (Peer p : networkMembers) {
             NeighborTable<Coordinate> neighborTable =
                     CanOperations.getNeighborTable(p);
 
@@ -142,9 +145,24 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
 
         Assert.assertEquals(
                 INITIAL_NUMBER_OF_PEERS + NB_PEERS_TO_INJECT, ids.size());
+
+        // Neighborhoods neighborhoods =
+        // CanHelper.checkNeighborhood(networkMembers);
+        // boolean areNeighborhoodsValid = neighborhoods.areValid();
+        //
+        // System.out.println("Detected errors are:\n");
+        // for (Neighborhood n : neighborhoods) {
+        // System.out.println(n);
+        // }
+        // Assert.assertTrue(areNeighborhoodsValid);
+        //
+        // if (!areNeighborhoodsValid) {
+        //
+        // log.info("Detected errors are:\n", neighborhoods);
+        // }
     }
 
-    @Test
+    @Ignore
     public void testConcurrentLeaveRequests() throws InterruptedException,
             NetworkAlreadyJoinedException {
         final Peer[] extraPeers = new Peer[70];
@@ -218,7 +236,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         Assert.assertEquals(INITIAL_NUMBER_OF_PEERS, ids.size());
     }
 
-    @Test
+    @Ignore
     public void testConcurrentJoinAndLeaveRequests()
             throws NetworkAlreadyJoinedException, InterruptedException {
         final RequestType[] requests = new RequestType[34];
@@ -337,7 +355,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         }
     }
 
-    @Test
+    @Ignore
     public void testConcurrentLeaveAndRoutingRequests()
             throws NetworkAlreadyJoinedException, InterruptedException {
         final ConcurrentLinkedQueue<Peer> preAllocatedPeers =
@@ -378,7 +396,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
         }
     }
 
-    @Test
+    @Ignore
     public void testConcurrentJoinLeaveAndRoutingRequests()
             throws NetworkAlreadyJoinedException, InterruptedException {
 

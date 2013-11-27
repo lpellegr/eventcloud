@@ -14,23 +14,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package org.objectweb.proactive.extensions.p2p.structured.operations.can;
+package fr.inria.eventcloud.load_balancing.configuration;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
+import java.io.Serializable;
+
+import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 
 /**
- * Abstract class defining compatibility for neighbors management operations.
+ * 
  * 
  * @author lpellegr
  */
-public abstract class JoinNeighborsManagementOperation extends
-        MaintenanceOperation {
+public class LoadBalancingConfiguration implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    public JoinNeighborsManagementOperation(MaintenanceId maintenanceId) {
-        super(maintenanceId);
+    private final EventCloudComponentsManager eventCloudComponentsManager;
+
+    public LoadBalancingConfiguration(
+            EventCloudComponentsManager eventCloudComponentsManager) {
+        super();
+        this.eventCloudComponentsManager = eventCloudComponentsManager;
+    }
+
+    public EventCloudComponentsManager getEventCloudComponentsManager() {
+        return this.eventCloudComponentsManager;
     }
 
 }

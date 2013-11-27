@@ -223,7 +223,8 @@ public final class PeerFactory extends AbstractFactory {
             if (deploymentConfiguration != null) {
                 peerAttributeController.setDeploymentConfiguration(deploymentConfiguration);
             }
-            peerAttributeController.initAttributes(peer, overlayProvider);
+            peerAttributeController.initAttributes(
+                    peer, deploymentConfiguration, overlayProvider);
 
             log.info("Peer {} created", peer.getId());
 

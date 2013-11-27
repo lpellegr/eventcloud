@@ -1077,7 +1077,6 @@ public class PublishSubscribeBenchmark {
                              int nbQuadruplesPerCE, int rdfTermSize) {
                 return EventGenerator.randomCompoundEvent(
                         zones,
-                        eventIndex,
                         nbQuadruplesPerCE,
                         rdfTermSize,
                         !PublishSubscribeBenchmark.this.disableIntraCompoundEventsShuffling);

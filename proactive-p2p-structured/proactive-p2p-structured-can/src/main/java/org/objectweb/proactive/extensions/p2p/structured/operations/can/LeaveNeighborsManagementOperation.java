@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.operations.can;
 
-import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.MaintenanceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 
@@ -32,23 +31,6 @@ public abstract class LeaveNeighborsManagementOperation extends
 
     public LeaveNeighborsManagementOperation(MaintenanceId maintenanceId) {
         super(maintenanceId);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatibleWithRouting() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isCompatible(CallableOperation other) {
-        return false;
-        // return other instanceof JoinIntroduceOperation;
     }
 
 }

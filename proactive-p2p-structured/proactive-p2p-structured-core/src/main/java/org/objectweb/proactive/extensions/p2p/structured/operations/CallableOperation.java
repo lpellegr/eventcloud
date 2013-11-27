@@ -49,8 +49,4 @@ public abstract class CallableOperation implements Operation {
         return false;
     }
 
-    public boolean isCompatible(CallableOperation other) {
-        return false;
-    }
-
 }
