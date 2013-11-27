@@ -72,7 +72,7 @@ public class SemanticPeerMBeanImpl extends StandardMBean implements
      */
     @Override
     public long getNumberOfMiscDataManaged() {
-        if (this.overlay.isLoadBalancingEnabled()) {
+        if (this.overlay.isLoadBalancingClaimed()) {
             return this.overlay.getMiscDatastore()
                     .getStatsRecorder()
                     .getNbQuadruples();
