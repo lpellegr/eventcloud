@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
@@ -62,7 +63,7 @@ import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudComponentsManagerFactory;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.load_balancing.configuration.ThresholdLoadBalancingConfiguration;
+import fr.inria.eventcloud.load_balancing.configuration.NeighborsThresholdLoadBalancingConfiguration;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 
@@ -239,7 +240,6 @@ public class LoadBalancingBenchmark {
                                         this.nodeProvider, registryURL,
                                         eventCloudId);
 
-                        // //
                         // log.info("Clearing recorded information before to start benchmark");
                         // // clear();
                         //
@@ -251,9 +251,10 @@ public class LoadBalancingBenchmark {
                         EventCloudDeploymentDescriptor descriptor =
                                 new EventCloudDeploymentDescriptor(
                                         new CustomSemanticOverlayProvider(
-                                                new ThresholdLoadBalancingConfiguration(
+                                                new NeighborsThresholdLoadBalancingConfiguration(
                                                         LoadBalancingBenchmark.this.ecComponentsManager,
-                                                        LoadBalancingBenchmark.this.maximumNbQuadsPerPeer),
+                                                        LoadBalancingBenchmark.this.maximumNbQuadsPerPeer,
+                                                        1.5),
                                                 this.collectorURL,
                                                 LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected(),
                                                 LoadBalancingBenchmark.this.inMemoryDatastore));
@@ -279,13 +280,20 @@ public class LoadBalancingBenchmark {
                         Map<OverlayId, Integer> results =
                                 this.collector.getResults();
 
+                        DescriptiveStatistics stats =
+                                new DescriptiveStatistics();
+
                         int count = 0;
                         for (Entry<OverlayId, Integer> entry : results.entrySet()) {
                             log.info("{}  {}", entry.getKey(), entry.getValue());
                             count += entry.getValue();
+                            stats.addValue(entry.getValue());
                         }
 
-                        log.info("Sum of data managed by peers gives {}", count);
+                        log.info(
+                                "Sum of data managed by peers gives {}, standard deviation is {}, skewness is {}",
+                                count, stats.getStandardDeviation(),
+                                stats.getSkewness());
                         log.info(
                                 "Number of peers used is {} whereas {} only should be used in an ideal situation",
                                 results.size(),

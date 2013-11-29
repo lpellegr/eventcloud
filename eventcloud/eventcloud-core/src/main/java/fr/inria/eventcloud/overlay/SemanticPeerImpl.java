@@ -45,9 +45,7 @@ import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
-import fr.inria.eventcloud.load_balancing.ThresholdLoadBalancingService;
 import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
-import fr.inria.eventcloud.load_balancing.configuration.ThresholdLoadBalancingConfiguration;
 import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
 import fr.inria.eventcloud.messages.request.PublishCompoundEventRequest;
@@ -121,14 +119,14 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         LoadBalancingConfiguration loadBalancingConfiguration =
                 ((SemanticOverlayProvider) overlayProvider).getLoadBalancingConfiguration();
 
+        SemanticCanOverlay semanticOverlay = (SemanticCanOverlay) super.overlay;
+
         if (loadBalancingConfiguration != null) {
             LoadBalancingManager loadBalancingManager =
                     new LoadBalancingManager(
-                            new ThresholdLoadBalancingService(
-                                    (SemanticCanOverlay) super.overlay,
-                                    (ThresholdLoadBalancingConfiguration) loadBalancingConfiguration));
+                            loadBalancingConfiguration.createLoadBalancingService(semanticOverlay));
 
-            ((SemanticCanOverlay) super.overlay).setLoadBalancingManager(loadBalancingManager);
+            semanticOverlay.setLoadBalancingManager(loadBalancingManager);
         }
     }
 

@@ -718,8 +718,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
             long endTime = System.currentTimeMillis();
 
             log.trace("Join {} T6 is {}", this.maintenanceId, endTime);
-            log.trace("Join {} has required {} ms", this.maintenanceId, endTime
-                    - this.lastMaintenanceTimestamp);
+            log.trace(
+                    "Join {} has required {} ms (misc={}, subscriptions={})",
+                    this.maintenanceId,
+                    endTime - this.lastMaintenanceTimestamp,
+                    this.miscDatastore.getStatsRecorder().getNbQuadruples(),
+                    this.subscriptionsDatastore.getStatsRecorder()
+                            .getNbQuadruples());
         }
     }
 
@@ -757,8 +762,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
             log.trace("Join {} T3 is {}", this.maintenanceId, endTime);
             log.trace(
-                    "JoinIntroduce {} has required {} ms", this.maintenanceId,
-                    endTime - startTime);
+                    "JoinIntroduce {} has required {} ms (misc={}, subscriptions={})",
+                    this.maintenanceId, endTime - startTime,
+                    this.miscDatastore.getStatsRecorder().getNbQuadruples(),
+                    this.subscriptionsDatastore.getStatsRecorder()
+                            .getNbQuadruples());
         }
 
         this.maintenanceId = null;

@@ -18,6 +18,8 @@ package fr.inria.eventcloud.load_balancing;
 
 import java.util.concurrent.TimeUnit;
 
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
+import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Status;
 import org.slf4j.Logger;
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 
-import fr.inria.eventcloud.load_balancing.configuration.ThresholdLoadBalancingConfiguration;
+import fr.inria.eventcloud.load_balancing.configuration.LocalThresholdLoadBalancingConfiguration;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -34,13 +36,13 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * 
  * @author lpellegr
  */
-public class ThresholdLoadBalancingService extends LoadBalancingService {
+public class LocalThresholdLoadBalancingService extends LoadBalancingService {
 
     private static final Logger log =
-            LoggerFactory.getLogger(ThresholdLoadBalancingService.class);
+            LoggerFactory.getLogger(LocalThresholdLoadBalancingService.class);
 
-    public ThresholdLoadBalancingService(final SemanticCanOverlay overlay,
-            ThresholdLoadBalancingConfiguration loadBalancingConfiguration) {
+    public LocalThresholdLoadBalancingService(final SemanticCanOverlay overlay,
+            LocalThresholdLoadBalancingConfiguration loadBalancingConfiguration) {
         super(overlay, loadBalancingConfiguration);
     }
 
@@ -60,11 +62,16 @@ public class ThresholdLoadBalancingService extends LoadBalancingService {
                         .getNbQuadruples();
 
         log.trace(
-                "Threshold load balancing service is running one iteration on {}, nbMiscData={}",
+                "Running one iteration on {}, nbMiscData={}",
                 super.overlay.getId(), nbQuadruples);
 
-        ThresholdLoadBalancingConfiguration configuration =
-                (ThresholdLoadBalancingConfiguration) super.loadBalancingConfiguration;
+        this.makeDecision(nbQuadruples);
+    }
+
+    protected final void makeDecision(long nbQuadruples)
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException {
+        LocalThresholdLoadBalancingConfiguration configuration =
+                (LocalThresholdLoadBalancingConfiguration) super.loadBalancingConfiguration;
 
         if (nbQuadruples > configuration.getMaximumNumberOfQuadruplesPerPeer()) {
             boolean isTraceEnabled = log.isTraceEnabled();
@@ -73,12 +80,6 @@ public class ThresholdLoadBalancingService extends LoadBalancingService {
             if (isTraceEnabled) {
                 startTime = System.currentTimeMillis();
             }
-
-            Peer newPeer =
-                    super.loadBalancingConfiguration.getEventCloudComponentsManager()
-                            .getPeer(
-                                    super.overlay.getDeploymentConfiguration(),
-                                    super.overlay.getOverlayProvider());
 
             String timingMsg = "";
             if (isTraceEnabled) {
@@ -92,8 +93,19 @@ public class ThresholdLoadBalancingService extends LoadBalancingService {
                     nbQuadruples,
                     configuration.getMaximumNumberOfQuadruplesPerPeer());
 
-            newPeer.join(super.overlay.getStub());
+            this.makeNewPeerJoin();
         }
+    }
+
+    protected final void makeNewPeerJoin()
+            throws NetworkAlreadyJoinedException, PeerNotActivatedException {
+        Peer newPeer =
+                super.loadBalancingConfiguration.getEventCloudComponentsManager()
+                        .getPeer(
+                                super.overlay.getDeploymentConfiguration(),
+                                super.overlay.getOverlayProvider());
+
+        newPeer.join(super.overlay.getStub());
     }
 
     /**
@@ -101,7 +113,7 @@ public class ThresholdLoadBalancingService extends LoadBalancingService {
      */
     @Override
     protected String serviceName() {
-        return "Threshold load-balancing service";
+        return "Local threshold load-balancing service";
     }
 
     /**

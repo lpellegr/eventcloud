@@ -17,21 +17,23 @@
 package fr.inria.eventcloud.load_balancing.configuration;
 
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
-import fr.inria.eventcloud.load_balancing.ThresholdLoadBalancingService;
+import fr.inria.eventcloud.load_balancing.LoadBalancingService;
+import fr.inria.eventcloud.load_balancing.LocalThresholdLoadBalancingService;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Configuration for {@link ThresholdLoadBalancingService}.
+ * Configuration for {@link LocalThresholdLoadBalancingService}.
  * 
  * @author lpellegr
  */
-public class ThresholdLoadBalancingConfiguration extends
+public class LocalThresholdLoadBalancingConfiguration extends
         LoadBalancingConfiguration {
 
     private static final long serialVersionUID = 160L;
 
     private final int maximumNumberOfQuadruplesPerPeer;
 
-    public ThresholdLoadBalancingConfiguration(
+    public LocalThresholdLoadBalancingConfiguration(
             EventCloudComponentsManager eventCloudComponentsManager,
             int maximumNumberOfQuadruplesPerPeer) {
         super(eventCloudComponentsManager);
@@ -42,6 +44,14 @@ public class ThresholdLoadBalancingConfiguration extends
 
     public int getMaximumNumberOfQuadruplesPerPeer() {
         return this.maximumNumberOfQuadruplesPerPeer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoadBalancingService createLoadBalancingService(SemanticCanOverlay overlay) {
+        return new LocalThresholdLoadBalancingService(overlay, this);
     }
 
 }
