@@ -53,15 +53,15 @@ public class NeighborsThresholdLoadBalancingService extends
      */
     @Override
     protected void runOneIteration() throws Exception {
-        // runs iteration if the zone of the peer is not being updated
-        if (super.overlay.getStatus() != Status.ACTIVATED) {
-            return;
-        }
-
         long nbQuadruples =
                 super.overlay.getMiscDatastore()
                         .getStatsRecorder()
                         .getNbQuadruples();
+
+        // runs iteration if the zone of the peer is not being updated
+        if (super.overlay.getStatus() != Status.ACTIVATED) {
+            return;
+        }
 
         log.trace(
                 "Running one iteration on {}, nbMiscData={}",

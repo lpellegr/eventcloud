@@ -36,6 +36,7 @@ import javax.management.ObjectName;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
@@ -75,6 +76,7 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
+import fr.inria.eventcloud.operations.can.RetrieveEstimatedNumberOfQuadruplesOperation;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -1197,6 +1199,23 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         this.miscDatastore.close();
         this.subscriptionsDatastore.close();
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean areCompatible(CallableOperation op1, CallableOperation op2) {
+        if (super.areCompatible(op1, op2)) {
+            return true;
+        }
+
+        if (op1.getClass() == RetrieveEstimatedNumberOfQuadruplesOperation.class
+                || op2.getClass() == RetrieveEstimatedNumberOfQuadruplesOperation.class) {
+            return true;
+        }
+
+        return false;
     }
 
     private static final class SubscriptionNotFoundException extends Exception {
