@@ -17,7 +17,10 @@
 package fr.inria.eventcloud.load_balancing.configuration;
 
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
+import fr.inria.eventcloud.load_balancing.LoadBalancingService;
+import fr.inria.eventcloud.load_balancing.UniformLoadBalancingService;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
  * 
@@ -41,6 +44,14 @@ public class UniformLoadBalancingConfiguration extends
 
     public Criterion[] getCriteria() {
         return this.criteria;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoadBalancingService createLoadBalancingService(SemanticCanOverlay overlay) {
+        return new UniformLoadBalancingService(overlay, this);
     }
 
 }

@@ -16,33 +16,41 @@
  **/
 package fr.inria.eventcloud.load_balancing.configuration;
 
-import java.io.Serializable;
-
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.load_balancing.LoadBalancingService;
+import fr.inria.eventcloud.load_balancing.NeighborsThresholdLoadBalancingService;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * 
+ * Configuration for {@link NeighborsThresholdLoadBalancingService}.
  * 
  * @author lpellegr
  */
-public abstract class LoadBalancingConfiguration implements Serializable {
+public class NeighborsThresholdLoadBalancingConfiguration extends
+        LocalThresholdLoadBalancingConfiguration {
 
     private static final long serialVersionUID = 160L;
 
-    private final EventCloudComponentsManager eventCloudComponentsManager;
+    private final double neighborsThresholdRatio;
 
-    public LoadBalancingConfiguration(
-            EventCloudComponentsManager eventCloudComponentsManager) {
-        super();
-        this.eventCloudComponentsManager = eventCloudComponentsManager;
+    public NeighborsThresholdLoadBalancingConfiguration(
+            EventCloudComponentsManager eventCloudComponentsManager,
+            int maximumNumberOfQuadruplesPerPeer, double neighborsThresholdRatio) {
+        super(eventCloudComponentsManager, maximumNumberOfQuadruplesPerPeer);
+
+        this.neighborsThresholdRatio = neighborsThresholdRatio;
     }
 
-    public EventCloudComponentsManager getEventCloudComponentsManager() {
-        return this.eventCloudComponentsManager;
+    public double getNeighborsThresholdRatio() {
+        return this.neighborsThresholdRatio;
     }
 
-    public abstract LoadBalancingService createLoadBalancingService(SemanticCanOverlay overlay);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoadBalancingService createLoadBalancingService(SemanticCanOverlay overlay) {
+        return new NeighborsThresholdLoadBalancingService(overlay, this);
+    }
 
 }
