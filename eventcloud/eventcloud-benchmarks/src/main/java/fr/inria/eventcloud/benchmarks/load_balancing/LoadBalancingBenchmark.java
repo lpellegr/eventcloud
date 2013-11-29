@@ -28,6 +28,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
@@ -116,6 +117,10 @@ public class LoadBalancingBenchmark {
     public int nbPeers;
 
     public static void main(String[] args) {
+        // alphabetic lower case interval
+        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x61);
+        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
+
         LoadBalancingBenchmark benchmark = new LoadBalancingBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
@@ -295,10 +300,10 @@ public class LoadBalancingBenchmark {
                                 count, stats.getStandardDeviation(),
                                 stats.getSkewness());
                         log.info(
-                                "Number of peers used is {} whereas {} only should be used in an ideal situation",
+                                "Number of peers used is {} whereas {} only should be used with an uniform situation",
                                 results.size(),
-                                LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected()
-                                        / LoadBalancingBenchmark.this.maximumNbQuadsPerPeer);
+                                (int) Math.ceil(LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected()
+                                        / (double) LoadBalancingBenchmark.this.maximumNbQuadsPerPeer));
 
                         // grep "Assign" LoadBalancingBenchmark
                         // grep "Join" LoadBalancingBenchmark | grep
