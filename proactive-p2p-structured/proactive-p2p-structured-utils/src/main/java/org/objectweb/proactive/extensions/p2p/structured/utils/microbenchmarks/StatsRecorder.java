@@ -16,6 +16,8 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
+import java.util.Collection;
+
 /**
  * Records statistical information about different runs and scenarios. Results
  * from different scenarios are classified according to categories.
@@ -27,5 +29,7 @@ public interface StatsRecorder {
     void reportValue(String categoryName, long value);
 
     Category getCategory(String name);
+
+    Collection<String> listCategoriesName();
 
 }

@@ -16,6 +16,7 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class StatsRecorderImpl implements StatsRecorder {
             category = this.categories.get(categoryName);
         }
 
-        category.reportTime(value);
+        category.reportValue(value);
     }
 
     /**
@@ -75,6 +76,14 @@ public class StatsRecorderImpl implements StatsRecorder {
     @Override
     public Category getCategory(String name) {
         return this.categories.get(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<String> listCategoriesName() {
+        return this.categories.keySet();
     }
 
 }
