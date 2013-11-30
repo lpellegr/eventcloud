@@ -80,8 +80,8 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
         super.multiActiveService.multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUBLISH_PROXIES.getValue(),
-                false, false);
+                EventCloudProperties.MAO_LIMIT_PUBLISH_PROXIES.getValue(),
+                true, false);
     }
 
     /**

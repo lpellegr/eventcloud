@@ -157,8 +157,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
         super.multiActiveService.multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                false, false);
+                EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue(),
+                true, false);
     }
 
     /**
@@ -214,16 +214,16 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
                         // is
                         // EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT
                         // we get the following formula
-                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                        EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                 * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                         0.75f,
-                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                        EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue());
         this.quadruplesSolutions =
                 new ConcurrentHashMap<NotificationId, QuadruplesSolution>(
-                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue()
+                        EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue()
                                 * EventCloudProperties.AVERAGE_NB_QUADRUPLES_PER_COMPOUND_EVENT.getValue(),
                         0.75f,
-                        EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue());
+                        EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue());
 
         String cacheEngine =
                 EventCloudProperties.SUBSCRIBER_CACHE_ENGINE.getValue();
@@ -1081,7 +1081,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
                     .strategy(EvictionStrategy.LRU)
                     .locking()
                     .concurrencyLevel(
-                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue())
+                            EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue())
                     .isolationLevel(IsolationLevel.NONE)
                     .jmxStatistics()
                     .disable();

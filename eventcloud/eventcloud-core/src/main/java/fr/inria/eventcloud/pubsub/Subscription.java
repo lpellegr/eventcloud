@@ -100,7 +100,7 @@ public class Subscription implements Quadruplable, Serializable {
         CacheBuilder<Object, Object> cacheBuilder =
                 CacheBuilder.newBuilder()
                         .concurrencyLevel(
-                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
+                                P2PStructuredProperties.MAO_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIBE_PROXIES_CACHE_MAXIMUM_SIZE.getValue());

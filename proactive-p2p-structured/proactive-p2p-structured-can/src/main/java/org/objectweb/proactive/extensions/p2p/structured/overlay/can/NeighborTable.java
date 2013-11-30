@@ -83,14 +83,12 @@ public class NeighborTable<E extends Coordinate> implements Serializable {
             // too much: 2*d per dimension for a total of 2*d^2
             this.entries[i][NeighborTable.DIRECTION_INFERIOR] =
                     new ConcurrentHashMap<OverlayId, NeighborEntry<E>>(
-                            nbNeighbors,
-                            0.75f,
-                            P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+                            nbNeighbors, 0.75f,
+                            P2PStructuredProperties.MAO_LIMIT_PEERS.getValue());
             this.entries[i][NeighborTable.DIRECTION_SUPERIOR] =
                     new ConcurrentHashMap<OverlayId, NeighborEntry<E>>(
-                            nbNeighbors,
-                            0.75f,
-                            P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+                            nbNeighbors, 0.75f,
+                            P2PStructuredProperties.MAO_LIMIT_PEERS.getValue());
         }
     }
 

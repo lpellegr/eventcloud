@@ -141,7 +141,7 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
         this.multiActiveService = new ComponentMultiActiveService(body);
         this.multiActiveService.policyServing(
                 new PeerServingPolicy(this), null,
-                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
+                P2PStructuredProperties.MAO_LIMIT_PEERS.getValue(), false,
                 false);
     }
 

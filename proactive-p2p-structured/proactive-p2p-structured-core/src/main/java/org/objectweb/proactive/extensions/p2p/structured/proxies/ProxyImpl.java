@@ -105,8 +105,8 @@ public class ProxyImpl extends AbstractComponent implements
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
         this.multiActiveService.multiActiveServing(
-                P2PStructuredProperties.MAO_SOFT_LIMIT_PROXIES.getValue(),
-                false, false);
+                P2PStructuredProperties.MAO_LIMIT_PROXIES.getValue(), false,
+                false);
     }
 
     /**

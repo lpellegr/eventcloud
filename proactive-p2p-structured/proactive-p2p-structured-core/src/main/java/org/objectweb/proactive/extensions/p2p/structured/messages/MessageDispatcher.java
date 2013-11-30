@@ -56,7 +56,7 @@ public class MessageDispatcher {
             FinalResponseReceiver finalResponseReceiver) {
         this.entries =
                 new ConcurrentHashMap<MessageId, Entry>(
-                        P2PStructuredProperties.MAO_SOFT_LIMIT_PROXIES.getValue());
+                        P2PStructuredProperties.MAO_LIMIT_PROXIES.getValue());
         this.multiActiveService = multiActiveService;
         this.proxyId = proxyId;
         this.sequencer = new AtomicLong();

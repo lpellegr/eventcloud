@@ -120,8 +120,8 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
     @Override
     public void runComponentActivity(Body body) {
         new ComponentMultiActiveService(body).multiActiveServing(
-                P2PStructuredProperties.MAO_SOFT_LIMIT_TRACKERS.getValue(),
-                false, false);
+                P2PStructuredProperties.MAO_LIMIT_TRACKERS.getValue(), true,
+                false);
     }
 
     /**
