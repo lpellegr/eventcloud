@@ -35,8 +35,8 @@ public interface Category {
 
     double getVariance();
 
-    double getTime(int index);
+    double getValue(int index);
 
-    void reportTime(long time);
+    void reportValue(long value);
 
 }

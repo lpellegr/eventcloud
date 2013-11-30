@@ -27,14 +27,14 @@ import org.apache.commons.math3.stat.StatUtils;
  */
 public class CategoryImpl implements Category {
 
-    private double[] times;
+    private double[] values;
 
     private int index;
 
     private int discardFirstRuns;
 
     public CategoryImpl(int nbEntries, int discardFirstRuns) {
-        this.times = new double[nbEntries + discardFirstRuns];
+        this.values = new double[nbEntries + discardFirstRuns];
         this.discardFirstRuns = discardFirstRuns;
     }
 
@@ -43,7 +43,7 @@ public class CategoryImpl implements Category {
      */
     @Override
     public int getNbEntries() {
-        return this.times.length;
+        return this.values.length;
     }
 
     /**
@@ -51,7 +51,7 @@ public class CategoryImpl implements Category {
      */
     @Override
     public double getMean() {
-        return StatUtils.mean(this.filter(this.times));
+        return StatUtils.mean(this.filter(this.values));
 
     }
 
@@ -60,7 +60,7 @@ public class CategoryImpl implements Category {
      */
     @Override
     public double getMedian() {
-        return StatUtils.percentile(this.filter(this.times), 50);
+        return StatUtils.percentile(this.filter(this.values), 50);
     }
 
     /**
@@ -76,29 +76,29 @@ public class CategoryImpl implements Category {
      */
     @Override
     public double getVariance() {
-        return StatUtils.variance(this.filter(this.times));
+        return StatUtils.variance(this.filter(this.values));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public double getTime(int index) {
-        return this.times[index];
+    public double getValue(int index) {
+        return this.values[index];
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void reportTime(long time) {
-        this.times[this.index] = time;
+    public void reportValue(long value) {
+        this.values[this.index] = value;
         this.index++;
     }
 
-    private double[] filter(double[] times) {
+    private double[] filter(double[] values) {
         return Arrays.copyOfRange(
-                times, this.discardFirstRuns, this.times.length);
+                values, this.discardFirstRuns, this.values.length);
     }
 
 }

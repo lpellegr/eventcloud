@@ -247,7 +247,7 @@ public class PublishSubscribeBenchmark {
 
     private Event[] events;
 
-    public static void main(String[] args) {
+    public PublishSubscribeBenchmark() {
         // WARNING: setting property values here set them only for the JVM where
         // this class is executed not on all JVMs associated to peers. This
         // should be done through the GCMA configuration file
@@ -255,7 +255,46 @@ public class PublishSubscribeBenchmark {
         // alphabetic lower case interval
         P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x61);
         P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
+    }
 
+    public PublishSubscribeBenchmark(int nbRuns, int discardFirstRuns,
+            int nbPublishers, int nbPeers, int nbSubscribers,
+            int nbPublications, int nbQuadruplesPerCompoundEvent,
+            int nbSubscriptionsPerSubscriber,
+            boolean publishIndependentQuadruples, int waitBetweenPublications,
+            int rewritingLevel, SubscriptionType subscriptionType,
+            boolean useDifferentSubscriptions,
+            NotificationListenerType listenerType, boolean inMemoryDatastore,
+            int nbEventGenerationRounds,
+            boolean disableInterCompoundEventsShuffling,
+            boolean disableIntraCompoundEventsShuffling,
+            boolean measureStorageTime) {
+        this();
+        this.nbRuns = nbRuns;
+        this.discardFirstRuns = discardFirstRuns;
+        this.nbPublishers = nbPublishers;
+        this.nbPeers = nbPeers;
+        this.nbSubscribers = nbSubscribers;
+        this.nbQuadruplesPerCompoundEvent = nbQuadruplesPerCompoundEvent;
+        this.nbSubscriptionsPerSubscriber = nbSubscriptionsPerSubscriber;
+        this.publishIndependentQuadruples = publishIndependentQuadruples;
+        this.waitBetweenPublications = waitBetweenPublications;
+        this.rewritingLevel = rewritingLevel;
+        this.subscriptionType = subscriptionType;
+        this.useDifferentSubscriptions = useDifferentSubscriptions;
+        this.listenerType = listenerType;
+        this.inMemoryDatastore = inMemoryDatastore;
+        this.nbEventGenerationRounds = nbEventGenerationRounds;
+        this.disableInterCompoundEventsShuffling =
+                disableInterCompoundEventsShuffling;
+        this.disableIntraCompoundEventsShuffling =
+                disableIntraCompoundEventsShuffling;
+        this.measureStorageTime = measureStorageTime;
+
+        PublishSubscribeBenchmark.nbPublications = nbPublications;
+    }
+
+    public static void main(String[] args) {
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
