@@ -1073,16 +1073,18 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             builder.persistence()
                     .passivation(true)
                     .addSingleFileStore()
-                    .location(super.diskStorePath)
                     .purgeOnStartup(true)
-                    .async()
-                    .enable()
+                    .location(super.diskStorePath)
                     .eviction()
                     .maxEntries(
                             EventCloudProperties.SUBSCRIBER_CACHE_MAX_ENTRIES.getValue())
                     .strategy(EvictionStrategy.LRU)
                     .locking()
-                    .isolationLevel(IsolationLevel.NONE);
+                    .concurrencyLevel(
+                            EventCloudProperties.MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES.getValue())
+                    .isolationLevel(IsolationLevel.NONE)
+                    .jmxStatistics()
+                    .disable();
 
             this.cacheManager.defineConfiguration("default", builder.build());
 
