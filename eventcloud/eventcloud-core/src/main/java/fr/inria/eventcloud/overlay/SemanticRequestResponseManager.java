@@ -67,7 +67,7 @@ public class SemanticRequestResponseManager extends CanRequestResponseManager {
         this.pendingResults =
                 new ConcurrentHashMap<MessageId, Future<? extends Object>>(
                         16, 0.75f,
-                        P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+                        P2PStructuredProperties.MAO_LIMIT_PEERS.getValue());
 
         this.threadPool =
                 Executors.newFixedThreadPool(

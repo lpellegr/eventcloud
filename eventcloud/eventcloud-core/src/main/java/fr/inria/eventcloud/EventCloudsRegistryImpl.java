@@ -96,7 +96,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
                 new ConcurrentHashMap<EventCloudId, EventCloudDeployer>(
                         50,
                         0.9f,
-                        EventCloudProperties.MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY.getValue());
+                        EventCloudProperties.MAO_LIMIT_EVENTCLOUDS_REGISTRY.getValue());
     }
 
     /**
@@ -105,7 +105,7 @@ public class EventCloudsRegistryImpl extends AbstractComponent implements
     @Override
     public void runComponentActivity(Body body) {
         new ComponentMultiActiveService(body).multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY.getValue(),
+                EventCloudProperties.MAO_LIMIT_EVENTCLOUDS_REGISTRY.getValue(),
                 true, false);
     }
 

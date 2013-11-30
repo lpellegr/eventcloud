@@ -153,7 +153,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
         this.multiActiveService.policyServing(
                 new PeerServingPolicy(this), priorityConstraints,
-                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue(), false,
+                P2PStructuredProperties.MAO_LIMIT_PEERS.getValue(), false,
                 false);
     }
 

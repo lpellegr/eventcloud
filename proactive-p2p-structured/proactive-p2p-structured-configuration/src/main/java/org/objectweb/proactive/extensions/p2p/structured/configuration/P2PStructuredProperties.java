@@ -95,27 +95,26 @@ public class P2PStructuredProperties {
             new PropertyString("can.element.display", "codepoints");
 
     /**
-     * Defines the soft limit used by each peer that runs with multiactive
-     * serving.
+     * Defines the soft limit used by each peer that runs with multi-active
+     * objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PEERS =
-            new PropertyInteger("mao.soft.limit.peers", Runtime.getRuntime()
+    public static final PropertyInteger MAO_LIMIT_PEERS = new PropertyInteger(
+            "mao.limit.peers", Runtime.getRuntime().availableProcessors() + 1);
+
+    /**
+     * Defines the soft limit used by each proxy that runs with multi-active
+     * objects.
+     */
+    public static final PropertyInteger MAO_LIMIT_PROXIES =
+            new PropertyInteger("mao.limit.proxies", Runtime.getRuntime()
                     .availableProcessors() + 1);
 
     /**
-     * Defines the soft limit used by each proxy that runs with multiactive
-     * serving.
+     * Defines the soft limit used by each tracker that runs with multi-active
+     * objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PROXIES =
-            new PropertyInteger("mao.soft.limit.proxies", Runtime.getRuntime()
-                    .availableProcessors() + 1);
-
-    /**
-     * Defines the soft limit used by each tracker that runs with multiactive
-     * serving.
-     */
-    public static final PropertyInteger MAO_SOFT_LIMIT_TRACKERS =
-            new PropertyInteger("mao.soft.limit.trackers", Runtime.getRuntime()
+    public static final PropertyInteger MAO_LIMIT_TRACKERS =
+            new PropertyInteger("mao.limit.trackers", Runtime.getRuntime()
                     .availableProcessors() + 1);
 
     public static final PropertyBoolean PROXY_CACHE_RANDOM_SELECTION =

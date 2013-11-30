@@ -124,7 +124,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
         super.multiActiveService.multiActiveServing(
-                EventCloudProperties.MAO_SOFT_LIMIT_PUTGET_PROXIES.getValue(),
+                EventCloudProperties.MAO_LIMIT_PUTGET_PROXIES.getValue(),
                 false, false);
     }
 

@@ -42,12 +42,12 @@ public class CanRequestResponseManager extends RequestResponseManager {
     private Set<MessageId> requestsAlreadyReceived;
 
     public CanRequestResponseManager() {
-        super(P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue());
+        super(P2PStructuredProperties.MAO_LIMIT_PEERS.getValue());
 
         this.requestsAlreadyReceived =
                 Collections.newSetFromMap(new ConcurrentHashMap<MessageId, Boolean>(
                         16, 0.75f,
-                        P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue()));
+                        P2PStructuredProperties.MAO_LIMIT_PEERS.getValue()));
     }
 
     /**

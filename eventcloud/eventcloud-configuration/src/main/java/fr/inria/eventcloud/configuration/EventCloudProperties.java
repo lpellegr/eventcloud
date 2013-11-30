@@ -364,39 +364,39 @@ public class EventCloudProperties {
             new PropertyBoolean("eventcloud.expose.jmx.statistics", false);
 
     /**
-     * Defines the soft limit used by each EventClouds registry that runs with
-     * multi active serving.
+     * Defines the limit used by each EventClouds registry that runs with
+     * multi-active objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_EVENTCLOUDS_REGISTRY =
+    public static final PropertyInteger MAO_LIMIT_EVENTCLOUDS_REGISTRY =
             new PropertyInteger(
-                    "eventcloud.mao.soft.limit.eventclouds.registry",
+                    "eventcloud.mao.limit.eventclouds.registry",
                     Runtime.getRuntime().availableProcessors() + 1);
 
     /**
-     * Defines the hard limit used by each publish proxy that runs with multi
-     * active serving.
+     * Defines the limit used by each publish proxy that runs with multi-active
+     * objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PUBLISH_PROXIES =
+    public static final PropertyInteger MAO_LIMIT_PUBLISH_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.hard.limit.publish.proxies",
+                    "eventcloud.mao.limit.publish.proxies",
                     Runtime.getRuntime().availableProcessors() + 1);
 
     /**
-     * Defines the hard limit used by each putget proxy that runs with multi
-     * active serving.
+     * Defines the limit used by each putget proxy that runs with multi-active
+     * objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_PUTGET_PROXIES =
+    public static final PropertyInteger MAO_LIMIT_PUTGET_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.hard.limit.putget.proxies",
-                    Runtime.getRuntime().availableProcessors() + 1);
+                    "eventcloud.mao.limit.putget.proxies", Runtime.getRuntime()
+                            .availableProcessors() + 1);
 
     /**
-     * Defines the hard limit used by each subscribe proxy that runs with multi
-     * active serving.
+     * Defines the limit used by each subscribe proxy that runs with
+     * multi-active objects.
      */
-    public static final PropertyInteger MAO_SOFT_LIMIT_SUBSCRIBE_PROXIES =
+    public static final PropertyInteger MAO_LIMIT_SUBSCRIBE_PROXIES =
             new PropertyInteger(
-                    "eventcloud.mao.hard.limit.subscribe.proxies",
+                    "eventcloud.mao.limit.subscribe.proxies",
                     Runtime.getRuntime().availableProcessors() * 4);
 
     /**

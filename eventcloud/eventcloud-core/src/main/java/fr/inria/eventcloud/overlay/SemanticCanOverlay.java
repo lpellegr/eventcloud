@@ -146,7 +146,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         CacheBuilder<Object, Object> cacheBuilder =
                 CacheBuilder.newBuilder()
                         .concurrencyLevel(
-                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
+                                P2PStructuredProperties.MAO_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.PEER_STUBS_CACHE_MAXIMUM_SIZE.getValue());
@@ -167,7 +167,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         cacheBuilder =
                 CacheBuilder.newBuilder()
                         .concurrencyLevel(
-                                P2PStructuredProperties.MAO_SOFT_LIMIT_PEERS.getValue())
+                                P2PStructuredProperties.MAO_LIMIT_PEERS.getValue())
                         .softValues()
                         .maximumSize(
                                 EventCloudProperties.SUBSCRIPTIONS_CACHE_MAXIMUM_SIZE.getValue());
