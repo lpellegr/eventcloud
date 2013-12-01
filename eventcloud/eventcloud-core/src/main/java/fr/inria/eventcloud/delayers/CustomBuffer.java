@@ -22,10 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.pubsub.Subscription;
 
 /**
@@ -45,14 +43,9 @@ public class CustomBuffer implements Collection<Object> {
     public CustomBuffer(int bufsize) {
         this.quadruples = new QuadrupleList(bufsize);
         this.subscriptions = new ArrayList<Subscription>(bufsize);
-
-        if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-            this.extendedCompoundEvents =
-                    new HashMap<ExtendedCompoundEvent, ExtendedCompoundEvent>(
-                            bufsize);
-        } else {
-            this.extendedCompoundEvents = null;
-        }
+        this.extendedCompoundEvents =
+                new HashMap<ExtendedCompoundEvent, ExtendedCompoundEvent>(
+                        bufsize);
     }
 
     public void add(Quadruple q) {
@@ -61,12 +54,10 @@ public class CustomBuffer implements Collection<Object> {
 
     public void add(ExtendedCompoundEvent e) {
         ExtendedCompoundEvent previousValue =
-                this.extendedCompoundEvents.get(e);
+                this.extendedCompoundEvents.put(e, e);
 
         if (previousValue != null) {
-            previousValue.addQuadrupleIndexesUsedForIndexing(e.quadrupleIndexesUsedForIndexing);
-        } else {
-            this.extendedCompoundEvents.put(e, e);
+            e.addQuadrupleIndexesUsedForIndexing(previousValue.quadrupleIndexesUsedForIndexing);
         }
     }
 
@@ -82,12 +73,8 @@ public class CustomBuffer implements Collection<Object> {
         return this.subscriptions;
     }
 
-    public Set<ExtendedCompoundEvent> getExtendedCompoundEvents() {
-        if (this.extendedCompoundEvents == null) {
-            return null;
-        }
-
-        return this.extendedCompoundEvents.keySet();
+    public Collection<ExtendedCompoundEvent> getExtendedCompoundEvents() {
+        return this.extendedCompoundEvents.values();
     }
 
     /**

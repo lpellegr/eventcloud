@@ -98,13 +98,15 @@ public class PublishSubscribeOperationsDelayer extends
      */
     @Override
     public int commit() {
+        final boolean isTraceEnabled = log.isTraceEnabled();
+
+        Stopwatch flushBufferStopwatch = null;
+        Stopwatch triggerActionStopwatch = null;
+
         synchronized (this.buffer) {
             int size = this.buffer.size();
 
-            Stopwatch flushBufferStopwatch = null;
-            Stopwatch triggerActionStopwatch = null;
-
-            if (log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 flushBufferStopwatch = Stopwatch.createUnstarted();
                 triggerActionStopwatch = Stopwatch.createUnstarted();
                 flushBufferStopwatch.start();
@@ -118,7 +120,7 @@ public class PublishSubscribeOperationsDelayer extends
                 this.compoundEventsOperator.flushBuffer(super.buffer);
             }
 
-            if (log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 flushBufferStopwatch.stop();
                 triggerActionStopwatch.start();
             }
@@ -131,7 +133,7 @@ public class PublishSubscribeOperationsDelayer extends
                 this.compoundEventsOperator.triggerAction(super.buffer);
             }
 
-            if (log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 triggerActionStopwatch.stop();
                 flushBufferStopwatch.start();
             }
@@ -140,7 +142,7 @@ public class PublishSubscribeOperationsDelayer extends
                 this.subscriptionsOperator.flushBuffer(super.buffer);
             }
 
-            if (log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 flushBufferStopwatch.stop();
                 triggerActionStopwatch.start();
             }
@@ -149,13 +151,16 @@ public class PublishSubscribeOperationsDelayer extends
                 this.subscriptionsOperator.triggerAction(super.buffer);
             }
 
-            if (log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 triggerActionStopwatch.stop();
 
+                boolean dueToTimeout = this.buffer.size() < super.bufsize;
+
                 log.trace(
-                        "Buffer flushed in {} ms on {}",
+                        "Buffer flushed in {} ms on {} {}",
                         flushBufferStopwatch.elapsed(TimeUnit.MILLISECONDS),
-                        this.overlay);
+                        this.overlay, dueToTimeout
+                                ? "due to timeout" : "due to bufsize");
                 log.trace(
                         "Fired {} in {} ms on {}", super.postActionName,
                         triggerActionStopwatch.elapsed(TimeUnit.MILLISECONDS),
