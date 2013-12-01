@@ -33,9 +33,9 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
     private Thread commitThread;
 
-    private final int bufsize;
+    protected final int bufsize;
 
-    private final int delayerCommitTimeout;
+    protected final int delayerCommitTimeout;
 
     protected final String postActionName;
 
@@ -80,7 +80,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
                     "{} {} committed because threshold exceeded on {}",
                     nbObjectsFlushed, this.bufferedObjectName, this.overlay);
         } else {
-            if (!this.buffer.isEmpty() && this.commitThread == null) {
+            if (this.commitThread == null) {
                 this.log.trace("Commit thread created on {}", this.overlay);
 
                 this.commitThread = new CommitThread();
@@ -90,6 +90,9 @@ public abstract class Delayer<R, B extends Collection<R>> {
     }
 
     protected int commit() {
+        boolean isTraceEnabled = this.log.isTraceEnabled();
+        long startTime = 0;
+
         synchronized (this.buffer) {
             int size = this.buffer.size();
 
@@ -97,24 +100,26 @@ public abstract class Delayer<R, B extends Collection<R>> {
                 return size;
             }
 
-            long startTime = 0;
-
-            if (this.log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 startTime = System.currentTimeMillis();
             }
 
             this.flushBuffer();
 
-            if (this.log.isTraceEnabled()) {
+            if (isTraceEnabled) {
+                boolean dueToTimeout = this.buffer.size() < this.bufsize;
+
                 this.log.trace(
-                        "Buffer flushed in {} ms on {}",
-                        System.currentTimeMillis() - startTime, this.overlay);
+                        "Buffer flushed in {} ms on {} {}",
+                        System.currentTimeMillis() - startTime, this.overlay,
+                        dueToTimeout
+                                ? "due to timeout" : "due to bufsize");
                 startTime = System.currentTimeMillis();
             }
 
             this.triggerAction();
 
-            if (this.log.isTraceEnabled()) {
+            if (isTraceEnabled) {
                 this.log.trace(
                         "Fired {} in {} ms on {}", this.postActionName,
                         System.currentTimeMillis() - startTime, this.overlay);

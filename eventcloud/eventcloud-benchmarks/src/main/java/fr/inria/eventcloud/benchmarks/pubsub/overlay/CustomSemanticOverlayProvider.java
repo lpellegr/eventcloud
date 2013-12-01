@@ -17,7 +17,6 @@
 package fr.inria.eventcloud.benchmarks.pubsub.overlay;
 
 import java.io.IOException;
-import java.util.Set;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -26,7 +25,6 @@ import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.CustomBuffer;
-import fr.inria.eventcloud.delayers.ExtendedCompoundEvent;
 import fr.inria.eventcloud.delayers.Observer;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
@@ -139,8 +137,7 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
             CustomSemanticOverlay customOverlay =
                     ((CustomSemanticOverlay) overlay);
 
-            int cumulatedSize =
-                    countNbCompoundEvents(buffer.getExtendedCompoundEvents());
+            int cumulatedSize = buffer.getExtendedCompoundEvents().size();
 
             if (cumulatedSize > 0) {
                 customOverlay.publicationsStorageEndTime =
@@ -149,14 +146,6 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
                 this.collector.reportNbQuadrupleStored(
                         customOverlay.getId(), cumulatedSize);
             }
-        }
-
-        private static int countNbCompoundEvents(Set<ExtendedCompoundEvent> set) {
-            if (set == null) {
-                return 0;
-            }
-
-            return set.size();
         }
 
     }

@@ -17,9 +17,9 @@
 package fr.inria.eventcloud.delayers;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
@@ -119,7 +119,7 @@ public class PublishCompoundEventRequestOperator extends
         this.fireMatchingSubscriptions(buffer.getExtendedCompoundEvents());
     }
 
-    private void fireMatchingSubscriptions(Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+    private void fireMatchingSubscriptions(Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
         TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
@@ -270,7 +270,7 @@ public class PublishCompoundEventRequestOperator extends
     }
 
     private List<Node> findAndHandleEphemeralSubscriptions(TransactionalDatasetGraph txnGraph,
-                                                           Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+                                                           Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
         Builder<Node> result = ImmutableList.builder();
 
         try {
@@ -329,7 +329,7 @@ public class PublishCompoundEventRequestOperator extends
         return result.build();
     }
 
-    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
                 PublishSubscribeConstants.SUBJECT_VAR,
@@ -365,7 +365,7 @@ public class PublishCompoundEventRequestOperator extends
     }
 
     private List<MatchingResult> identifyMatchingCompoundEvents(QueryIterator it,
-                                                                Set<ExtendedCompoundEvent> extendedCompoundEvents) {
+                                                                Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
         Builder<MatchingResult> builder = ImmutableList.builder();
 
         while (it.hasNext()) {
@@ -411,7 +411,7 @@ public class PublishCompoundEventRequestOperator extends
                 || publicationTerm.equals(subscriptionTerm);
     }
 
-    private Op createFindSubscriptionsMatchingAlgebra(Set<ExtendedCompoundEvent> compoundEvents) {
+    private Op createFindSubscriptionsMatchingAlgebra(Collection<ExtendedCompoundEvent> compoundEvents) {
         Iterator<ExtendedCompoundEvent> it = compoundEvents.iterator();
 
         // basic graph pattern

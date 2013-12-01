@@ -18,7 +18,6 @@ package fr.inria.eventcloud.benchmarks.performance_tuning;
 
 import java.io.IOException;
 
-import org.objectweb.proactive.extensions.p2p.structured.utils.LoggerUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
 
 import com.beust.jcommander.JCommander;
@@ -64,8 +63,6 @@ public class DelayersBenchmark {
 
     public static void main(String[] args) throws IOException,
             ClassNotFoundException {
-        LoggerUtils.disableLoggers();
-
         DelayersBenchmark benchmark = new DelayersBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
