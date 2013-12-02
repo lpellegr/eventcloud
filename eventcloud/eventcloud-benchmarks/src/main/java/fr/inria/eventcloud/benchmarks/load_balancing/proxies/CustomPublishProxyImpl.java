@@ -64,11 +64,27 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
                 for (int i = 0; i < this.events.size(); i++) {
                     CompoundEvent ce = (CompoundEvent) this.events.get(i);
 
+                    // if (i % 500 == 0) {
+                    // try {
+                    // Thread.sleep(100);
+                    // } catch (InterruptedException e) {
+                    // e.printStackTrace();
+                    // }
+                    // }
+
                     super.publish(ce);
                 }
             } else {
                 for (int i = 0; i < this.events.size(); i++) {
                     Quadruple q = (Quadruple) this.events.get(i);
+
+                    // if (i % 500 == 0) {
+                    // try {
+                    // Thread.sleep(100);
+                    // } catch (InterruptedException e) {
+                    // e.printStackTrace();
+                    // }
+                    // }
 
                     super.publish(q);
                 }
