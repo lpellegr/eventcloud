@@ -51,7 +51,7 @@ import com.beust.jcommander.converters.FileConverter;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.benchmarks.load_balancing.overlay.CustomSemanticOverlayProvider;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomProxyFactory;
@@ -103,6 +103,9 @@ public class LoadBalancingBenchmark {
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
+
+    @Parameter(names = {"-pq", "--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
+    public boolean publishIndependentQuadruples = false;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
@@ -175,7 +178,7 @@ public class LoadBalancingBenchmark {
 
                     private CustomPublishProxy publishProxies;
 
-                    private CompoundEvent[] events;
+                    private Event[] events;
 
                     @Override
                     public void setup() throws Exception {
@@ -216,13 +219,20 @@ public class LoadBalancingBenchmark {
                                 LoadBalancingBenchmark.this.retrievePeerZones(this.deployer);
 
                         this.events =
-                                new CompoundEvent[LoadBalancingBenchmark.this.nbPublications];
+                                new Event[LoadBalancingBenchmark.this.nbPublications];
+
                         for (int i = 0; i < this.events.length; i++) {
-                            this.events[i] =
-                                    EventGenerator.randomCompoundEvent(
-                                            zones,
-                                            LoadBalancingBenchmark.this.nbQuadruplesPerCompoundEvent,
-                                            10, true);
+                            if (LoadBalancingBenchmark.this.publishIndependentQuadruples) {
+                                this.events[i] =
+                                        EventGenerator.randomQuadruple(
+                                                zones[0], 10);
+                            } else {
+                                this.events[i] =
+                                        EventGenerator.randomCompoundEvent(
+                                                zones,
+                                                LoadBalancingBenchmark.this.nbQuadruplesPerCompoundEvent,
+                                                10, true);
+                            }
                         }
 
                         this.registry =
@@ -296,9 +306,10 @@ public class LoadBalancingBenchmark {
                         }
 
                         log.info(
-                                "Sum of data managed by peers gives {}, standard deviation is {}, skewness is {}",
-                                count, stats.getStandardDeviation(),
-                                stats.getSkewness());
+                                "Sum of data managed by peers gives {}, standard deviation is {}, variability (stddev/average * 100) is {}%",
+                                count,
+                                stats.getStandardDeviation(),
+                                (stats.getStandardDeviation() / stats.getMean()) * 100);
                         log.info(
                                 "Number of peers used is {} whereas {} only should be used with an uniform situation",
                                 results.size(),
@@ -348,7 +359,12 @@ public class LoadBalancingBenchmark {
     }
 
     private int computeNumberOfQuadruplesExpected() {
-        return (this.nbQuadruplesPerCompoundEvent + 1) * this.nbPublications;
+        if (this.publishIndependentQuadruples) {
+            return this.nbPublications;
+        } else {
+            return (this.nbQuadruplesPerCompoundEvent + 1)
+                    * this.nbPublications;
+        }
     }
 
     private SemanticZone[] retrievePeerZones(EventCloudDeployer deployer) {
