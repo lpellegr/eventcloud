@@ -178,6 +178,9 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"-negr", "--nb-event-generation-rounds"}, description = "When combined with uniform data distribution, the specified number of event sets are generated and only event set with the best standard deviation is kept")
     public int nbEventGenerationRounds = 1;
 
+    @Parameter(names = {"-rts", "--rdf-term-size"}, description = "The size of each RDF term generated")
+    private int rdfTermSize = 10;
+
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
 
@@ -260,7 +263,7 @@ public class PublishSubscribeBenchmark {
     public PublishSubscribeBenchmark(int nbRuns, int discardFirstRuns,
             int nbPublishers, int nbPeers, int nbSubscribers,
             int nbPublications, int nbQuadruplesPerCompoundEvent,
-            int nbSubscriptionsPerSubscriber,
+            int rdfTermSize, int nbSubscriptionsPerSubscriber,
             boolean publishIndependentQuadruples, int waitBetweenPublications,
             int rewritingLevel, SubscriptionType subscriptionType,
             boolean useDifferentSubscriptions,
@@ -276,6 +279,7 @@ public class PublishSubscribeBenchmark {
         this.nbPeers = nbPeers;
         this.nbSubscribers = nbSubscribers;
         this.nbQuadruplesPerCompoundEvent = nbQuadruplesPerCompoundEvent;
+        this.rdfTermSize = rdfTermSize;
         this.nbSubscriptionsPerSubscriber = nbSubscriptionsPerSubscriber;
         this.publishIndependentQuadruples = publishIndependentQuadruples;
         this.waitBetweenPublications = waitBetweenPublications;
@@ -1156,7 +1160,8 @@ public class PublishSubscribeBenchmark {
             } else {
                 events[i] =
                         provider.get(
-                                zones, i, this.nbQuadruplesPerCompoundEvent, 10);
+                                zones, i, this.nbQuadruplesPerCompoundEvent,
+                                this.rdfTermSize);
             }
         }
 
@@ -1280,7 +1285,7 @@ public class PublishSubscribeBenchmark {
             result[i] =
                     EventGenerator.randomNode(
                             zone.getLowerBound((byte) 2),
-                            zone.getUpperBound((byte) 2), -1, 10);
+                            zone.getUpperBound((byte) 2), -1, this.rdfTermSize);
         }
 
         return result;

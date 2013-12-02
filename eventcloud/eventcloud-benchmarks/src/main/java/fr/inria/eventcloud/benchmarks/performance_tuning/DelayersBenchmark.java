@@ -49,8 +49,8 @@ public class DelayersBenchmark {
     private int bufferSize =
             EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE.getValue();
 
-    @Parameter(names = {"-qs", "--quadruple-size"}, description = "The size of each quadruple")
-    private int quadrupleSize = 10;
+    @Parameter(names = {"-rts", "--rdf-term-size"}, description = "The size of each RDF term generated")
+    private int rdfTermSize = 10;
 
     @Parameter(names = {"-ces", "--compound-event-size"}, description = "Number of quadruples per ce")
     private int compoundEventSize = 5;
@@ -91,8 +91,8 @@ public class DelayersBenchmark {
         PublishSubscribeBenchmark pubSubBenchmark =
                 new PublishSubscribeBenchmark(
                         this.nbRuns, 2, 1, 1, 1, this.nbPublications,
-                        this.compoundEventSize, 1, false, 0, 4,
-                        SubscriptionType.PATH_QUERY_FIXED_PREDICATE, false,
+                        this.compoundEventSize, this.rdfTermSize, 1, false, 0,
+                        4, SubscriptionType.PATH_QUERY_FIXED_PREDICATE, false,
                         NotificationListenerType.COMPOUND_EVENT, false, 1,
                         false, false, false);
 
