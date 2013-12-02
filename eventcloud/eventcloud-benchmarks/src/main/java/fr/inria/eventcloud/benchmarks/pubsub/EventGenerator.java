@@ -193,6 +193,21 @@ public class EventGenerator {
                 sequenceNumber.incrementAndGet(), nodeSize);
     }
 
+    public static Quadruple randomQuadruple(SemanticZone zone, int nodeSize) {
+        Node[] nodes =
+                new Node[P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()];
+
+        for (byte i = 0; i < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); i++) {
+            nodes[i] =
+                    randomNode(
+                            zone.getLowerBound(i), zone.getUpperBound(i), -1,
+                            nodeSize);
+        }
+
+        return new Quadruple(
+                nodes[0], nodes[1], nodes[2], nodes[3], false, false);
+    }
+
     public static Quadruple randomQuadruple(SemanticZone zone, Node graphNode,
                                             int nodeSize) {
         Node[] nodes =
