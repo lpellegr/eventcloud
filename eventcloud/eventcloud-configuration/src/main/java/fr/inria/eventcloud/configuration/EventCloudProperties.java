@@ -108,7 +108,7 @@ public class EventCloudProperties {
      */
     public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE =
             new PropertyInteger(
-                    "eventcloud.pubsub.operations.delayer.buffer.size", 65);
+                    "eventcloud.pubsub.operations.delayer.buffer.size", 120);
 
     /**
      * Defines the maximum timeout (in milliseconds) to wait before to commit
