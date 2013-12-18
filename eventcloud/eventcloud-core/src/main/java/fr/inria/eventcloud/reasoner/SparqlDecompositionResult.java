@@ -34,4 +34,24 @@ public class SparqlDecompositionResult {
         return this.atomicQueries;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append('[');
+
+        for (int i = 0; i < atomicQueries.size(); i++) {
+            result.append(atomicQueries.get(i));
+
+            if (i < atomicQueries.size() - 1) {
+                result.append(", ");
+            }
+        }
+
+        result.append(']');
+        return result.toString();
+    }
+
 }
