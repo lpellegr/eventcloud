@@ -42,10 +42,10 @@ public class SparqlDecompositionResult {
         StringBuilder result = new StringBuilder();
         result.append('[');
 
-        for (int i = 0; i < atomicQueries.size(); i++) {
-            result.append(atomicQueries.get(i));
+        for (int i = 0; i < this.atomicQueries.size(); i++) {
+            result.append(this.atomicQueries.get(i));
 
-            if (i < atomicQueries.size() - 1) {
+            if (i < this.atomicQueries.size() - 1) {
                 result.append(", ");
             }
         }
