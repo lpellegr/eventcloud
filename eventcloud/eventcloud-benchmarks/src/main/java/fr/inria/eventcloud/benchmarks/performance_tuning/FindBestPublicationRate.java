@@ -57,6 +57,15 @@ public class FindBestPublicationRate {
     @Parameter(names = {"-npmax", "--nb-publications-max"}, description = "Maximum number of publications to publish")
     private int nbPublicationsMax = 30000;
 
+    @Parameter(names = {"-p", "--nb-peers"}, description = "The number of peers to inject into the P2P network")
+    public int nbPeers = 1;
+
+    @Parameter(names = {"--nb-publishers"}, description = "The number of publishers, each sharing the publication pool")
+    public int nbPublishers = 1;
+
+    @Parameter(names = {"--nb-subscribers"}, description = "The number of subscribers")
+    public int nbSubscribers = 1;
+
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
 
@@ -141,10 +150,10 @@ public class FindBestPublicationRate {
     private double executeOneIteration(int nbPublications) {
         PublishSubscribeBenchmark pubSubBenchmark =
                 new PublishSubscribeBenchmark(
-                        this.gcmaDescriptor, this.nbRuns, 2, 1, 1, 1,
-                        nbPublications, this.compoundEventSize,
-                        this.rdfTermSize, 1, false, 0, 4,
-                        SubscriptionType.PATH_QUERY_FIXED_PREDICATE, false,
+                        this.gcmaDescriptor, this.nbRuns, 2, this.nbPublishers,
+                        this.nbPeers, this.nbSubscribers, nbPublications,
+                        this.compoundEventSize, this.rdfTermSize, 1, false, 0,
+                        4, SubscriptionType.PATH_QUERY_FIXED_PREDICATE, false,
                         NotificationListenerType.COMPOUND_EVENT, false, 1,
                         false, false, false);
 
