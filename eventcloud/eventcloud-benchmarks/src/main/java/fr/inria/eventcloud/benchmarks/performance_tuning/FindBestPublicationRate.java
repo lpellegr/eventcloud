@@ -60,8 +60,6 @@ public class FindBestPublicationRate {
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
 
-    private double percentageDifferenceToStop = 5;
-
     @Parameter(names = {"-h", "--help"}, help = true)
     private boolean help;
 
@@ -88,56 +86,56 @@ public class FindBestPublicationRate {
         System.exit(0);
     }
 
-    private static int middle(int a, int b) {
-        return (a + b) / 2;
-    }
-
     public void perform() {
-        double lastThroughput =
-                this.executeOneIteration(this.nbPublicationsMin);
         boolean inc = true;
+        int bestPublicationNumber = this.nbPublicationsMin;
+        double bestThroughput =
+                this.executeOneIteration(this.nbPublicationsMin);
 
         while (this.nbPublicationsMin != this.nbPublicationsMax) {
-            int m =
-                    this.nbPublicationsMin
-                            + middle(
-                                    this.nbPublicationsMin,
-                                    this.nbPublicationsMax);
+            int m = middle(this.nbPublicationsMin, this.nbPublicationsMax);
 
-            log.info("Testing with nbPublications set to {}", m);
+            log.info(
+                    "Testing with m={}, {}, nbPublicationsMin={}, nbPublicationsMax={}, bestThroughput={}",
+                    m, inc
+                            ? "inc" : "dec", this.nbPublicationsMin,
+                    this.nbPublicationsMax, bestThroughput);
+
             double throughput = this.executeOneIteration(m);
 
-            if (percentageDifference(throughput, lastThroughput) >= this.percentageDifferenceToStop) {
-                if (inc) {
-                    this.nbPublicationsMin = m;
-                } else {
+            if (inc) {
+                if (throughput < bestThroughput) {
                     this.nbPublicationsMax = m;
+                    inc = !inc;
+                } else {
+                    this.nbPublicationsMin = m;
+                    bestPublicationNumber = m;
+                    bestThroughput = throughput;
                 }
-
-                lastThroughput = throughput;
             } else {
-                if (inc) {
-                    this.nbPublicationsMax = m;
-                } else {
+                if (throughput < bestThroughput) {
                     this.nbPublicationsMin = m;
+                    inc = !inc;
+                } else {
+                    this.nbPublicationsMax = m;
+                    bestPublicationNumber = m;
+                    bestThroughput = throughput;
                 }
-
-                inc = !inc;
             }
 
             log.info(
                     "nbPublicationsMin={}, nbPublicationsMax={}, lastThroughput={}, throughput={}",
                     this.nbPublicationsMin, this.nbPublicationsMax,
-                    lastThroughput, throughput);
+                    bestThroughput, throughput);
         }
 
         log.info(
-                "Best throughput is when nbPublications is set to {}",
-                this.nbPublicationsMin);
+                "Best throughput ({}) is when nbPublications is set to {}",
+                bestThroughput, bestPublicationNumber);
     }
 
-    private static double percentageDifference(double a, double b) {
-        return (a - b) / ((a + b) / 2) * 100;
+    private static int middle(int a, int b) {
+        return (a + b) / 2;
     }
 
     private double executeOneIteration(int nbPublications) {
