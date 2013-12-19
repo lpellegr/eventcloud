@@ -260,6 +260,29 @@ public class PublishSubscribeBenchmark {
         P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
     }
 
+    public PublishSubscribeBenchmark(String gcma, int nbRuns,
+            int discardFirstRuns, int nbPublishers, int nbPeers,
+            int nbSubscribers, int nbPublications,
+            int nbQuadruplesPerCompoundEvent, int rdfTermSize,
+            int nbSubscriptionsPerSubscriber,
+            boolean publishIndependentQuadruples, int waitBetweenPublications,
+            int rewritingLevel, SubscriptionType subscriptionType,
+            boolean useDifferentSubscriptions,
+            NotificationListenerType listenerType, boolean inMemoryDatastore,
+            int nbEventGenerationRounds,
+            boolean disableInterCompoundEventsShuffling,
+            boolean disableIntraCompoundEventsShuffling,
+            boolean measureStorageTime) {
+        this(nbRuns, discardFirstRuns, nbPublishers, nbPeers, nbSubscribers,
+                nbPublications, nbQuadruplesPerCompoundEvent, rdfTermSize,
+                nbSubscriptionsPerSubscriber, publishIndependentQuadruples,
+                waitBetweenPublications, rewritingLevel, subscriptionType,
+                useDifferentSubscriptions, listenerType, inMemoryDatastore,
+                nbEventGenerationRounds, disableInterCompoundEventsShuffling,
+                disableIntraCompoundEventsShuffling, measureStorageTime);
+        this.gcmaDescriptor = gcma;
+    }
+
     public PublishSubscribeBenchmark(int nbRuns, int discardFirstRuns,
             int nbPublishers, int nbPeers, int nbSubscribers,
             int nbPublications, int nbQuadruplesPerCompoundEvent,
@@ -300,13 +323,19 @@ public class PublishSubscribeBenchmark {
 
     public static void main(String[] args) {
         PublishSubscribeBenchmark benchmark = new PublishSubscribeBenchmark();
+        benchmark.parseArguments(args);
+        benchmark.execute();
 
-        JCommander jCommander = new JCommander(benchmark);
+        System.exit(0);
+    }
+
+    public void parseArguments(String[] args) {
+        JCommander jCommander = new JCommander(this);
 
         try {
             jCommander.parse(args);
 
-            if (benchmark.help) {
+            if (this.help) {
                 jCommander.usage();
                 System.exit(0);
             }
@@ -315,9 +344,6 @@ public class PublishSubscribeBenchmark {
             System.exit(1);
         }
 
-        benchmark.execute();
-
-        System.exit(0);
     }
 
     private void logParameterValues() {
