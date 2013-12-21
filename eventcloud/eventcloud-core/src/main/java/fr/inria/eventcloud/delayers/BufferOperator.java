@@ -19,7 +19,13 @@ package fr.inria.eventcloud.delayers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
@@ -29,13 +35,35 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public abstract class BufferOperator<B extends Collection<?>> {
 
+    private final List<Observer<B>> observers;
+
     protected final SemanticCanOverlay overlay;
 
-    private final List<Observer<B>> observers;
+    protected final ExecutorService threadPool;
 
     public BufferOperator(SemanticCanOverlay overlay) {
         this.overlay = overlay;
-        this.observers = new ArrayList<Observer<B>>();
+
+        if (EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE.getValue() == 1) {
+            this.threadPool = MoreExecutors.sameThreadExecutor();
+        } else {
+            this.threadPool =
+                    Executors.newFixedThreadPool(
+                            EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_THREAD_POOL_SIZE.getValue(),
+                            new ThreadFactory() {
+                                private int counter = 0;
+
+                                @Override
+                                public Thread newThread(Runnable r) {
+                                    return new Thread(
+                                            r, "Buffer Operator Thread("
+                                                    + (this.counter++) + ")");
+                                }
+                            });
+        }
+
+        // to have observers should be something rare
+        this.observers = new ArrayList<Observer<B>>(0);
     }
 
     public void register(Observer<B> r) {

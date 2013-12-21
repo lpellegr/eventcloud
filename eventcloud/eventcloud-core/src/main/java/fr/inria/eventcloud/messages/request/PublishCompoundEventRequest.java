@@ -18,6 +18,9 @@ package fr.inria.eventcloud.messages.request;
 
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ThreadUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
@@ -34,6 +37,9 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  * @author lpellegr
  */
 public class PublishCompoundEventRequest extends QuadrupleRequest {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(PublishCompoundEventRequest.class);
 
     private static final long serialVersionUID = 160L;
 
@@ -68,12 +74,26 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
     @Override
     public void onDestinationReached(final StructuredOverlay overlay,
                                      final Quadruple quadruple) {
+        this.logNumberOfActiveAndWaitingMAOThreads();
 
         ((SemanticCanOverlay) overlay).getPublishSubscribeOperationsDelayer()
                 .receive(
                         new ExtendedCompoundEvent(
                                 this.compoundEvent.getValue(),
                                 this.indexQuadrupleUsedForIndexing));
+    }
+
+    private void logNumberOfActiveAndWaitingMAOThreads() {
+        if (log.isTraceEnabled()) {
+            Thread[] threads =
+                    ThreadUtils.getAllThreads("MAOs Executor Thread.*SemanticPeerImpl.*");
+
+            log.trace(
+                    "Dump Threads SemanticPeerImpl {}, total={} active={} waiting={}",
+                    System.identityHashCode(this), threads.length,
+                    ThreadUtils.countActive(threads),
+                    ThreadUtils.countWaiting(threads));
+        }
     }
 
 }

@@ -39,6 +39,15 @@ import fr.inria.eventcloud.pubsub.Subscription;
 public class PublishSubscribeOperationsDelayer extends
         Delayer<Object, CustomBuffer> {
 
+    // TODO: this class and all other related delayer classes should be
+    // redesigned so that a delayer is defined as a buffer and an action to
+    // perform once the buffer is flushed. Then, one class per delayed objects
+    // should be created (quadruples, compound events, subscriptions). Delayer
+    // parameters (commit time, commit threshold, etc.) should be constructor
+    // parameters to offer the possibility to set them per delayer type.
+    // Finally, the current class could contain references to the different
+    // delayer instances which will substitute current operators
+
     private static final Logger log =
             LoggerFactory.getLogger(PublishSubscribeOperationsDelayer.class);
 

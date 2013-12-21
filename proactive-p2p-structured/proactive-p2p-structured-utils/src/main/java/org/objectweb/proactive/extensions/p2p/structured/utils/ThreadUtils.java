@@ -147,8 +147,9 @@ public class ThreadUtils {
         ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
         ThreadGroup parentThreadGroup;
 
-        while ((parentThreadGroup = threadGroup.getParent()) != null)
+        while ((parentThreadGroup = threadGroup.getParent()) != null) {
             threadGroup = parentThreadGroup;
+        }
 
         return threadGroup;
     }

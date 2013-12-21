@@ -26,9 +26,9 @@ public class PeerServingPolicy extends DefaultServingPolicy {
      * {@inheritDoc}
      */
     @Override
-    public int runPolicyOnRequest(int requestIndexInRequestQueue,
-                                  StatefulCompatibilityMap compatibility,
-                                  List<Request> runnableRequests) {
+    public final int runPolicyOnRequest(int requestIndexInRequestQueue,
+                                        StatefulCompatibilityMap compatibility,
+                                        List<Request> runnableRequests) {
         /* 
          * We should manage the following cases:
          * 

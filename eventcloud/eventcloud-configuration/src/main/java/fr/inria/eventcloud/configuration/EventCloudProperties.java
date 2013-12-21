@@ -102,6 +102,10 @@ public class EventCloudProperties {
                     "eventcloud.filter.functions.ns",
                     "http://eventcloud.inria.fr/function#");
 
+    // TODO: the following three properties should ideally exist for each
+    // delayer instance (quadruples, compound events, subscriptions). Currently,
+    // they are all sharing the same values defined hereafter.
+
     /**
      * Defines the number of entries that may be bufferized by the
      * publish/subscribe operations delayer before to be committed.
@@ -118,6 +122,15 @@ public class EventCloudProperties {
     public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT =
             new PropertyInteger(
                     "eventcloud.pubsub.operations.delayer.timeout", 500);
+
+    /**
+     * Defines the size of the thread pool used by the delayer action once the
+     * buffer is flushed.
+     */
+    public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_THREAD_POOL_SIZE =
+            new PropertyInteger(
+                    "eventcloud.pubsub.operations.delayer.thread.pool.size",
+                    Runtime.getRuntime().availableProcessors());
 
     /**
      * Constant used to identify the SBCE publish/subscribe algorithm in version
@@ -370,7 +383,7 @@ public class EventCloudProperties {
     public static final PropertyInteger MAO_LIMIT_EVENTCLOUDS_REGISTRY =
             new PropertyInteger(
                     "eventcloud.mao.limit.eventclouds.registry",
-                    Runtime.getRuntime().availableProcessors() + 1);
+                    Runtime.getRuntime().availableProcessors());
 
     /**
      * Defines the limit used by each publish proxy that runs with multi-active
@@ -379,7 +392,7 @@ public class EventCloudProperties {
     public static final PropertyInteger MAO_LIMIT_PUBLISH_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.limit.publish.proxies",
-                    Runtime.getRuntime().availableProcessors() + 1);
+                    Runtime.getRuntime().availableProcessors());
 
     /**
      * Defines the limit used by each putget proxy that runs with multi-active
@@ -388,7 +401,7 @@ public class EventCloudProperties {
     public static final PropertyInteger MAO_LIMIT_PUTGET_PROXIES =
             new PropertyInteger(
                     "eventcloud.mao.limit.putget.proxies", Runtime.getRuntime()
-                            .availableProcessors() + 1);
+                            .availableProcessors());
 
     /**
      * Defines the limit used by each subscribe proxy that runs with
