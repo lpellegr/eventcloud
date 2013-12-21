@@ -120,13 +120,11 @@ public class PublishCompoundEventRequestOperator extends
     }
 
     private void fireMatchingSubscriptions(Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
-        TransactionalDatasetGraph txnGraph =
+        final TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
 
         QueryIterator it = null;
-
-        Subscription subscription = null;
 
         try {
             Optimize.noOptimizer();
@@ -143,113 +141,125 @@ public class PublishCompoundEventRequestOperator extends
                     this.identifyMatchingCompoundEvents(
                             it, extendedCompoundEvents);
 
-            for (MatchingResult matchingResult : matchingResults) {
-                CompoundEvent compoundEvent =
-                        matchingResult.extendedCompoundEvent.compoundEvent;
+            for (final MatchingResult matchingResult : matchingResults) {
+                this.threadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CompoundEvent compoundEvent =
+                                matchingResult.extendedCompoundEvent.compoundEvent;
 
-                Quadruple quadruple =
-                        matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
+                        Quadruple quadruple =
+                                matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
 
-                subscription =
-                        this.overlay.findSubscription(
-                                txnGraph, matchingResult.subscriptionId);
+                        final Subscription subscription =
+                                PublishCompoundEventRequestOperator.this.overlay.findSubscription(
+                                        txnGraph, matchingResult.subscriptionId);
 
-                if (PublishSubscribeUtils.filteredBySocialFilter(
-                        super.overlay, subscription, quadruple)) {
-                    continue;
-                }
-
-                boolean mustIgnoreSolution =
-                        quadruple.getPublicationTime() < subscription.getIndexationTime();
-
-                if (mustIgnoreSolution) {
-                    continue;
-                }
-
-                // tries to rewrite the subscription (with the compound
-                // event published) that has the first sub-subscription that
-                // is matched in order to know whether the subscription is
-                // fully satisfied or not
-                Pair<Binding, Integer> result =
-                        PublishSubscribeUtils.matches(
-                                compoundEvent, subscription);
-
-                if (result != null
-                // the quadruple used to route the compound event is the first
-                // quadruple matching the subscription
-                        && matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing.contains(result.getSecond())) {
-                    // the overall subscription is verified
-                    // we have to notify the subscriber about the solution
-
-                    String source =
-                            PAActiveObject.getUrl(this.overlay.getStub());
-
-                    Node metaGraphNode = quadruple.createMetaGraphNode();
-
-                    try {
-                        SubscribeProxy subscriber =
-                                subscription.getSubscriberProxy();
-
-                        switch (subscription.getType()) {
-                            case BINDING:
-                                subscriber.receiveSbce3(new BindingNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source,
-                                        result.getFirst()));
-                                break;
-                            case COMPOUND_EVENT:
-                                subscriber.receiveSbce3(new QuadruplesNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source, compoundEvent));
-                                break;
-                            case SIGNAL:
-                                subscriber.receiveSbce3(new SignalNotification(
-                                        subscription.getOriginalId(),
-                                        metaGraphNode, source));
-                                break;
+                        if (PublishSubscribeUtils.filteredBySocialFilter(
+                                PublishCompoundEventRequestOperator.this.overlay,
+                                subscription, quadruple)) {
+                            return;
                         }
 
-                        log.debug(
-                                "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
-                                compoundEvent.getGraph(),
-                                matchingResult.subscriptionId,
-                                super.overlay.getId());
-                    } catch (Throwable t) {
-                        PublishSubscribeUtils.logSubscribeProxyNotReachable(
-                                metaGraphNode.toString(),
-                                subscription.getOriginalId(),
-                                subscription.getSubscriberUrl());
+                        boolean mustIgnoreSolution =
+                                quadruple.getPublicationTime() < subscription.getIndexationTime();
 
-                        // This could be due to a subscriber which has left
-                        // without unsubscribing or a temporary network outage.
-                        // In that case the subscription could be removed after
-                        // some attempts and/or time
-                        PublishSubscribeUtils.handleSubscriberConnectionFailure(
-                                this.overlay, subscription);
-                    }
-                } else {
-                    if (log.isTraceEnabled()) {
-                        String reason;
+                        if (mustIgnoreSolution) {
+                            return;
+                        }
 
-                        if (result == null) {
-                            reason =
-                                    "the subscription is not satisfied, CE="
-                                            + compoundEvent;
+                        // tries to rewrite the subscription (with the compound
+                        // event published) that has the first sub-subscription
+                        // that is matched in order to know whether the
+                        // subscription is fully satisfied or not
+                        Pair<Binding, Integer> result =
+                                PublishSubscribeUtils.matches(
+                                        compoundEvent, subscription);
+
+                        if (result != null
+                        // the quadruple used to route the compound event is the
+                        // first quadruple matching the subscription
+                                && matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing.contains(result.getSecond())) {
+                            // the overall subscription is verified
+                            // we have to notify the subscriber about the
+                            // solution
+                            String source =
+                                    PAActiveObject.getUrl(PublishCompoundEventRequestOperator.this.overlay.getStub());
+
+                            Node metaGraphNode =
+                                    quadruple.createMetaGraphNode();
+
+                            try {
+                                SubscribeProxy subscriber =
+                                        subscription.getSubscriberProxy();
+
+                                switch (subscription.getType()) {
+                                    case BINDING:
+                                        subscriber.receiveSbce3(new BindingNotification(
+                                                subscription.getOriginalId(),
+                                                metaGraphNode, source,
+                                                result.getFirst()));
+                                        break;
+                                    case COMPOUND_EVENT:
+                                        subscriber.receiveSbce3(new QuadruplesNotification(
+                                                subscription.getOriginalId(),
+                                                metaGraphNode, source,
+                                                compoundEvent));
+                                        break;
+                                    case SIGNAL:
+                                        subscriber.receiveSbce3(new SignalNotification(
+                                                subscription.getOriginalId(),
+                                                metaGraphNode, source));
+                                        break;
+                                }
+
+                                log.debug(
+                                        "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
+                                        compoundEvent.getGraph(),
+                                        matchingResult.subscriptionId,
+                                        PublishCompoundEventRequestOperator.this.overlay.getId());
+                            } catch (Throwable t) {
+                                PublishSubscribeUtils.logSubscribeProxyNotReachable(
+                                        metaGraphNode.toString(),
+                                        subscription.getOriginalId(),
+                                        subscription.getSubscriberUrl());
+
+                                // This could be due to a subscriber which has
+                                // left without unsubscribing or a temporary
+                                // network outage.
+                                // In that case the subscription could be
+                                // removed after some attempts and/or time
+                                PublishSubscribeUtils.handleSubscriberConnectionFailure(
+                                        PublishCompoundEventRequestOperator.this.overlay,
+                                        subscription);
+                            }
                         } else {
-                            reason =
-                                    "the triggering notification condition is false: "
-                                            + matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing
-                                            + " does not contains "
-                                            + result.getSecond();
-                        }
+                            if (log.isTraceEnabled()) {
+                                String reason;
 
-                        log.trace(
-                                "Notification not sent for graph {} with subscription {} on peer {} because {}",
-                                compoundEvent.getGraph(),
-                                matchingResult.subscriptionId, super.overlay,
-                                reason);
+                                if (result == null) {
+                                    reason =
+                                            "the subscription is not satisfied, CE="
+                                                    + compoundEvent;
+                                } else {
+                                    reason =
+                                            "the triggering notification condition is false: "
+                                                    + matchingResult.extendedCompoundEvent.quadrupleIndexesUsedForIndexing
+                                                    + " does not contains "
+                                                    + result.getSecond();
+                                }
+
+                                log.trace(
+                                        "Notification not sent for graph {} with subscription {} on peer {} because {}",
+                                        compoundEvent.getGraph(),
+                                        matchingResult.subscriptionId,
+                                        PublishCompoundEventRequestOperator.this.overlay,
+                                        reason);
+                            }
+                        }
                     }
-                }
+                });
+
             }
 
             // looks for ephemeral subscriptions that can be satisfied
@@ -541,7 +551,7 @@ public class PublishCompoundEventRequestOperator extends
                 PublishSubscribeConstants.SUBSUBSCRIPTION_VARIABLE_EXPR));
     }
 
-    private static class MatchingResult {
+    private static final class MatchingResult {
 
         public final SubscriptionId subscriptionId;
 

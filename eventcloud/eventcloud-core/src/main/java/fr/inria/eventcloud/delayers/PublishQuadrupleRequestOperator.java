@@ -193,6 +193,11 @@ public class PublishQuadrupleRequestOperator extends
             }
 
             for (MatchingResult matchingResult : matchingResults) {
+                // TODO each quadrupleMatching could be handled in parallel to
+                // another by using the thread pool from the super class but
+                // doing so requires to check that no new concurrent issue
+                // occurs
+
                 // a subscription with only one sub-subscription (that matches
                 // the quadruple which has been inserted) has been detected
                 PublishSubscribeUtils.rewriteSubscriptionOrNotifySender(

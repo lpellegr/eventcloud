@@ -49,6 +49,7 @@ import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ThreadUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.UnicodeUtils;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
 import org.slf4j.Logger;
@@ -616,6 +617,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @MemberOf("parallelSelfCompatible")
     @SuppressWarnings("unchecked")
     public void receiveSbce3(QuadruplesNotification notification) {
+        this.logNumberOfActiveAndWaitingMAOThreads();
         this.logNotificationReception(notification);
 
         SubscriptionEntry<CompoundEventNotificationListener> subscriptionEntry =
@@ -727,6 +729,19 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
         this.sendInputOutputMonitoringReport(graph, listener.getSubscriberUrl());
 
         this.logIntegrationInformation(graph);
+    }
+
+    private void logNumberOfActiveAndWaitingMAOThreads() {
+        if (log.isTraceEnabled()) {
+            Thread[] threads =
+                    ThreadUtils.getAllThreads("MAOs Executor Thread.*SubscribeProxyImpl.*");
+
+            log.trace(
+                    "Dump Threads SubscribeProxy {}, total={} active={} waiting={}",
+                    System.identityHashCode(this), threads.length,
+                    ThreadUtils.countActive(threads),
+                    ThreadUtils.countWaiting(threads));
+        }
     }
 
     /**

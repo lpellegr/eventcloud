@@ -99,7 +99,7 @@ public class P2PStructuredProperties {
      * objects.
      */
     public static final PropertyInteger MAO_LIMIT_PEERS = new PropertyInteger(
-            "mao.limit.peers", Runtime.getRuntime().availableProcessors() + 1);
+            "mao.limit.peers", Runtime.getRuntime().availableProcessors());
 
     /**
      * Defines the soft limit used by each proxy that runs with multi-active
@@ -107,7 +107,7 @@ public class P2PStructuredProperties {
      */
     public static final PropertyInteger MAO_LIMIT_PROXIES =
             new PropertyInteger("mao.limit.proxies", Runtime.getRuntime()
-                    .availableProcessors() + 1);
+                    .availableProcessors());
 
     /**
      * Defines the soft limit used by each tracker that runs with multi-active

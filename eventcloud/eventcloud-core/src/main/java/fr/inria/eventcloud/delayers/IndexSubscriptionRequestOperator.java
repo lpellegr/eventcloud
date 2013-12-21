@@ -137,6 +137,9 @@ public class IndexSubscriptionRequestOperator extends
         }
 
         for (Quadruple quadrupleMatching : matchingQuadruples.build()) {
+            // TODO each quadrupleMatching could be handled in parallel to
+            // another by using the thread pool from the super class but doing
+            // so requires to check that no new concurrent issue occurs
             boolean mustIgnoreQuadrupleMatching =
                     quadrupleMatching.getPublicationTime() < s.getIndexationTime();
 
