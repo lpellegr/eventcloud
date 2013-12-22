@@ -192,15 +192,21 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CompoundEvent other = (CompoundEvent) obj;
-        if (this.quadruples == null) {
-            if (other.quadruples != null)
-                return false;
-        } else if (!this.quadruples.equals(other.quadruples))
-            return false;
-        return true;
+
+        if (obj instanceof CompoundEvent) {
+            CompoundEvent that = (CompoundEvent) obj;
+
+            // TODO: should be replaced by equals between quadruple lists but it
+            // requires to update
+            // SemanticNotificationTranslatorTest#testTranslationWithBlankNodes
+            // because this last was implemented when CEs were unordered sets of
+            // elements
+            return this.quadruples.size() == that.quadruples.size()
+                    && this.quadruples.containsAll(that.quadruples);
+
+        }
+
+        return false;
     }
 
     /**
