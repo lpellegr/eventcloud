@@ -676,7 +676,7 @@ public class PublishSubscribeBenchmark {
                             // issue may occur with all the algorithms when a
                             // signal or binding notification listener is used.
                             try {
-                                Thread.sleep(EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.getValue() * 2);
+                                Thread.sleep(EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue() * 2);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }

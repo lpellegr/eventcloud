@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.delayers.ExtendedCompoundEvent;
+import fr.inria.eventcloud.delayers.buffers.ExtendedCompoundEvent;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**

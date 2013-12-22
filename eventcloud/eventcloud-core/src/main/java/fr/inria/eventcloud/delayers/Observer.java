@@ -16,20 +16,18 @@
  **/
 package fr.inria.eventcloud.delayers;
 
-import java.util.Collection;
-
+import fr.inria.eventcloud.delayers.buffers.Buffer;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Defines the operations that may be used by entities that want to observe a
- * {@link Delayer}.
+ * Events that may be notified when a {@link Delayer} is observed.
  * 
  * @author lpellegr
  */
-public interface Observer<B extends Collection<?>> {
+public interface Observer<T> {
 
-    void bufferFlushed(B buffer, SemanticCanOverlay overlay);
+    void bufferFlushed(Buffer<T> buffer, SemanticCanOverlay overlay);
 
-    void postActionTriggered(B buffer, SemanticCanOverlay overlay);
+    void actionTriggered(Buffer<T> buffer, SemanticCanOverlay overlay);
 
 }

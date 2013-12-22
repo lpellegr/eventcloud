@@ -32,7 +32,6 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import com.google.common.primitives.Longs;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_ANY;
@@ -289,16 +288,19 @@ public class Quadruple implements Externalizable, Event {
     @Override
     public int hashCode() {
         if (this.nodesHashCode == 0) {
-            this.nodesHashCode = 31 + Arrays.hashCode(this.nodes);
+            this.nodesHashCode = Arrays.hashCode(this.nodes);
         }
 
-        int hash = this.nodesHashCode;
-        hash = hash * 31 + Longs.hashCode(this.publicationTime);
-        if (this.publicationSource != null) {
-            hash = hash * 31 + this.publicationSource.hashCode();
-        }
-
-        return hash;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.nodesHashCode;
+        result = prime * result + ((this.publicationSource == null)
+                ? 0 : this.publicationSource.hashCode());
+        result =
+                prime
+                        * result
+                        + (int) (this.publicationTime ^ (this.publicationTime >>> 32));
+        return result;
     }
 
     /**
@@ -309,40 +311,27 @@ public class Quadruple implements Externalizable, Event {
         if (this == obj) {
             return true;
         }
-
-        if (obj instanceof Quadruple) {
-            Quadruple other = (Quadruple) obj;
-
-            for (int i = 0; i < this.nodes.length; i++) {
-                if (!this.nodes[i].equals(other.nodes[i])) {
-                    return false;
-                }
-            }
-
-            if (!equalsNull(this.publicationSource, other.publicationSource)) {
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        Quadruple other = (Quadruple) obj;
+        if (!Arrays.equals(this.nodes, other.nodes)) {
+            return false;
+        }
+        if (this.publicationSource == null) {
+            if (other.publicationSource != null) {
                 return false;
             }
-
-            if (this.publicationTime != other.publicationTime) {
-                return false;
-            }
-
-            return true;
+        } else if (!this.publicationSource.equals(other.publicationSource)) {
+            return false;
         }
-
-        return false;
-    }
-
-    private static final boolean equalsNull(String s1, String s2) {
-        if (s1 == s2) {
-            return true;
+        if (this.publicationTime != other.publicationTime) {
+            return false;
         }
-
-        if (s1 != null && s2 != null) {
-            return s1.equals(s2);
-        }
-
-        return false;
+        return true;
     }
 
     /**

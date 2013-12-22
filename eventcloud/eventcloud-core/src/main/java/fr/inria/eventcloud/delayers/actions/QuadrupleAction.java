@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.delayers;
+package fr.inria.eventcloud.delayers.actions;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,6 +61,9 @@ import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.delayers.Delayer;
+import fr.inria.eventcloud.delayers.buffers.Buffer;
+import fr.inria.eventcloud.delayers.buffers.QuadrupleBuffer;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -69,59 +72,32 @@ import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 import fr.inria.eventcloud.reasoner.AtomicQuery;
 
 /**
- * Delayer used to buffer write operations due to publications that are
- * published with SBCE1 and SBCE2.
+ * Action used by a delayer to detect satisfied subscriptions and rewritten
+ * subscriptions or notification solutions.
  * 
  * @author lpellegr
+ * 
+ * @see Delayer
+ * @see QuadrupleBuffer
  */
-public class PublishQuadrupleRequestOperator extends
-        BufferOperator<CustomBuffer> {
+public final class QuadrupleAction extends Action<Quadruple> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(PublishQuadrupleRequestOperator.class);
+            LoggerFactory.getLogger(QuadrupleAction.class);
 
-    public PublishQuadrupleRequestOperator(SemanticCanOverlay overlay) {
-        super(overlay);
+    public QuadrupleAction(SemanticCanOverlay overlay, int threadPoolSize) {
+        super(overlay, threadPoolSize);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void _flushBuffer(CustomBuffer buffer) {
-        TransactionalDatasetGraph txnGraph =
-                super.overlay.getMiscDatastore().begin(AccessMode.WRITE);
-
-        try {
-            // the quadruple is stored by using its meta graph value
-            Iterator<Quadruple> it = buffer.getQuadruples().iterator();
-
-            while (it.hasNext()) {
-                Quadruple q = it.next();
-
-                txnGraph.add(
-                        q.createMetaGraphNode(), q.getSubject(),
-                        q.getPredicate(), q.getObject());
-            }
-
-            txnGraph.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            txnGraph.abort();
-        } finally {
-            txnGraph.end();
-        }
+    public void perform(Buffer<Quadruple> buffer) {
+        this.fireMatchingSubscriptions((QuadrupleBuffer) buffer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void _triggerAction(CustomBuffer buffer) {
-        this.fireMatchingSubscriptions(buffer.getQuadruples());
-    }
-
-    private void fireMatchingSubscriptions(QuadrupleList quadruples) {
+    private void fireMatchingSubscriptions(QuadrupleBuffer quadruples) {
         // finds the sub-subscriptions which are stored locally and that are
         // matching the quadruple which have been just inserted into the
         // local datastore
@@ -226,7 +202,7 @@ public class PublishQuadrupleRequestOperator extends
     }
 
     private void findAndHandleEphemeralSubscriptions(TransactionalDatasetGraph txnGraph,
-                                                     List<Quadruple> quadruples) {
+                                                     Buffer<Quadruple> quadruples) {
         try {
             QueryIterator it =
                     Algebra.exec(
@@ -278,7 +254,7 @@ public class PublishQuadrupleRequestOperator extends
         }
     }
 
-    private Op createFindMatchedEphemeralSubscriptionsAlgebra(List<Quadruple> quadruples) {
+    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Buffer<Quadruple> quadruples) {
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
                 PublishSubscribeConstants.SUBJECT_VAR,

@@ -41,13 +41,13 @@ public class DelayersBenchmark {
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of runs")
     private int nbRuns = 5;
 
-    @Parameter(names = {"-ct", "--commit-timeout"}, description = "Commit timeout value in ms")
-    private int commitTimeout =
-            EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.getValue();
+    @Parameter(names = {"-ci", "--commit-interval"}, description = "Commit timeout value in ms")
+    private int commitInterval =
+            EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue();
 
-    @Parameter(names = {"-bs", "--buffer-size"}, description = "Buffer size")
-    private int bufferSize =
-            EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE.getValue();
+    @Parameter(names = {"-cs", "--commit-size"}, description = "Buffer size")
+    private int commitSize =
+            EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getValue();
 
     @Parameter(names = {"-rts", "--rdf-term-size"}, description = "The size of each RDF term generated")
     private int rdfTermSize = 10;
@@ -85,8 +85,8 @@ public class DelayersBenchmark {
     }
 
     public void execute() throws IOException, ClassNotFoundException {
-        EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT.setValue(this.commitTimeout);
-        EventCloudProperties.PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE.setValue(this.bufferSize);
+        EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.setValue(this.commitInterval);
+        EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.setValue(this.commitSize);
 
         PublishSubscribeBenchmark pubSubBenchmark =
                 new PublishSubscribeBenchmark(
@@ -110,8 +110,8 @@ public class DelayersBenchmark {
 
         double nbQuadsPerPeer = stats.getCategory("quadsPerPeer").getValue(0);
 
-        System.out.println("buffer_size=" + this.bufferSize);
-        System.out.println("commit_timeout=" + this.commitTimeout);
+        System.out.println("buffer_size=" + this.commitSize);
+        System.out.println("commit_timeout=" + this.commitInterval);
         System.out.println("endtoend_average_throughput="
                 + endToEndAverageThroughput);
         System.out.println("average_latency=" + pointToPointAverageThroughput);
