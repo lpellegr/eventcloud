@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.delayers;
+package fr.inria.eventcloud.delayers.buffers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,8 @@ import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Quadruple;
 
 /**
- * Simple abstraction to maintain together a compound event and the index of the
- * quadruple used to publish the compound event.
+ * Simple abstraction to maintain together a compound event and the indexes of
+ * the quadruple used to publish the compound event.
  * 
  * @author lpellegr
  */

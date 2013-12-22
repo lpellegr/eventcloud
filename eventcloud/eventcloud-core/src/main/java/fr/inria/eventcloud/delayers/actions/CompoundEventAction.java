@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.delayers;
+package fr.inria.eventcloud.delayers.actions;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -61,6 +60,10 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.SubscriptionId;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.delayers.Delayer;
+import fr.inria.eventcloud.delayers.buffers.Buffer;
+import fr.inria.eventcloud.delayers.buffers.CompoundEventBuffer;
+import fr.inria.eventcloud.delayers.buffers.ExtendedCompoundEvent;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.proxies.SubscribeProxy;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -70,56 +73,32 @@ import fr.inria.eventcloud.pubsub.notifications.QuadruplesNotification;
 import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
 
 /**
- * Delayer used to buffer write operations due to publications that are
- * published with SBCE3.
+ * Action used by a delayer to detect satisfied subscriptions and forwarding
+ * compound events from a {@link CompoundEventBuffer}.
  * 
  * @author lpellegr
+ * 
+ * @see Delayer
+ * @see CompoundEventBuffer
  */
-public class PublishCompoundEventRequestOperator extends
-        BufferOperator<CustomBuffer> {
+public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(PublishCompoundEventRequestOperator.class);
+            LoggerFactory.getLogger(CompoundEventAction.class);
 
-    public PublishCompoundEventRequestOperator(SemanticCanOverlay overlay) {
-        super(overlay);
+    public CompoundEventAction(SemanticCanOverlay overlay, int threadPoolSize) {
+        super(overlay, threadPoolSize);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void _flushBuffer(CustomBuffer buffer) {
-        TransactionalDatasetGraph txnGraph =
-                this.overlay.getMiscDatastore().begin(AccessMode.WRITE);
-
-        try {
-            // the quadruple is stored by using its meta graph value
-            for (ExtendedCompoundEvent extendedCompoundEvent : buffer.getExtendedCompoundEvents()) {
-                for (Quadruple q : extendedCompoundEvent.getQuadruplesUsedForIndexing()) {
-                    txnGraph.add(
-                            q.createMetaGraphNode(), q.getSubject(),
-                            q.getPredicate(), q.getObject());
-                }
-            }
-            txnGraph.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            txnGraph.abort();
-        } finally {
-            txnGraph.end();
-        }
+    public void perform(Buffer<ExtendedCompoundEvent> buffer) {
+        this.fireMatchingSubscriptions((CompoundEventBuffer) buffer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void _triggerAction(CustomBuffer buffer) {
-        this.fireMatchingSubscriptions(buffer.getExtendedCompoundEvents());
-    }
-
-    private void fireMatchingSubscriptions(Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
+    private void fireMatchingSubscriptions(CompoundEventBuffer buffer) {
         final TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
@@ -134,15 +113,14 @@ public class PublishCompoundEventRequestOperator extends
             // event which is published
             it =
                     Algebra.exec(
-                            this.createFindSubscriptionsMatchingAlgebra(extendedCompoundEvents),
+                            this.createFindSubscriptionsMatchingAlgebra(buffer),
                             txnGraph.getUnderlyingDataset());
 
             List<MatchingResult> matchingResults =
-                    this.identifyMatchingCompoundEvents(
-                            it, extendedCompoundEvents);
+                    this.identifyMatchingCompoundEvents(it, buffer);
 
             for (final MatchingResult matchingResult : matchingResults) {
-                this.threadPool.execute(new Runnable() {
+                super.threadPool.execute(new Runnable() {
                     @Override
                     public void run() {
                         CompoundEvent compoundEvent =
@@ -152,12 +130,12 @@ public class PublishCompoundEventRequestOperator extends
                                 matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
 
                         final Subscription subscription =
-                                PublishCompoundEventRequestOperator.this.overlay.findSubscription(
+                                CompoundEventAction.this.overlay.findSubscription(
                                         txnGraph, matchingResult.subscriptionId);
 
                         if (PublishSubscribeUtils.filteredBySocialFilter(
-                                PublishCompoundEventRequestOperator.this.overlay,
-                                subscription, quadruple)) {
+                                CompoundEventAction.this.overlay, subscription,
+                                quadruple)) {
                             return;
                         }
 
@@ -184,7 +162,7 @@ public class PublishCompoundEventRequestOperator extends
                             // we have to notify the subscriber about the
                             // solution
                             String source =
-                                    PAActiveObject.getUrl(PublishCompoundEventRequestOperator.this.overlay.getStub());
+                                    PAActiveObject.getUrl(CompoundEventAction.this.overlay.getStub());
 
                             Node metaGraphNode =
                                     quadruple.createMetaGraphNode();
@@ -217,7 +195,7 @@ public class PublishCompoundEventRequestOperator extends
                                         "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
                                         compoundEvent.getGraph(),
                                         matchingResult.subscriptionId,
-                                        PublishCompoundEventRequestOperator.this.overlay.getId());
+                                        CompoundEventAction.this.overlay.getId());
                             } catch (Throwable t) {
                                 PublishSubscribeUtils.logSubscribeProxyNotReachable(
                                         metaGraphNode.toString(),
@@ -230,7 +208,7 @@ public class PublishCompoundEventRequestOperator extends
                                 // In that case the subscription could be
                                 // removed after some attempts and/or time
                                 PublishSubscribeUtils.handleSubscriberConnectionFailure(
-                                        PublishCompoundEventRequestOperator.this.overlay,
+                                        CompoundEventAction.this.overlay,
                                         subscription);
                             }
                         } else {
@@ -253,7 +231,7 @@ public class PublishCompoundEventRequestOperator extends
                                         "Notification not sent for graph {} with subscription {} on peer {} because {}",
                                         compoundEvent.getGraph(),
                                         matchingResult.subscriptionId,
-                                        PublishCompoundEventRequestOperator.this.overlay,
+                                        CompoundEventAction.this.overlay,
                                         reason);
                             }
                         }
@@ -265,8 +243,7 @@ public class PublishCompoundEventRequestOperator extends
             // looks for ephemeral subscriptions that can be satisfied
             // TODO: remove ephemeral subscriptions thanks to the meta graph
             // values returned by the following method call
-            this.findAndHandleEphemeralSubscriptions(
-                    txnGraph, extendedCompoundEvents);
+            this.findAndHandleEphemeralSubscriptions(txnGraph, buffer);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -280,7 +257,7 @@ public class PublishCompoundEventRequestOperator extends
     }
 
     private List<Node> findAndHandleEphemeralSubscriptions(TransactionalDatasetGraph txnGraph,
-                                                           Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
+                                                           Iterable<ExtendedCompoundEvent> extendedCompoundEvents) {
         Builder<Node> result = ImmutableList.builder();
 
         try {
@@ -339,7 +316,7 @@ public class PublishCompoundEventRequestOperator extends
         return result.build();
     }
 
-    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
+    private Op createFindMatchedEphemeralSubscriptionsAlgebra(Iterable<ExtendedCompoundEvent> extendedCompoundEvents) {
         BasicPattern bp = new BasicPattern();
         bp.add(Triple.create(
                 PublishSubscribeConstants.SUBJECT_VAR,
@@ -375,7 +352,7 @@ public class PublishCompoundEventRequestOperator extends
     }
 
     private List<MatchingResult> identifyMatchingCompoundEvents(QueryIterator it,
-                                                                Collection<ExtendedCompoundEvent> extendedCompoundEvents) {
+                                                                CompoundEventBuffer buffer) {
         Builder<MatchingResult> builder = ImmutableList.builder();
 
         while (it.hasNext()) {
@@ -395,7 +372,7 @@ public class PublishCompoundEventRequestOperator extends
                             PublishSubscribeConstants.SUBSCRIPTION_ID_VAR)
                             .getLiteralLexicalForm());
 
-            for (ExtendedCompoundEvent extendedCompoundEvent : extendedCompoundEvents) {
+            for (ExtendedCompoundEvent extendedCompoundEvent : buffer) {
                 for (Quadruple q : extendedCompoundEvent.compoundEvent) {
                     if (this.matches(q.getObject(), ssObject)
                             && this.matches(q.getPredicate(), ssPredicate)
@@ -421,8 +398,8 @@ public class PublishCompoundEventRequestOperator extends
                 || publicationTerm.equals(subscriptionTerm);
     }
 
-    private Op createFindSubscriptionsMatchingAlgebra(Collection<ExtendedCompoundEvent> compoundEvents) {
-        Iterator<ExtendedCompoundEvent> it = compoundEvents.iterator();
+    private Op createFindSubscriptionsMatchingAlgebra(CompoundEventBuffer buffer) {
+        Iterator<ExtendedCompoundEvent> it = buffer.iterator();
 
         // basic graph pattern
         BasicPattern bp = new BasicPattern();

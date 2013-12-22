@@ -102,34 +102,120 @@ public class EventCloudProperties {
                     "eventcloud.filter.functions.ns",
                     "http://eventcloud.inria.fr/function#");
 
-    // TODO: the following three properties should ideally exist for each
-    // delayer instance (quadruples, compound events, subscriptions). Currently,
-    // they are all sharing the same values defined hereafter.
+    // /**
+    // * Defines the number of quadruples to put in cache before to commit them
+    // to
+    // * disk and trigger the associated action.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_COMMIT_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.quadruple.delayer.commit.size", 120);
+    //
+    // /**
+    // * Defines the number of subscriptions to put in cache before to commit
+    // them
+    // * to disk and trigger the associated action.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_COMMIT_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.subscription.delayer.commit.size", 120);
+    //
+    // /**
+    // * Defines the number of compound events to put in cache before to commit
+    // * them to disk and trigger the associated action.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_COMMIT_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.compound.event.delayer.commit.size", 120);
 
     /**
-     * Defines the number of entries that may be bufferized by the
-     * publish/subscribe operations delayer before to be committed.
+     * Defines the number of elements (quadruples, subscriptions or compound
+     * events) to put in cache before to commit them to disk and trigger the
+     * associated action.
      */
-    public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_BUFFER_SIZE =
-            new PropertyInteger(
-                    "eventcloud.pubsub.operations.delayer.buffer.size", 120);
+    public static final PropertyInteger PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE =
+            new PropertyInteger("eventcloud.pubsub.delayer.commit.size", 120);
+
+    // /**
+    // * Defines the maximum time to wait (in milliseconds) before to commit
+    // * buffered quadruples when a commit thread is running with the
+    // * publish/subscribe operations delayer.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_COMMIT_INTERVAL =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.quadruple.delayer.commit.interval", 500);
+    //
+    // /**
+    // * Defines the maximum time to wait (in milliseconds) before to commit
+    // * buffered subscriptions when a commit thread is running with the
+    // * publish/subscribe operations delayer.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_COMMIT_INTERVAL =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.subscription.delayer.commit.interval",
+    // 500);
+    //
+    // /**
+    // * Defines the maximum time to wait (in milliseconds) before to commit
+    // * buffered compound events when a commit thread is running with the
+    // * publish/subscribe operations delayer.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_COMMIT_INTERVAL =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.compound.event.delayer.commit.interval",
+    // 500);
 
     /**
-     * Defines the maximum timeout (in milliseconds) to wait before to commit
-     * bufferized entries when a commit thread is running with the
+     * Defines the maximum time to wait (in milliseconds) before to commit
+     * buffered elements when a commit thread is running with the
      * publish/subscribe operations delayer.
      */
-    public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_TIMEOUT =
+    public static final PropertyInteger PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL =
             new PropertyInteger(
-                    "eventcloud.pubsub.operations.delayer.timeout", 500);
+                    "eventcloud.pubsub.delayer.commit.interval", 500);
+
+    // /**
+    // * Defines the size of the thread pool used by the delayer action once
+    // * quadruples have been flushed to the disk.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_THREAD_POOL_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.quadruple.delayer.thread.pool.size", 0);
+    //
+    // /**
+    // * Defines the size of the thread pool used by the delayer action once
+    // * subscriptions have been flushed to the disk.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_THREAD_POOL_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.subscription.delayer.thread.pool.size",
+    // 0);
+    //
+    // /**
+    // * Defines the size of the thread pool used by the delayer action once
+    // * compound events have been flushed to the disk.
+    // */
+    // public static final PropertyInteger
+    // PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_THREAD_POOL_SIZE =
+    // new PropertyInteger(
+    // "eventcloud.pubsub.compound.events.delayer.thread.pool.size",
+    // Runtime.getRuntime().availableProcessors());
 
     /**
-     * Defines the size of the thread pool used by the delayer action once the
-     * buffer is flushed.
+     * Defines the size of the thread pool used by the delayer action once
+     * compound events have been flushed to the disk.
      */
-    public static final PropertyInteger PUBLISH_SUBSCRIBE_OPERATIONS_DELAYER_THREAD_POOL_SIZE =
+    public static final PropertyInteger PUBLISH_SUBSCRIBE_DELAYER_THREAD_POOL_SIZE =
             new PropertyInteger(
-                    "eventcloud.pubsub.operations.delayer.thread.pool.size",
+                    "eventcloud.pubsub.delayer.thread.pool.size",
                     Runtime.getRuntime().availableProcessors());
 
     /**

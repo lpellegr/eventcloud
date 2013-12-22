@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.delayers;
+package fr.inria.eventcloud.delayers.actions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +28,9 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
+import fr.inria.eventcloud.delayers.Delayer;
+import fr.inria.eventcloud.delayers.buffers.Buffer;
+import fr.inria.eventcloud.delayers.buffers.SubscriptionBuffer;
 import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.pubsub.PublishSubscribeUtils;
@@ -35,51 +38,31 @@ import fr.inria.eventcloud.pubsub.Subscription;
 import fr.inria.eventcloud.pubsub.Subsubscription;
 
 /**
- * Delayer used to buffer write operations due to subscriptions that are indexed
- * with SBCE1, SBCE2 and SBCE3.
+ * Action used by a delayer to find events matching subscriptions that have been
+ * flushed. For each event found, a notification is triggered.
  * 
  * @author lpellegr
+ * 
+ * @see Delayer
+ * @see SubscriptionBuffer
  */
-public class IndexSubscriptionRequestOperator extends
-        BufferOperator<CustomBuffer> {
+public final class SubscriptionAction extends Action<Subscription> {
 
     private static final Logger log =
-            LoggerFactory.getLogger(IndexSubscriptionRequestOperator.class);
+            LoggerFactory.getLogger(SubscriptionAction.class);
 
-    public IndexSubscriptionRequestOperator(SemanticCanOverlay overlay) {
-        super(overlay);
+    public SubscriptionAction(SemanticCanOverlay overlay, int threadPoolSize) {
+        super(overlay, threadPoolSize);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void _flushBuffer(CustomBuffer buffer) {
-        TransactionalDatasetGraph txnGraph =
-                this.overlay.getSubscriptionsDatastore()
-                        .begin(AccessMode.WRITE);
+    public void perform(Buffer<Subscription> buffer) {
+        SubscriptionBuffer buf = (SubscriptionBuffer) buffer;
 
-        try {
-            for (Subscription s : buffer.getSubscriptions()) {
-                this.overlay.getSubscriptionsCache().put(s.getId(), s);
-                txnGraph.add(s.toQuadruples());
-            }
-
-            txnGraph.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            txnGraph.abort();
-        } finally {
-            txnGraph.end();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void _triggerAction(CustomBuffer buffer) {
-        for (Subscription s : buffer.getSubscriptions()) {
+        for (Subscription s : buf) {
             this.fireQuadrupleMatching(s);
         }
     }

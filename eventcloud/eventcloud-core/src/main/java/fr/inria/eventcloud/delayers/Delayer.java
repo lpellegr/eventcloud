@@ -16,72 +16,79 @@
  **/
 package fr.inria.eventcloud.delayers;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import fr.inria.eventcloud.delayers.actions.Action;
+import fr.inria.eventcloud.delayers.buffers.Buffer;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Abstract delayer that factorizes some code shared between all delayers.
+ * Defines a delayer that aims to cache elements of type T inside a
+ * {@link Buffer}. Once the buffer is flushed (i.e. persisted to disk), an
+ * {@link Action} is performed with elements from the buffer.
  * 
  * @author lpellegr
  */
-public abstract class Delayer<R, B extends Collection<R>> {
+public class Delayer<T> {
 
-    private final Logger log;
+    private static final Logger log = LoggerFactory.getLogger(Delayer.class);
+
+    private final SemanticCanOverlay overlay;
+
+    private final List<Observer<T>> observers;
+
+    protected final Buffer<T> buffer;
+
+    protected final Action<T> action;
+
+    private final String bufferElementsName;
+
+    protected final int commitInterval;
+
+    protected final int commitSize;
 
     private Thread commitThread;
 
-    protected final int bufsize;
-
-    protected final int delayerCommitTimeout;
-
-    protected final String postActionName;
-
-    protected final String bufferedObjectName;
-
-    protected final SemanticCanOverlay overlay;
-
-    protected final B buffer;
-
-    public Delayer(SemanticCanOverlay overlay, Logger logger,
-            String postActionName, String bufferedObjectName, int bufsize,
-            int delayerCommitTimeout) {
+    public Delayer(SemanticCanOverlay overlay, Buffer<T> buffer,
+            Action<T> action, int commitInterval, int commitSize) {
         this.overlay = overlay;
-        this.log = logger;
 
-        this.bufsize = bufsize;
-        this.delayerCommitTimeout = delayerCommitTimeout;
-        this.postActionName = postActionName;
-        this.bufferedObjectName = bufferedObjectName;
+        this.action = action;
+        this.buffer = buffer;
 
-        this.buffer = this.createEmptyBuffer(bufsize);
+        this.commitInterval = commitInterval;
+        this.commitSize = commitSize;
+
+        this.bufferElementsName = null;
+
+        // to have observers should be something rare
+        this.observers = new ArrayList<Observer<T>>(0);
     }
 
-    protected abstract B createEmptyBuffer(int bufsize);
-
-    protected abstract void flushBuffer();
-
-    protected abstract void triggerAction();
-
-    public void receive(R request) {
+    public void receive(T request) {
         synchronized (this.buffer) {
             this.buffer.add(request);
-
             this.commitOrCreateCommitThread();
         }
     }
 
+    public void register(Observer<T> r) {
+        this.observers.add(r);
+    }
+
     protected void commitOrCreateCommitThread() {
-        if (this.buffer.size() >= this.bufsize) {
+        if (this.buffer.size() >= this.commitSize) {
             int nbObjectsFlushed = this.commit();
-            this.log.trace(
+            log.trace(
                     "{} {} committed because threshold exceeded on {}",
-                    nbObjectsFlushed, this.bufferedObjectName, this.overlay);
+                    nbObjectsFlushed, this.bufferElementsName, this.overlay);
         } else {
             if (this.commitThread == null) {
-                this.log.trace("Commit thread created on {}", this.overlay);
+                log.trace("Commit thread created on {}", this.overlay);
 
                 this.commitThread = new CommitThread();
                 this.commitThread.start();
@@ -90,7 +97,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
     }
 
     protected int commit() {
-        boolean isTraceEnabled = this.log.isTraceEnabled();
+        boolean isTraceEnabled = log.isTraceEnabled();
         long startTime = 0;
 
         synchronized (this.buffer) {
@@ -107,9 +114,9 @@ public abstract class Delayer<R, B extends Collection<R>> {
             this.flushBuffer();
 
             if (isTraceEnabled) {
-                boolean dueToTimeout = this.buffer.size() < this.bufsize;
+                boolean dueToTimeout = this.buffer.size() < this.commitSize;
 
-                this.log.trace(
+                log.trace(
                         "Buffer flushed in {} ms on {} {}",
                         System.currentTimeMillis() - startTime, this.overlay,
                         dueToTimeout
@@ -120,9 +127,10 @@ public abstract class Delayer<R, B extends Collection<R>> {
             this.triggerAction();
 
             if (isTraceEnabled) {
-                this.log.trace(
-                        "Fired {} in {} ms on {}", this.postActionName,
-                        System.currentTimeMillis() - startTime, this.overlay);
+                log.trace(
+                        "Fired {} action in {} ms on {}",
+                        this.bufferElementsName, System.currentTimeMillis()
+                                - startTime, this.overlay);
             }
 
             this.buffer.clear();
@@ -131,7 +139,24 @@ public abstract class Delayer<R, B extends Collection<R>> {
         }
     }
 
-    public synchronized void flush() {
+    private void flushBuffer() {
+        this.buffer.persist();
+
+        for (Observer<T> observer : this.observers) {
+            observer.bufferFlushed(this.buffer, this.overlay);
+        }
+    }
+
+    private void triggerAction() {
+        this.action.perform(this.buffer);
+
+        for (Observer<T> observer : this.observers) {
+            observer.actionTriggered(this.buffer, this.overlay);
+        }
+    }
+
+    public void flush() {
+        // synchronized (this.buffer) {
         if (this.commitThread != null) {
             try {
                 this.commitThread.join();
@@ -140,6 +165,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
                 Thread.currentThread().interrupt();
             }
         }
+        // }
     }
 
     private final class CommitThread extends Thread {
@@ -156,7 +182,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(Delayer.this.delayerCommitTimeout);
+                    Thread.sleep(Delayer.this.commitInterval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();
@@ -165,7 +191,7 @@ public abstract class Delayer<R, B extends Collection<R>> {
                 int nbObjectsFlushed = Delayer.this.commit();
 
                 if (nbObjectsFlushed == 0) {
-                    Delayer.this.log.trace(
+                    log.trace(
                             "Commit thread terminated on {}",
                             Delayer.this.overlay);
                     // nothing was committed, we should
@@ -174,9 +200,9 @@ public abstract class Delayer<R, B extends Collection<R>> {
 
                     return;
                 } else {
-                    Delayer.this.log.trace(
+                    log.trace(
                             "{} {} committed because timeout exceeded on {}",
-                            nbObjectsFlushed, Delayer.this.bufferedObjectName,
+                            nbObjectsFlushed, Delayer.this.bufferElementsName,
                             Delayer.this.overlay);
                 }
             }

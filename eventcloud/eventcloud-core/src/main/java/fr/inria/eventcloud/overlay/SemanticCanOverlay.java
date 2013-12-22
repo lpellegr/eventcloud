@@ -74,7 +74,7 @@ import fr.inria.eventcloud.datastore.AccessMode;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.delayers.PublishSubscribeOperationsDelayer;
+import fr.inria.eventcloud.delayers.PublishSubscribeDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
 import fr.inria.eventcloud.operations.can.RetrieveEstimatedNumberOfQuadruplesOperation;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
@@ -108,7 +108,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
     private final ScheduledExecutorService ephemeralSubscriptionsGarbageColletor;
 
-    private final PublishSubscribeOperationsDelayer publishSubscribeOperationsDelayer;
+    private final PublishSubscribeDelayer publishSubscribeOperationsDelayer;
 
     private LoadBalancingManager loadBalancingManager;
 
@@ -221,7 +221,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         }
 
         this.publishSubscribeOperationsDelayer =
-                new PublishSubscribeOperationsDelayer(this);
+                new PublishSubscribeDelayer(this);
 
         if (EventCloudProperties.EXPOSE_JMX_STATISTICS.getValue()) {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -354,11 +354,11 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     }
 
     /**
-     * Returns the {@link PublishSubscribeOperationsDelayer} instance.
+     * Returns the {@link PublishSubscribeDelayer} instance.
      * 
      * @return the publishSubscribeOperationsDelayer
      */
-    public PublishSubscribeOperationsDelayer getPublishSubscribeOperationsDelayer() {
+    public PublishSubscribeDelayer getPublishSubscribeOperationsDelayer() {
         return this.publishSubscribeOperationsDelayer;
     }
 

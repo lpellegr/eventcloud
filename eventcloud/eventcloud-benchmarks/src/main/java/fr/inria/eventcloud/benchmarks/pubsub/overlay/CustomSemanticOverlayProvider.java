@@ -22,10 +22,11 @@ import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.api.PAActiveObject;
 
 import fr.inria.eventcloud.benchmarks.pubsub.BenchmarkStatsCollector;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
-import fr.inria.eventcloud.delayers.CustomBuffer;
 import fr.inria.eventcloud.delayers.Observer;
+import fr.inria.eventcloud.delayers.buffers.Buffer;
+import fr.inria.eventcloud.delayers.buffers.ExtendedCompoundEvent;
+import fr.inria.eventcloud.delayers.buffers.ThreeInOneBuffer;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 
@@ -57,31 +58,18 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
                         datastores[0], datastores[1], datastores[2]);
 
         if (this.markStorageEndTime) {
-            result.getPublishSubscribeOperationsDelayer()
-                    .getQuadruplesOperator()
-                    .register(new QuadruplesObserver(this.statsCollectorURL));
-            result.getPublishSubscribeOperationsDelayer()
-                    .getSubscriptionsOperator()
-                    .register(new SubscriptionsObserver(this.statsCollectorURL));
-
-            if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-                result.getPublishSubscribeOperationsDelayer()
-                        .getCompoundEventsOperator()
-                        .register(
-                                new CompoundEventsObserver(
-                                        this.statsCollectorURL));
-            }
+            result.getPublishSubscribeOperationsDelayer().register(
+                    new DelayerObserver(this.statsCollectorURL));
         }
 
         return result;
     }
 
-    private static abstract class OperatorObserver implements
-            Observer<CustomBuffer> {
+    private static class DelayerObserver implements Observer<Object> {
 
         protected final BenchmarkStatsCollector collector;
 
-        public OperatorObserver(String benchmarkStatsCollectorURL) {
+        public DelayerObserver(String benchmarkStatsCollectorURL) {
             this.collector =
                     this.lookupBenchmarkStatsCollector(benchmarkStatsCollectorURL);
         }
@@ -90,17 +78,47 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
          * {@inheritDoc}
          */
         @Override
-        public void bufferFlushed(CustomBuffer buffer,
+        public void bufferFlushed(Buffer<Object> buffer,
                                   SemanticCanOverlay overlay) {
-            // to be overriden if required
+            CustomSemanticOverlay customOverlay =
+                    ((CustomSemanticOverlay) overlay);
+            ThreeInOneBuffer buf = (ThreeInOneBuffer) buffer;
+
+            if (buf.getCompoundEventBuffer() != null
+                    && !buf.getCompoundEventBuffer().isEmpty()) {
+                customOverlay.publicationsStorageEndTime =
+                        System.currentTimeMillis();
+
+                int size = 0;
+
+                for (ExtendedCompoundEvent ce : buf.getCompoundEventBuffer()) {
+                    size += ce.compoundEvent.size();
+                }
+
+                this.collector.reportNbQuadrupleStored(
+                        customOverlay.getId(), size);
+            }
+
+            if (!buf.getQuadrupleBuffer().isEmpty()) {
+                customOverlay.publicationsStorageEndTime =
+                        System.currentTimeMillis();
+
+                this.collector.reportNbQuadrupleStored(
+                        customOverlay.getId(), buf.getQuadrupleBuffer().size());
+            }
+
+            if (!buf.getSubscriptionBuffer().isEmpty()) {
+                customOverlay.subscriptionsStorageEndTime =
+                        System.currentTimeMillis();
+            }
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public void postActionTriggered(CustomBuffer buffer,
-                                        SemanticCanOverlay overlay) {
+        public void actionTriggered(Buffer<Object> buffer,
+                                    SemanticCanOverlay overlay) {
             // to be overriden if required
         }
 
@@ -118,83 +136,6 @@ public class CustomSemanticOverlayProvider extends SemanticOverlayProvider {
             }
 
             return null;
-        }
-
-    }
-
-    private static class CompoundEventsObserver extends OperatorObserver {
-
-        public CompoundEventsObserver(String benchmarkStatsCollectorURL) {
-            super(benchmarkStatsCollectorURL);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void bufferFlushed(CustomBuffer buffer,
-                                  SemanticCanOverlay overlay) {
-            CustomSemanticOverlay customOverlay =
-                    ((CustomSemanticOverlay) overlay);
-
-            int cumulatedSize = buffer.getExtendedCompoundEvents().size();
-
-            if (cumulatedSize > 0) {
-                customOverlay.publicationsStorageEndTime =
-                        System.currentTimeMillis();
-
-                this.collector.reportNbQuadrupleStored(
-                        customOverlay.getId(), cumulatedSize);
-            }
-        }
-
-    }
-
-    private static class QuadruplesObserver extends OperatorObserver {
-
-        public QuadruplesObserver(String benchmarkStatsCollectorURL) {
-            super(benchmarkStatsCollectorURL);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void bufferFlushed(CustomBuffer buffer,
-                                  SemanticCanOverlay overlay) {
-            CustomSemanticOverlay customOverlay =
-                    ((CustomSemanticOverlay) overlay);
-
-            if (buffer.getQuadruples().size() > 0) {
-                customOverlay.publicationsStorageEndTime =
-                        System.currentTimeMillis();
-
-                this.collector.reportNbQuadrupleStored(
-                        customOverlay.getId(), buffer.getQuadruples().size());
-            }
-        }
-
-    }
-
-    private static class SubscriptionsObserver extends OperatorObserver {
-
-        public SubscriptionsObserver(String benchmarkStatsCollectorURL) {
-            super(benchmarkStatsCollectorURL);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void bufferFlushed(CustomBuffer buffer,
-                                  SemanticCanOverlay overlay) {
-            CustomSemanticOverlay customOverlay =
-                    ((CustomSemanticOverlay) overlay);
-
-            if (buffer.getSubscriptions().size() > 0) {
-                customOverlay.subscriptionsStorageEndTime =
-                        System.currentTimeMillis();
-            }
         }
 
     }
