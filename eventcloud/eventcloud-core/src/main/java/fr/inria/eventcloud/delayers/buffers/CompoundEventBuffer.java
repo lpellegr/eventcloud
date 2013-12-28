@@ -89,7 +89,9 @@ public final class CompoundEventBuffer extends Buffer<ExtendedCompoundEvent> {
         try {
             // the quadruple is stored by using its meta graph value
             for (ExtendedCompoundEvent extendedCompoundEvent : this.extendedCompoundEvents.values()) {
-                for (Quadruple q : extendedCompoundEvent.getQuadruplesUsedForIndexing()) {
+                for (int index : extendedCompoundEvent.quadrupleIndexesUsedForIndexing) {
+                    Quadruple q =
+                            extendedCompoundEvent.compoundEvent.get(index);
                     txnGraph.add(
                             q.createMetaGraphNode(), q.getSubject(),
                             q.getPredicate(), q.getObject());

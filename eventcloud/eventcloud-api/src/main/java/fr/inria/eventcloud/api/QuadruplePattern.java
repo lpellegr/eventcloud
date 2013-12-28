@@ -142,13 +142,13 @@ public class QuadruplePattern extends Quadruple {
             ClassNotFoundException {
         byte bitmap = in.readByte();
 
-        boolean isGraphSet = (1 & (bitmap >> 0)) == 1;
+        boolean isGraphSet = (1 & (bitmap)) == 1;
         boolean isSubjectSet = (1 & (bitmap >> 1)) == 1;
         boolean isPredicateSet = (1 & (bitmap >> 2)) == 1;
         boolean isObjectSet = (1 & (bitmap >> 3)) == 1;
 
         if (isGraphSet || isSubjectSet || isPredicateSet) {
-            String[] chunks = new String(in.readUTF()).split(" ");
+            String[] chunks = in.readUTF().split(" ");
 
             int i = 0;
 

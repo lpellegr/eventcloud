@@ -127,7 +127,7 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
                                 matchingResult.extendedCompoundEvent.compoundEvent;
 
                         Quadruple quadruple =
-                                matchingResult.extendedCompoundEvent.getQuadruplesUsedForIndexing()[0];
+                                matchingResult.extendedCompoundEvent.compoundEvent.get(0);
 
                         final Subscription subscription =
                                 CompoundEventAction.this.overlay.findSubscription(
@@ -192,7 +192,8 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
                                 }
 
                                 log.debug(
-                                        "Notification sent for graph {} because subscription {} and triggering condition satisfied on peer {}",
+                                        "Notification sent at time {} for graph {} because subscription {} and triggering condition satisfied on peer {}",
+                                        System.currentTimeMillis(),
                                         compoundEvent.getGraph(),
                                         matchingResult.subscriptionId,
                                         CompoundEventAction.this.overlay.getId());

@@ -349,7 +349,7 @@ public final class AtomicQueryConstraintsValidator extends
         private boolean bool;
 
         public E_Bool(boolean bool) {
-            super(new Boolean(bool).toString());
+            super(Boolean.toString(bool));
             this.setBool(bool);
         }
 

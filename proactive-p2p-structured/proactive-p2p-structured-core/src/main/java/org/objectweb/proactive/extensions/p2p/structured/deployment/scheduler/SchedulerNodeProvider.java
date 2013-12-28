@@ -400,7 +400,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                     nodeRequestIds.add(virtualNodeEntry.nodeRequestId);
                 }
                 this.nodes =
-                        this.schedulerNodeProvider.getNodes(nodeRequestIds.toArray(new UniqueID[] {}));
+                        this.schedulerNodeProvider.getNodes(nodeRequestIds.toArray(new UniqueID[nodeRequestIds.size()]));
             }
 
             Preconditions.checkElementIndex(

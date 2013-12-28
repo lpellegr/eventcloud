@@ -530,9 +530,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
         int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         byte[][] directions = new byte[2][dimensions];
         for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < dimensions; j++) {
-                directions[i][j] = initialDirs[i][j];
-            }
+            System.arraycopy(initialDirs[i], 0, directions[i], 0, dimensions);
         }
         return directions;
     }
@@ -547,9 +545,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
     protected Coordinate[] copyPlan(Coordinate[] initialPlan) {
         int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         Coordinate[] plan = new Coordinate[dimensions];
-        for (int j = 0; j < dimensions; j++) {
-            plan[j] = initialPlan[j];
-        }
+        System.arraycopy(initialPlan, 0, plan, 0, dimensions);
         return plan;
     }
 

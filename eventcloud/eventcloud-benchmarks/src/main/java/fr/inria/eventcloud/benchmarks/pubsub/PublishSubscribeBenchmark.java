@@ -1000,10 +1000,7 @@ public class PublishSubscribeBenchmark {
 
                     subscriptions[i].nbEventsExpected = generatedEvents.length;
 
-                    for (int j = 0; j < generatedEvents.length; j++) {
-                        events[(i * nbEventsPerSubscriber) + j] =
-                                generatedEvents[j];
-                    }
+                    System.arraycopy(generatedEvents, 0, events, i * nbEventsPerSubscriber, generatedEvents.length);
                 }
 
                 this.events = events;

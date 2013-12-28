@@ -18,6 +18,7 @@ package fr.inria.eventcloud;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import fr.inria.eventcloud.api.EventCloudId;
@@ -56,9 +57,7 @@ public class EventCloudDescription implements Serializable {
             this.elaProperties =
                     new ArrayList<UnalterableElaProperty>(elaProperties.length);
 
-            for (UnalterableElaProperty prop : elaProperties) {
-                this.elaProperties.add(prop);
-            }
+            Collections.addAll(this.elaProperties, elaProperties);
         }
     }
 

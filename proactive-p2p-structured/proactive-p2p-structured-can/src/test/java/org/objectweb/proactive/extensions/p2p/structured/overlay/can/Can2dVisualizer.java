@@ -38,11 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 
 import org.objectweb.proactive.api.PAFuture;
@@ -193,7 +189,7 @@ public class Can2dVisualizer extends JFrame {
         contentPane.add(this.area, BorderLayout.CENTER);
 
         super.pack();
-        super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         super.setMinimumSize(new Dimension(
                 DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT));
         super.setResizable(true);

@@ -363,10 +363,12 @@ public abstract class CanOverlay<E extends Coordinate> extends
                         buf.append(neighbor.getZone());
                         buf.append(", id is ");
                         buf.append(neighbor.getId());
-                        buf.append(", abuts in dim "
-                                + neighbor.getZone().neighbors(this.zone)
-                                + " and is in dim=" + dim + ", dir="
-                                + direction);
+                        buf.append(", abuts in dim ");
+                        buf.append(neighbor.getZone().neighbors(this.zone));
+                        buf.append(" and is in dim=");
+                        buf.append(dim);
+                        buf.append(", dir=");
+                        buf.append(direction);
                         buf.append('\n');
                     }
                 }

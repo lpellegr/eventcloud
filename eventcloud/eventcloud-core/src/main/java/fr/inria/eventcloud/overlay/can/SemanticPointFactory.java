@@ -111,10 +111,7 @@ public final class SemanticPointFactory {
     public static String toNTripleSyntax(String tripleElt) {
         if (tripleElt.length() > 0 && tripleElt.charAt(0) != '?'
                 && tripleElt.charAt(0) != '"') {
-            StringBuilder triple = new StringBuilder("<");
-            triple.append(tripleElt);
-            triple.append('>');
-            return triple.toString();
+            return '<' + tripleElt + '>';
         } else {
             return tripleElt;
         }
