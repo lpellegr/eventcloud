@@ -424,9 +424,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
         int dimensions = P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue();
         byte[][] directions = new byte[2][dimensions];
         for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < dimensions; j++) {
-                directions[i][j] = initialDirs[i][j];
-            }
+            System.arraycopy(initialDirs[i], 0, directions[i], 0, dimensions);
         }
         return directions;
     }

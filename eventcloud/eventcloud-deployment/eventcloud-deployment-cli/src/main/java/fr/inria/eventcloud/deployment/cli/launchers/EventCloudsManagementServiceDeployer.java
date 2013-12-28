@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -125,9 +126,7 @@ public class EventCloudsManagementServiceDeployer {
             cmd.addAll(addProperties(
                     binariesBaseUrl + "resources/", activateLoggers));
 
-            for (String property : properties) {
-                cmd.add(property);
-            }
+            Collections.addAll(cmd, properties);
 
             cmd.add(EventCloudsManagementServiceDeployer.class.getCanonicalName());
             cmd.add(Integer.toString(port));
@@ -204,8 +203,7 @@ public class EventCloudsManagementServiceDeployer {
 
         StringBuilder classPath = new StringBuilder();
         for (String libName : libNames) {
-            classPath.append(libDirPath + File.separator + libName
-                    + File.pathSeparator);
+            classPath.append(libDirPath).append(File.separator).append(libName).append(File.pathSeparator);
         }
         classPath.delete(classPath.length() - 2, classPath.length() - 1);
 

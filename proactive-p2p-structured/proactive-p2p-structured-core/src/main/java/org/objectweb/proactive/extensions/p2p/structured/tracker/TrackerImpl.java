@@ -336,7 +336,7 @@ public class TrackerImpl extends AbstractComponent implements Tracker,
 
     public String getBindingNameSuffix() {
         if (this.bindingNameSuffix == null) {
-            StringBuffer appender = new StringBuffer("tracker/");
+            StringBuilder appender = new StringBuilder("tracker/");
             appender.append(this.networkName);
             appender.append('/');
             appender.append(this.id.toString());

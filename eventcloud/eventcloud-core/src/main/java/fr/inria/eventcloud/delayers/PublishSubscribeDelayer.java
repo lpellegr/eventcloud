@@ -34,12 +34,6 @@ import fr.inria.eventcloud.pubsub.Subscription;
  */
 public final class PublishSubscribeDelayer extends Delayer<Object> {
 
-    // private final Delayer<Quadruple> quadrupleDelayer;
-    //
-    // private final Delayer<Subscription> subscriptionDelayer;
-    //
-    // private final Delayer<ExtendedCompoundEvent> compoundEventDelayer;
-
     private final ThreeInOneBuffer buffer;
 
     public PublishSubscribeDelayer(SemanticCanOverlay overlay) {
@@ -52,61 +46,13 @@ public final class PublishSubscribeDelayer extends Delayer<Object> {
                 getCommitInterval(), getCommitSize());
 
         this.buffer = (ThreeInOneBuffer) super.buffer;
-
-        // FIXME: a better solution is to have one delayer per element to manage
-        // (quadruple, subscription and compound event). However, having one
-        // delayer per element means that several thread may flush data in
-        // parallel. Consequently, some race conditions may occur and some
-        // events not notified. A synchronization between delayers requires more
-        // investigation.
-
-        // this.quadrupleDelayer =
-        // new Delayer<Quadruple>(
-        // overlay,
-        // "quadruples",
-        // new QuadrupleBuffer(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_COMMIT_SIZE.getValue()),
-        // new QuadrupleAction(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_THREAD_POOL_SIZE.getValue()),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_COMMIT_INTERVAL.getValue(),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_QUADRUPLE_DELAYER_COMMIT_SIZE.getValue());
-        //
-        // this.subscriptionDelayer =
-        // new Delayer<Subscription>(
-        // overlay,
-        // "subscriptions",
-        // new SubscriptionBuffer(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_COMMIT_SIZE.getValue()),
-        // new SubscriptionAction(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_THREAD_POOL_SIZE.getValue()),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_COMMIT_INTERVAL.getValue(),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_SUBSCRIPTION_DELAYER_COMMIT_SIZE.getValue());
-        //
-        // if (EventCloudProperties.isSbce3PubSubAlgorithmUsed()) {
-        // this.compoundEventDelayer =
-        // new Delayer<ExtendedCompoundEvent>(
-        // overlay,
-        // "subscriptions",
-        // new CompoundEventBuffer(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_COMMIT_SIZE.getValue()),
-        // new CompoundEventAction(
-        // overlay,
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_THREAD_POOL_SIZE.getValue()),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_COMMIT_INTERVAL.getValue(),
-        // EventCloudProperties.PUBLISH_SUBSCRIBE_COMPOUND_EVENT_DELAYER_COMMIT_SIZE.getValue());
-        // } else {
-        // this.compoundEventDelayer = null;
-        // }
     }
 
     private static final int getCommitInterval() {
         if (!EventCloudProperties.isSbce3PubSubAlgorithmUsed()
-                && EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue() == EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getDefaultValue()) {
+                && EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue()
+                        .equals(
+                                EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getDefaultValue())) {
             return EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue() / 4;
         } else {
             return EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_INTERVAL.getValue();
@@ -115,7 +61,9 @@ public final class PublishSubscribeDelayer extends Delayer<Object> {
 
     private static final int getCommitSize() {
         if (!EventCloudProperties.isSbce3PubSubAlgorithmUsed()
-                && EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getValue() == EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getDefaultValue()) {
+                && EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getValue()
+                        .equals(
+                                EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getDefaultValue())) {
             return EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getValue() / 4;
         } else {
             return EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_COMMIT_SIZE.getValue();

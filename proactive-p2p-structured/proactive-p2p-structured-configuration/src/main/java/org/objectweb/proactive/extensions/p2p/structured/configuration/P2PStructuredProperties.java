@@ -41,7 +41,7 @@ public class P2PStructuredProperties {
             new PropertyBoolean("enable.benchmarks.information", false);
 
     public static final PropertyByte CAN_NB_DIMENSIONS = new PropertyByte(
-            "can.nb.dimensions", Byte.valueOf((byte) 3));
+            "can.nb.dimensions", (byte) 3);
 
     /**
      * This property defines the minimum lower bound associated to a CAN

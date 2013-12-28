@@ -605,7 +605,7 @@ public class EventCloudProperties {
      * @return the default path to the repositories.
      */
     public static final String getDefaultRepositoriesPath() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(getPreferencesPath());
         buffer.append("repositories");
         buffer.append(File.separatorChar);

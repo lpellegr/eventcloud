@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.deployment.cli.commands;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,9 +72,7 @@ public abstract class Command<T> {
 
         this.parameters = new JCommander(this).getParameters();
 
-        for (String shortcut : shortcuts) {
-            this.shortcuts.add(shortcut);
-        }
+        Collections.addAll(this.shortcuts, shortcuts);
     }
 
     /**

@@ -779,7 +779,7 @@ public class Quadruple implements Externalizable, Event {
     @Override
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
-        String[] chunks = new String(in.readUTF()).split(" ");
+        String[] chunks = in.readUTF().split(" ");
 
         this.nodes[0] =
                 this.extractAndSetMetaInformation(NodeFactory.createURI(chunks[0]));
