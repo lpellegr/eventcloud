@@ -211,7 +211,9 @@ public class EventCloudProperties {
 
     /**
      * Defines the size of the thread pool used by the delayer action once
-     * compound events have been flushed to the disk.
+     * compound events have been flushed to the disk. Using 0 as value forces the
+     * action to be dispatched in the current thread (i.e. no additional thread
+     * is created).
      */
     public static final PropertyInteger PUBLISH_SUBSCRIBE_DELAYER_THREAD_POOL_SIZE =
             new PropertyInteger(
