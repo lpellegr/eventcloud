@@ -28,11 +28,7 @@ import org.objectweb.proactive.ActiveObjectCreationException;
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.InitActive;
 import org.objectweb.proactive.RunActive;
-import org.objectweb.proactive.annotation.multiactivity.Compatible;
-import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
-import org.objectweb.proactive.annotation.multiactivity.DefineRules;
-import org.objectweb.proactive.annotation.multiactivity.Group;
-import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+import org.objectweb.proactive.annotation.multiactivity.*;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.core.util.MutableInteger;
@@ -448,12 +444,12 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
                     System.out.println("Subscriber sends report");
                     collector.reportMeasurements(
                             new SubscriptionId(), new SimpleMeasurement(),
-                            new CumulatedMeasurement());
+                            new CumulatedMeasurement(1));
 
                     System.out.println("Subscriber sends report");
                     collector.reportMeasurements(
                             new SubscriptionId(), new SimpleMeasurement(),
-                            new CumulatedMeasurement());
+                            new CumulatedMeasurement(1));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
