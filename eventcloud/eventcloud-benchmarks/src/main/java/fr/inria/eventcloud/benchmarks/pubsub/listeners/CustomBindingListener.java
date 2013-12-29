@@ -34,7 +34,7 @@ public class CustomBindingListener extends BindingNotificationListener {
 
     private static final long serialVersionUID = 160L;
 
-    private NotificationManager<Binding> manager;
+    private final NotificationManager<Binding> manager;
 
     public CustomBindingListener(BenchmarkStatsCollector collector,
             int nbEventsExpected) {

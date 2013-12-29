@@ -33,7 +33,7 @@ public class CustomSignalListener extends SignalNotificationListener {
 
     private static final long serialVersionUID = 160L;
 
-    private NotificationManager<String> manager;
+    private final NotificationManager<String> manager;
 
     public CustomSignalListener(BenchmarkStatsCollector collector,
             int nbEventsExpected) {
