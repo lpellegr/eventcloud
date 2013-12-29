@@ -44,7 +44,7 @@ public abstract class NotificationManager<T> implements Serializable {
 
     private final int nbEventsExpected;
 
-    private AtomicInteger nbEventsReceived;
+    private final AtomicInteger nbEventsReceived;
 
     public NotificationManager(BenchmarkStatsCollector collector,
             int nbEventsExpected) {
