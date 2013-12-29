@@ -33,7 +33,7 @@ public class CustomCompoundEventListener extends
 
     private static final long serialVersionUID = 160L;
 
-    private NotificationManager<CompoundEvent> manager;
+    private final NotificationManager<CompoundEvent> manager;
 
     public CustomCompoundEventListener(BenchmarkStatsCollector collector,
             int nbEventsExpected) {

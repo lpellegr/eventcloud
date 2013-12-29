@@ -17,11 +17,13 @@
 package fr.inria.eventcloud.benchmarks.pubsub.measurements;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.hp.hpl.jena.graph.Node;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 
 /**
  * Cumulated measurements to keep entry or exit times for a bunch of events.
@@ -32,42 +34,41 @@ public class CumulatedMeasurement implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private Map<String, Long> times;
+    private ConcurrentMap<String, Long> times;
 
-    public CumulatedMeasurement() {
-        this.times = new HashMap<String, Long>();
+    public CumulatedMeasurement(int nbEventsExpected) {
+        this.times =
+                new ConcurrentHashMap<String, Long>(
+                        nbEventsExpected + 1,
+                        1,
+                        EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue());
     }
 
     public void reportReception(Node eventId) {
-        synchronized (this.times) {
-            this.times.put(eventId.getURI(), System.currentTimeMillis());
-        }
+        this.times.put(eventId.getURI(), System.currentTimeMillis());
     }
 
     public long getElapsedTime(Map<String, Long> pointToPointEntryMeasurements) {
         long sum = 0;
 
-        synchronized (this.times) {
-            for (Entry<String, Long> entry : this.times.entrySet()) {
-                Long entryValue =
-                        pointToPointEntryMeasurements.get(entry.getKey());
-                Long exitValue = entry.getValue();
+        for (Entry<String, Long> entry : this.times.entrySet()) {
+            Long entryValue = pointToPointEntryMeasurements.get(entry.getKey());
+            Long exitValue = entry.getValue();
 
-                if (entryValue == null) {
-                    throw new IllegalStateException(
-                            "Entry time not found for eventId "
-                                    + entry.getKey()
-                                    + "\nPoint-to-point entry map contains "
-                                    + pointToPointEntryMeasurements.size()
-                                    + " entrie(s)\n"
-                                    + "Point-to-point exit map contains "
-                                    + this.times.size()
-                                    + " entrie(s)\nPoint-to-point entry collection dump:\n"
-                                    + this.toString(pointToPointEntryMeasurements));
-                }
-
-                sum += exitValue - entryValue;
+            if (entryValue == null) {
+                throw new IllegalStateException(
+                        "Entry time not found for eventId "
+                                + entry.getKey()
+                                + "\nPoint-to-point entry map contains "
+                                + pointToPointEntryMeasurements.size()
+                                + " entrie(s)\n"
+                                + "Point-to-point exit map contains "
+                                + this.times.size()
+                                + " entrie(s)\nPoint-to-point entry collection dump:\n"
+                                + this.toString(pointToPointEntryMeasurements));
             }
+
+            sum += exitValue - entryValue;
         }
 
         return sum;
