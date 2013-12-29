@@ -99,15 +99,15 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
     }
 
     private void fireMatchingSubscriptions(CompoundEventBuffer buffer) {
+        Optimize.noOptimizer();
+
+        QueryIterator it = null;
+
         final TransactionalDatasetGraph txnGraph =
                 this.overlay.getSubscriptionsDatastore().begin(
                         AccessMode.READ_ONLY);
 
-        QueryIterator it = null;
-
         try {
-            Optimize.noOptimizer();
-
             // finds the subscriptions that have their first sub-subscription
             // that matches one of the quadruple contained by the compound
             // event which is published
