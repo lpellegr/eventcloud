@@ -34,7 +34,6 @@ import com.google.common.collect.Iterators;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
-
 import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
@@ -226,9 +225,10 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
 
         Iterator<Quadruple> it = this.quadruples.iterator();
 
-        for (int i = 0; i < this.quadruples.size(); i++) {
+        while (it.hasNext()) {
             buf.append(it.next().toString());
-            if (i < this.quadruples.size() - 1) {
+
+            if (it.hasNext()) {
                 buf.append('\n');
             }
         }
@@ -372,12 +372,12 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
     }
 
     private void appendRdfTerms(StringBuilder buffer, int rdfTermsIndex) {
-        for (int i = 0; i < this.quadruples.size(); i++) {
-            buffer.append(this.quadruples.get(i)
-                    .getTermByIndex(rdfTermsIndex)
-                    .getURI());
+        Iterator<Quadruple> it = this.quadruples.iterator();
 
-            if (i < this.quadruples.size() - 1) {
+        while (it.hasNext()) {
+            buffer.append(it.next().getTermByIndex(rdfTermsIndex).getURI());
+
+            if (it.hasNext()) {
                 buffer.append(' ');
             }
         }
