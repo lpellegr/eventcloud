@@ -18,6 +18,8 @@ package fr.inria.eventcloud.delayers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +47,16 @@ public class Delayer<T> {
 
     protected final Action<T> action;
 
-    private final String bufferElementsName;
+    private final String elementsName;
 
     protected final int commitInterval;
 
     protected final int commitSize;
 
-    private Thread commitThread;
+    private volatile CommitThread commitThread;
 
     public Delayer(SemanticCanOverlay overlay, Buffer<T> buffer,
-            Action<T> action, int commitInterval, int commitSize) {
+            Action<T> action, String elementNames, int commitInterval, int commitSize) {
         this.overlay = overlay;
 
         this.action = action;
@@ -63,7 +65,7 @@ public class Delayer<T> {
         this.commitInterval = commitInterval;
         this.commitSize = commitSize;
 
-        this.bufferElementsName = null;
+        this.elementsName = elementNames;
 
         // to have observers should be something rare
         this.observers = new ArrayList<Observer<T>>(0);
@@ -85,7 +87,7 @@ public class Delayer<T> {
             int nbObjectsFlushed = this.commit();
             log.trace(
                     "{} {} committed because threshold exceeded on {}",
-                    nbObjectsFlushed, this.bufferElementsName, this.overlay);
+                    nbObjectsFlushed, this.elementsName, this.overlay);
         } else {
             if (this.commitThread == null) {
                 log.trace("Commit thread created on {}", this.overlay);
@@ -129,7 +131,7 @@ public class Delayer<T> {
             if (isTraceEnabled) {
                 log.trace(
                         "Fired {} action in {} ms on {}",
-                        this.bufferElementsName, System.currentTimeMillis()
+                        this.elementsName, System.currentTimeMillis()
                                 - startTime, this.overlay);
             }
 
@@ -156,7 +158,6 @@ public class Delayer<T> {
     }
 
     public void flush() {
-        // synchronized (this.buffer) {
         if (this.commitThread != null) {
             try {
                 this.commitThread.join();
@@ -165,14 +166,12 @@ public class Delayer<T> {
                 Thread.currentThread().interrupt();
             }
         }
-        // }
     }
 
     private final class CommitThread extends Thread {
 
         public CommitThread() {
             super("Commit thread " + Delayer.this.getClass().getSimpleName());
-
         }
 
         /**
@@ -202,7 +201,7 @@ public class Delayer<T> {
                 } else {
                     log.trace(
                             "{} {} committed because timeout exceeded on {}",
-                            nbObjectsFlushed, Delayer.this.bufferElementsName,
+                            nbObjectsFlushed, Delayer.this.elementsName,
                             Delayer.this.overlay);
                 }
             }
