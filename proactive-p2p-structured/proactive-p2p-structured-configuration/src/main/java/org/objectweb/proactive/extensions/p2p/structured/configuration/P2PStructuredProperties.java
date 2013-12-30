@@ -117,8 +117,14 @@ public class P2PStructuredProperties {
             new PropertyInteger("mao.limit.trackers", Runtime.getRuntime()
                     .availableProcessors() + 1);
 
+    /**
+     * Defines whether MAO priority rules are enabled for peers or not.
+     */
+    public static final PropertyBoolean MAO_PRIORITIES_PEERS_ENABLED =
+            new PropertyBoolean("mao.priorities.peers.enabled", true);
+
     public static final PropertyBoolean PROXY_CACHE_RANDOM_SELECTION =
-            new PropertyBoolean("proxy.cache.random.selection", false);
+            new PropertyBoolean("proxy.cache.random.selection", true);
 
     public static final PropertyDouble TRACKER_STORAGE_PROBABILITY =
             new PropertyDouble("tracker.storage.probability", 1.0);

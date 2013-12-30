@@ -46,11 +46,7 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
 import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
-import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
-import fr.inria.eventcloud.messages.request.PublishCompoundEventRequest;
-import fr.inria.eventcloud.messages.request.PublishQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.*;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.pubsub.Subscription;
 
@@ -137,18 +133,20 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
     public void runComponentActivity(Body body) {
         this.multiActiveService = new ComponentMultiActiveService(body);
 
-        List<PriorityConstraint> priorityConstraints =
-                new ArrayList<PriorityConstraint>();
+        List<PriorityConstraint> priorityConstraints = null;
 
-        priorityConstraints.add(new PriorityConstraint(-1, 1, "publish"));
+        if (P2PStructuredProperties.MAO_PRIORITIES_PEERS_ENABLED.getValue()) {
+            priorityConstraints = new ArrayList<PriorityConstraint>(3);
+            priorityConstraints.add(new PriorityConstraint(-1, 1, "publish"));
 
-        if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
-            priorityConstraints.add(new PriorityConstraint(
-                    3, 8, "send", ReconstructCompoundEventRequest.class));
-            priorityConstraints.add(new PriorityConstraint(0, 1));
-        } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
-            priorityConstraints.add(new PriorityConstraint(
-                    1, 8, "sendv", IndexEphemeralSubscriptionRequest.class));
+            if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
+                priorityConstraints.add(new PriorityConstraint(
+                        3, 8, "send", ReconstructCompoundEventRequest.class));
+                priorityConstraints.add(new PriorityConstraint(0, 1));
+            } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
+                priorityConstraints.add(new PriorityConstraint(
+                        1, 8, "sendv", IndexEphemeralSubscriptionRequest.class));
+            }
         }
 
         this.multiActiveService.policyServing(
