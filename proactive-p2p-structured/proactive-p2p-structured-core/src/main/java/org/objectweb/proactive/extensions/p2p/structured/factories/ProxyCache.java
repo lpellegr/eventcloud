@@ -53,38 +53,44 @@ public class ProxyCache implements Serializable {
         this.trackers = trackers;
         this.peers = this.selectTracker().getPeers();
 
+        this.selectedPeer =
+                this.peers.get((int) (this.creationTime % this.peers.size()));
+
         if (!P2PStructuredProperties.PROXY_CACHE_RANDOM_SELECTION.getValue()) {
             this.creationTime = System.currentTimeMillis();
         }
     }
 
-    public synchronized Peer selectPeer() {
-        if (this.selectedPeer == null) {
-            if (this.peers.isEmpty()) {
-                this.peers = this.selectTracker().getPeers();
+    public Peer selectPeer() {
+        Peer result;
 
-                if (this.peers.isEmpty()) {
-                    throw new IllegalStateException(
-                            "No peer available from trackers");
-                }
+        if (P2PStructuredProperties.PROXY_CACHE_RANDOM_SELECTION.getValue()) {
+            result = this.randomPeer();
+        } else {
+            synchronized (this) {
+                result = this.selectedPeer;
             }
-
-            if (P2PStructuredProperties.PROXY_CACHE_RANDOM_SELECTION.getValue()) {
-                this.selectedPeer = this.randomPeer();
-            } else {
-                this.selectedPeer =
-                        this.peers.get((int) (this.creationTime % this.peers.size()));
-            }
-
         }
 
-        return this.selectedPeer;
+        if (result == null) {
+            throw new IllegalStateException("No peer available from trackers");
+        }
+
+        return result;
     }
 
     public void invalidate(Peer peer) {
         synchronized (this) {
             this.peers.remove(peer);
-            this.selectedPeer = null;
+            // TODO: peer reference should also be removed from trackers
+            // or a probing mechanism must be implemented at the tracker level
+
+            if (this.peers.isEmpty()) {
+                this.peers = this.selectTracker().getPeers();
+            }
+
+            this.selectedPeer =
+                    this.peers.get((int) (this.creationTime % this.peers.size()));
         }
     }
 
@@ -92,8 +98,14 @@ public class ProxyCache implements Serializable {
         return this.trackers.get(RandomUtils.nextInt(this.trackers.size()));
     }
 
-    private Peer randomPeer() {
-        return this.peers.get(RandomUtils.nextInt(this.peers.size()));
+    private synchronized Peer randomPeer() {
+        int nbPeers = this.peers.size();
+
+        if (nbPeers == 0) {
+            return null;
+        }
+
+        return this.peers.get(RandomUtils.nextInt(nbPeers));
     }
 
 }
