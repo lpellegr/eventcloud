@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import org.objectweb.proactive.extensions.p2p.structured.factories.ProxyCache;
 import org.objectweb.proactive.extensions.p2p.structured.tracker.Tracker;
 
 import fr.inria.eventcloud.EventCloudsRegistry;
@@ -48,8 +47,6 @@ public class EventCloudCache implements Serializable {
 
     private EventCloudDeployer deployer;
 
-    private ProxyCache proxyCache;
-
     public EventCloudCache(String registryUrl, EventCloudId id)
             throws EventCloudIdNotManaged {
         try {
@@ -61,9 +58,6 @@ public class EventCloudCache implements Serializable {
             if (this.deployer == null) {
                 throw new EventCloudIdNotManaged(id.toString(), registryUrl);
             }
-
-            this.proxyCache =
-                    org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory.getOrCreateProxyCache(this.deployer.getTrackers());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -83,10 +77,6 @@ public class EventCloudCache implements Serializable {
 
     public List<UnalterableElaProperty> getElaProperties() {
         return this.deployer.getEventCloudDescription().getElaProperties();
-    }
-
-    public ProxyCache getProxyCache() {
-        return this.proxyCache;
     }
 
     public List<Tracker> getTrackers() {

@@ -16,10 +16,7 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.proxies;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;
@@ -64,7 +61,6 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
     }
 
     /**
-     * 
      * {@inheritDoc}
      */
     @Override
@@ -75,28 +71,32 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
 
         if (!this.events.isEmpty()) {
             if (this.events.get(0) instanceof CompoundEvent) {
-                for (int i = 0; i < this.events.size(); i++) {
-                    CompoundEvent ce = (CompoundEvent) this.events.get(i);
+                Iterator<Event> it = this.events.iterator();
+
+                while (it.hasNext()) {
+                    CompoundEvent ce = (CompoundEvent) it.next();
 
                     this.pointToPointEntryMeasurements.put(ce.getGraph()
                             .getURI(), System.currentTimeMillis());
 
                     super.publish(ce);
 
-                    if (i < this.events.size() - 1) {
+                    if (it.hasNext()) {
                         this.forceWaitingPeriod();
                     }
                 }
             } else {
-                for (int i = 0; i < this.events.size(); i++) {
-                    Quadruple q = (Quadruple) this.events.get(i);
+                Iterator<Event> it = this.events.iterator();
+
+                while (it.hasNext()) {
+                    Quadruple q = (Quadruple) it.next();
 
                     this.pointToPointEntryMeasurements.put(q.getGraph()
                             .getURI(), System.currentTimeMillis());
 
                     super.publish(q);
 
-                    if (i < this.events.size() - 1) {
+                    if (it.hasNext()) {
                         this.forceWaitingPeriod();
                     }
                 }
@@ -117,6 +117,9 @@ public class CustomPublishProxyImpl extends PublishProxyImpl implements
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean clear() {
         this.pointToPointEntryMeasurements.clear();

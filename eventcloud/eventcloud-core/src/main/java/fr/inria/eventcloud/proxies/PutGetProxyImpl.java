@@ -26,11 +26,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.objectweb.proactive.Body;
-import org.objectweb.proactive.annotation.multiactivity.Compatible;
-import org.objectweb.proactive.annotation.multiactivity.DefineGroups;
-import org.objectweb.proactive.annotation.multiactivity.DefineRules;
-import org.objectweb.proactive.annotation.multiactivity.Group;
-import org.objectweb.proactive.annotation.multiactivity.MemberOf;
+import org.objectweb.proactive.annotation.multiactivity.*;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.messages.Response;
 import org.objectweb.proactive.multiactivity.component.ComponentMultiActiveService;
@@ -46,24 +42,14 @@ import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.exceptions.MalformedSparqlQueryException;
-import fr.inria.eventcloud.api.responses.SparqlAskResponse;
-import fr.inria.eventcloud.api.responses.SparqlConstructResponse;
-import fr.inria.eventcloud.api.responses.SparqlDescribeResponse;
-import fr.inria.eventcloud.api.responses.SparqlResponse;
-import fr.inria.eventcloud.api.responses.SparqlSelectResponse;
+import fr.inria.eventcloud.api.responses.*;
 import fr.inria.eventcloud.api.wrappers.ResultSetWrapper;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.SparqlMessageContext;
 import fr.inria.eventcloud.messages.SparqlQueryType;
 import fr.inria.eventcloud.messages.SparqlResponseCombiner;
-import fr.inria.eventcloud.messages.request.AddQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.ContainsQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.CountQuadruplePatternRequest;
-import fr.inria.eventcloud.messages.request.DeleteQuadrupleRequest;
-import fr.inria.eventcloud.messages.request.DeleteQuadruplesRequest;
-import fr.inria.eventcloud.messages.request.QuadruplePatternRequest;
-import fr.inria.eventcloud.messages.request.SparqlAtomicRequest;
+import fr.inria.eventcloud.messages.request.*;
 import fr.inria.eventcloud.messages.response.BooleanForwardResponse;
 import fr.inria.eventcloud.messages.response.CountQuadruplePatternResponse;
 import fr.inria.eventcloud.messages.response.QuadruplePatternResponse;
@@ -136,7 +122,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
         assert !this.initialized;
 
         this.eventCloudCache = proxy;
-        super.initAttributes(this.eventCloudCache.getProxyCache());
+        super.initAttributes(org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory.getOrCreateProxyCache(this.eventCloudCache.getTrackers()));
     }
 
     /**

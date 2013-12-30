@@ -84,7 +84,7 @@ public class ProxyImpl extends AbstractComponent implements
 
     protected MultiActiveService multiActiveService;
 
-    private ProxyCache proxyCache;
+    protected ProxyCache proxyCache;
 
     protected String url;
 
