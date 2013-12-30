@@ -43,7 +43,8 @@ public final class PublishSubscribeDelayer extends Delayer<Object> {
                 new ThreeInOneAction(
                         overlay,
                         EventCloudProperties.PUBLISH_SUBSCRIBE_DELAYER_THREAD_POOL_SIZE.getValue()),
-                getCommitInterval(), getCommitSize());
+                "Quadruples/Subscriptions/CEs", getCommitInterval(),
+                getCommitSize());
 
         this.buffer = (ThreeInOneBuffer) super.buffer;
     }
