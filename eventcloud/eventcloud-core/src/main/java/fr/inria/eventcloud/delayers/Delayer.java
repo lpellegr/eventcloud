@@ -18,8 +18,6 @@ package fr.inria.eventcloud.delayers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,8 @@ public class Delayer<T> {
     private volatile CommitThread commitThread;
 
     public Delayer(SemanticCanOverlay overlay, Buffer<T> buffer,
-            Action<T> action, String elementNames, int commitInterval, int commitSize) {
+            Action<T> action, String elementNames, int commitInterval,
+            int commitSize) {
         this.overlay = overlay;
 
         this.action = action;
@@ -130,9 +129,8 @@ public class Delayer<T> {
 
             if (isTraceEnabled) {
                 log.trace(
-                        "Fired {} action in {} ms on {}",
-                        this.elementsName, System.currentTimeMillis()
-                                - startTime, this.overlay);
+                        "Fired {} action in {} ms on {}", this.elementsName,
+                        System.currentTimeMillis() - startTime, this.overlay);
             }
 
             this.buffer.clear();
