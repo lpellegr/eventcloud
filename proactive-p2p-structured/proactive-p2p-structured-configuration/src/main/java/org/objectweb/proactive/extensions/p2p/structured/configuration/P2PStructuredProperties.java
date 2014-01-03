@@ -96,10 +96,11 @@ public class P2PStructuredProperties {
 
     /**
      * Defines the soft limit used by each peer that runs with multi-active
-     * objects.
+     * objects. Default value is set to 6 and is currently the optimal value for
+     * OSMA with rewriting since it prevents too much contention among threads.
      */
     public static final PropertyInteger MAO_LIMIT_PEERS = new PropertyInteger(
-            "mao.limit.peers", Runtime.getRuntime().availableProcessors());
+            "mao.limit.peers", 6);
 
     /**
      * Defines the soft limit used by each proxy that runs with multi-active
