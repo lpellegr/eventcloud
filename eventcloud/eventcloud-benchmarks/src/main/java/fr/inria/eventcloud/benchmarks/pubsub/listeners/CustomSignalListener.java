@@ -36,11 +36,13 @@ public class CustomSignalListener extends SignalNotificationListener {
     private final NotificationManager<String> manager;
 
     public CustomSignalListener(BenchmarkStatsCollector collector,
-            int nbEventsExpected) {
+            int nbEventsExpected, int subscribeProxyDeliveryWaitTime) {
         super();
 
         this.manager =
-                new NotificationManager<String>(collector, nbEventsExpected) {
+                new NotificationManager<String>(
+                        collector, nbEventsExpected,
+                        subscribeProxyDeliveryWaitTime) {
                     private static final long serialVersionUID = 160L;
 
                     @Override

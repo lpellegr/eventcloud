@@ -46,8 +46,10 @@ public abstract class NotificationManager<T> implements Serializable {
 
     private final AtomicInteger nbEventsReceived;
 
+    private final int subscribeProxyDeliveryWaitTime;
+
     public NotificationManager(BenchmarkStatsCollector collector,
-            int nbEventsExpected) {
+            int nbEventsExpected, int subscribeProxyDeliveryWaitTime) {
         super();
 
         this.collector = collector;
@@ -55,6 +57,8 @@ public abstract class NotificationManager<T> implements Serializable {
         this.outputMeasurement = new SimpleMeasurement();
         this.nbEventsExpected = nbEventsExpected;
         this.nbEventsReceived = new AtomicInteger();
+
+        this.subscribeProxyDeliveryWaitTime = subscribeProxyDeliveryWaitTime;
     }
 
     // WARNING: this method may be invoked in parallel
@@ -83,6 +87,14 @@ public abstract class NotificationManager<T> implements Serializable {
                 this.collector.reportMeasurements(
                         subscriptionId, this.outputMeasurement,
                         this.pointToPointExitMeasurements);
+            }
+        }
+
+        if (this.subscribeProxyDeliveryWaitTime > 0) {
+            try {
+                Thread.sleep(this.subscribeProxyDeliveryWaitTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
