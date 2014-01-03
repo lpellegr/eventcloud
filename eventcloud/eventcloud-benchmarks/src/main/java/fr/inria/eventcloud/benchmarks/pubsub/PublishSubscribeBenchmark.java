@@ -17,11 +17,7 @@
 package fr.inria.eventcloud.benchmarks.pubsub;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
@@ -55,18 +51,8 @@ import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.Event;
-import fr.inria.eventcloud.api.EventCloudId;
-import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.api.SubscribeApi;
-import fr.inria.eventcloud.api.Subscription;
-import fr.inria.eventcloud.api.SubscriptionId;
-import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
-import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
-import fr.inria.eventcloud.api.listeners.NotificationListener;
-import fr.inria.eventcloud.api.listeners.NotificationListenerType;
-import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
+import fr.inria.eventcloud.api.*;
+import fr.inria.eventcloud.api.listeners.*;
 import fr.inria.eventcloud.benchmarks.pubsub.converters.ListenerTypeConverter;
 import fr.inria.eventcloud.benchmarks.pubsub.converters.SubscriptionTypeConverter;
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomBindingListener;
@@ -150,6 +136,9 @@ public class PublishSubscribeBenchmark {
 
     @Parameter(names = {"--wait-between-publications"}, description = "The time to wait (in ms) between each publication from a publisher")
     public int waitBetweenPublications = 0;
+
+    @Parameter(names = {"--subscribe-proxy-delivery-wait-time", "-spdwt"}, description = "The time to wait (in ms) after each event delivery on a subscriber before to release request's thread")
+    public int subscribeProxyDeliveryWaitTime = 0;
 
     // a rewriting level of 0 means no rewrite
     @Parameter(names = {"-rl", "--rewriting-level"}, description = "Indicates the number of rewrites to force before delivering a notification")
@@ -1376,21 +1365,24 @@ public class PublishSubscribeBenchmark {
         switch (listenerType) {
             case BINDING:
                 listener =
-                        new CustomBindingListener(collector, nbEventsExpected);
+                        new CustomBindingListener(
+                                collector, nbEventsExpected,
+                                this.subscribeProxyDeliveryWaitTime);
                 subscribeProxy.subscribe(
                         subscription, (BindingNotificationListener) listener);
                 break;
             case COMPOUND_EVENT:
                 listener =
                         new CustomCompoundEventListener(
-                                collector, nbEventsExpected);
+                                collector, nbEventsExpected, this.subscribeProxyDeliveryWaitTime);
                 subscribeProxy.subscribe(
                         subscription,
                         (CompoundEventNotificationListener) listener);
                 break;
             case SIGNAL:
                 listener =
-                        new CustomSignalListener(collector, nbEventsExpected);
+                        new CustomSignalListener(
+                                collector, nbEventsExpected, this.subscribeProxyDeliveryWaitTime);
                 subscribeProxy.subscribe(
                         subscription, (SignalNotificationListener) listener);
                 break;

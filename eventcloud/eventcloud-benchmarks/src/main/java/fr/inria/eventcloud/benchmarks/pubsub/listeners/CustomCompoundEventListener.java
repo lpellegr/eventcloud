@@ -36,12 +36,13 @@ public class CustomCompoundEventListener extends
     private final NotificationManager<CompoundEvent> manager;
 
     public CustomCompoundEventListener(BenchmarkStatsCollector collector,
-            int nbEventsExpected) {
+            int nbEventsExpected, int subscribeProxyDeliveryWaitTime) {
         super();
 
         this.manager =
                 new NotificationManager<CompoundEvent>(
-                        collector, nbEventsExpected) {
+                        collector, nbEventsExpected,
+                        subscribeProxyDeliveryWaitTime) {
                     private static final long serialVersionUID = 160L;
 
                     @Override

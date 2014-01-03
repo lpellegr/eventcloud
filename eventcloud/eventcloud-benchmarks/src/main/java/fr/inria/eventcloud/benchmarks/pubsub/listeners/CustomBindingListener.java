@@ -37,11 +37,13 @@ public class CustomBindingListener extends BindingNotificationListener {
     private final NotificationManager<Binding> manager;
 
     public CustomBindingListener(BenchmarkStatsCollector collector,
-            int nbEventsExpected) {
+            int nbEventsExpected, int subscribeProxyDeliveryWaitTime) {
         super();
 
         this.manager =
-                new NotificationManager<Binding>(collector, nbEventsExpected) {
+                new NotificationManager<Binding>(
+                        collector, nbEventsExpected,
+                        subscribeProxyDeliveryWaitTime) {
                     private static final long serialVersionUID = 160L;
 
                     @Override
