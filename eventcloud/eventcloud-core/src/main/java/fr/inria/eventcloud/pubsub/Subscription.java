@@ -292,9 +292,9 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getURI(),
                         subscriptionDestination,
-                        NotificationListenerType.BINDING.convert((Short) basicInfo.get(
+                        NotificationListenerType.BINDING.convert(((Integer) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
-                                .getLiteralValue()));
+                                .getLiteralValue()).shortValue()));
 
         // re-insert the intermediate peer references
         if (peerReferences != null) {
