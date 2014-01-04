@@ -292,9 +292,9 @@ public class Subscription implements Quadruplable, Serializable {
                         basicInfo.get(SUBSCRIPTION_SUBSCRIBER_PROPERTY)
                                 .getURI(),
                         subscriptionDestination,
-                        NotificationListenerType.BINDING.convert(((Integer) basicInfo.get(
+                        NotificationListenerType.BINDING.convert((Short) basicInfo.get(
                                 SUBSCRIPTION_TYPE_PROPERTY)
-                                .getLiteralValue()).shortValue()));
+                                .getLiteralValue()));
 
         // re-insert the intermediate peer references
         if (peerReferences != null) {
@@ -653,7 +653,7 @@ public class Subscription implements Quadruplable, Serializable {
                 .add("sparqlQuery", this.sparqlQuery)
                 .add("peerReferences", this.intermediatePeerReferences != null
                         ? this.intermediatePeerReferencesAsString() : "empty")
-                .add("type", this.creationTime)
+                .add("type", this.type)
                 .toString();
     }
 
