@@ -141,11 +141,11 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
             if (EventCloudProperties.isSbce1PubSubAlgorithmUsed()) {
                 priorityConstraints.add(new PriorityConstraint(
-                        3, 8, "send", ReconstructCompoundEventRequest.class));
+                        3, 8, "route", ReconstructCompoundEventRequest.class));
                 priorityConstraints.add(new PriorityConstraint(0, 1));
             } else if (EventCloudProperties.isSbce2PubSubAlgorithmUsed()) {
                 priorityConstraints.add(new PriorityConstraint(
-                        1, 8, "sendv", IndexEphemeralSubscriptionRequest.class));
+                        1, 8, "route", IndexEphemeralSubscriptionRequest.class));
             }
         }
 
