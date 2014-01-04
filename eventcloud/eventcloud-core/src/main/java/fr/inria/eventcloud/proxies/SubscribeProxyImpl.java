@@ -149,10 +149,11 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
 
-        // must use soft limit because of re-entrant calls with reconstructions
+        // must use soft limit with SBCE1 because of re-entrant calls with
+        // reconstructions
         super.multiActiveService.multiActiveServing(
                 EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                false, false);
+                !EventCloudProperties.isSbce1PubSubAlgorithmUsed(), false);
     }
 
     /**
