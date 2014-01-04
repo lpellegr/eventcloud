@@ -148,9 +148,11 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     @Override
     public void runComponentActivity(Body body) {
         super.multiActiveService = new ComponentMultiActiveService(body);
+
+        // must use soft limit because of re-entrant calls with reconstructions
         super.multiActiveService.multiActiveServing(
                 EventCloudProperties.MAO_LIMIT_SUBSCRIBE_PROXIES.getValue(),
-                true, false);
+                false, false);
     }
 
     /**
@@ -781,8 +783,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             }
 
             List<Quadruple> quads =
-                    ((QuadruplePatternResponse) PAFuture.getFutureValue(super.send(new ReconstructCompoundEventRequest(
-                            reconstructPattern, quadHashesReceived)))).getResult();
+                    ((QuadruplePatternResponse) super.send(new ReconstructCompoundEventRequest(
+                            reconstructPattern, quadHashesReceived))).getResult();
 
             for (Quadruple q : quads) {
                 if (PublishSubscribeUtils.isMetaQuadruple(q)) {
