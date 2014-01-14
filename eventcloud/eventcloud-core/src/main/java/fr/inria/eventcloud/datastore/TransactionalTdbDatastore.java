@@ -19,7 +19,6 @@ package fr.inria.eventcloud.datastore;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.jena.riot.system.IRIResolver;
 import org.objectweb.proactive.extensions.p2p.structured.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

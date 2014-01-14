@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.inria.eventcloud.api.CompoundEvent;
-import fr.inria.eventcloud.api.Quadruple;
 
 /**
  * Simple abstraction to maintain together a compound event and the indexes of
@@ -57,15 +56,18 @@ public class ExtendedCompoundEvent {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
+        }
 
         ExtendedCompoundEvent that = (ExtendedCompoundEvent) o;
 
-        if (!this.compoundEvent.equals(that.compoundEvent))
+        if (!this.compoundEvent.equals(that.compoundEvent)) {
             return false;
+        }
 
         return true;
     }

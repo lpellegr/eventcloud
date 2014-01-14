@@ -88,7 +88,7 @@ public class MessageDispatcher {
 
     /**
      * Dispatches the specified requests in parallel and wait for a response for
-     * each request sent. Once responses are received they are combiner with the
+     * each request sent. Once responses are received they are combined with the
      * specifies response combiner and returned to the requester.
      * 
      * @param requests

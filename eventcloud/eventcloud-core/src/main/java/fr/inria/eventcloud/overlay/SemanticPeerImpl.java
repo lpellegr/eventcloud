@@ -46,7 +46,11 @@ import fr.inria.eventcloud.exceptions.DecompositionException;
 import fr.inria.eventcloud.factories.SemanticFactory;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
 import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
-import fr.inria.eventcloud.messages.request.*;
+import fr.inria.eventcloud.messages.request.IndexEphemeralSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.IndexSubscriptionRequest;
+import fr.inria.eventcloud.messages.request.PublishCompoundEventRequest;
+import fr.inria.eventcloud.messages.request.PublishQuadrupleRequest;
+import fr.inria.eventcloud.messages.request.ReconstructCompoundEventRequest;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.pubsub.Subscription;
 
