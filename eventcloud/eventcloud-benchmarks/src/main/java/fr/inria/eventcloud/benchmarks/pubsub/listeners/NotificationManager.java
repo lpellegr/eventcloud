@@ -53,7 +53,8 @@ public abstract class NotificationManager<T> implements Serializable {
         super();
 
         this.collector = collector;
-        this.pointToPointExitMeasurements = new CumulatedMeasurement(nbEventsExpected);
+        this.pointToPointExitMeasurements =
+                new CumulatedMeasurement(nbEventsExpected);
         this.outputMeasurement = new SimpleMeasurement();
         this.nbEventsExpected = nbEventsExpected;
         this.nbEventsReceived = new AtomicInteger();

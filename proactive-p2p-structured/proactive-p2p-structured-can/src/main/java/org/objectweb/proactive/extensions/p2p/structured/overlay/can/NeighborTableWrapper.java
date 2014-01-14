@@ -146,7 +146,11 @@ public class NeighborTableWrapper<E extends Coordinate> implements Serializable 
 
         for (byte dim = 0; dim < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim++) {
             for (byte direction = 0; direction < 2; direction++) {
-                buf.append("\nDimension: ").append(dim).append(" Direction ").append(direction).append(": ");
+                buf.append("\nDimension: ")
+                        .append(dim)
+                        .append(" Direction ")
+                        .append(direction)
+                        .append(": ");
                 int i = 0;
                 for (NeighborEntryWrapper<E> entry : this.entries[dim][direction]) {
                     buf.append(entry.getNeighborEntry().getZone());

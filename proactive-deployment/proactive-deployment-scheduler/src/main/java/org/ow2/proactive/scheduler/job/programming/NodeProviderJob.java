@@ -128,8 +128,8 @@ public class NodeProviderJob {
             int nbNodes, String dataFolder, List<String> jvmArguments,
             String registryURL, String... nodeSourceNames)
             throws NodeProviderException {
-            this.nodeRequestID = nodeRequestID;
-            this.scheduler = scheduler;
+        this.nodeRequestID = nodeRequestID;
+        this.scheduler = scheduler;
         try {
             this.jobID =
                     this.scheduler.submit(this.createJob(
@@ -179,8 +179,7 @@ public class NodeProviderJob {
         TaskFlowJob job = new TaskFlowJob();
         String inputSpaceURL = startFileSystemServer(dataFolder);
         List<String> var = this.getJarNames(new File(dataFolder));
-        String[] jarNames =
-                var.toArray(new String[var.size()]);
+        String[] jarNames = var.toArray(new String[var.size()]);
 
         job.setName("NodeProviderJob#" + this.nodeRequestID);
         job.setInputSpace(inputSpaceURL);

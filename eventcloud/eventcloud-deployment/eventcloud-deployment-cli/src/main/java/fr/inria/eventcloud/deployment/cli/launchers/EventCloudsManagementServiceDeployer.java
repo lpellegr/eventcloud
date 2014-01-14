@@ -203,7 +203,10 @@ public class EventCloudsManagementServiceDeployer {
 
         StringBuilder classPath = new StringBuilder();
         for (String libName : libNames) {
-            classPath.append(libDirPath).append(File.separator).append(libName).append(File.pathSeparator);
+            classPath.append(libDirPath)
+                    .append(File.separator)
+                    .append(libName)
+                    .append(File.pathSeparator);
         }
         classPath.delete(classPath.length() - 2, classPath.length() - 1);
 
