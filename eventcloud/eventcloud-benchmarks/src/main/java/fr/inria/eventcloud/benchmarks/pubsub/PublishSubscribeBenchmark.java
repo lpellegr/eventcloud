@@ -17,7 +17,11 @@
 package fr.inria.eventcloud.benchmarks.pubsub;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
@@ -51,8 +55,18 @@ import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
-import fr.inria.eventcloud.api.*;
-import fr.inria.eventcloud.api.listeners.*;
+import fr.inria.eventcloud.api.CompoundEvent;
+import fr.inria.eventcloud.api.Event;
+import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.SubscribeApi;
+import fr.inria.eventcloud.api.Subscription;
+import fr.inria.eventcloud.api.SubscriptionId;
+import fr.inria.eventcloud.api.listeners.BindingNotificationListener;
+import fr.inria.eventcloud.api.listeners.CompoundEventNotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListener;
+import fr.inria.eventcloud.api.listeners.NotificationListenerType;
+import fr.inria.eventcloud.api.listeners.SignalNotificationListener;
 import fr.inria.eventcloud.benchmarks.pubsub.converters.ListenerTypeConverter;
 import fr.inria.eventcloud.benchmarks.pubsub.converters.SubscriptionTypeConverter;
 import fr.inria.eventcloud.benchmarks.pubsub.listeners.CustomBindingListener;
@@ -989,7 +1003,8 @@ public class PublishSubscribeBenchmark {
 
                     subscriptions[i].nbEventsExpected = generatedEvents.length;
 
-                    System.arraycopy(generatedEvents, 0, events, i * nbEventsPerSubscriber, generatedEvents.length);
+                    System.arraycopy(generatedEvents, 0, events, i
+                            * nbEventsPerSubscriber, generatedEvents.length);
                 }
 
                 this.events = events;
@@ -1374,7 +1389,8 @@ public class PublishSubscribeBenchmark {
             case COMPOUND_EVENT:
                 listener =
                         new CustomCompoundEventListener(
-                                collector, nbEventsExpected, this.subscribeProxyDeliveryWaitTime);
+                                collector, nbEventsExpected,
+                                this.subscribeProxyDeliveryWaitTime);
                 subscribeProxy.subscribe(
                         subscription,
                         (CompoundEventNotificationListener) listener);
@@ -1382,7 +1398,8 @@ public class PublishSubscribeBenchmark {
             case SIGNAL:
                 listener =
                         new CustomSignalListener(
-                                collector, nbEventsExpected, this.subscribeProxyDeliveryWaitTime);
+                                collector, nbEventsExpected,
+                                this.subscribeProxyDeliveryWaitTime);
                 subscribeProxy.subscribe(
                         subscription, (SignalNotificationListener) listener);
                 break;

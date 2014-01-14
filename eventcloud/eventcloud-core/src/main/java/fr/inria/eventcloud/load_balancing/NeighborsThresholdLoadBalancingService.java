@@ -32,7 +32,8 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
  * Load balancing service that forces a new peer from a preallocated pool of
- * peers to join the current one if its load is greater than a given threshold.
+ * peers to join the current one if the ratio between its load and the one of
+ * its neighbors is greater than a given threshold.
  * 
  * @author lpellegr
  */

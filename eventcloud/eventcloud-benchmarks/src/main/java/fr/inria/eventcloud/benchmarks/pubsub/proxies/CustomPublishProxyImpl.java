@@ -16,7 +16,11 @@
  **/
 package fr.inria.eventcloud.benchmarks.pubsub.proxies;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectweb.proactive.Body;
 import org.objectweb.proactive.api.PAActiveObject;

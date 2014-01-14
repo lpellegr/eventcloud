@@ -25,7 +25,7 @@ import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfigurati
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * 
+ * Abstract service in charge of performing load balancing periodically.
  * 
  * @author lpellegr
  */

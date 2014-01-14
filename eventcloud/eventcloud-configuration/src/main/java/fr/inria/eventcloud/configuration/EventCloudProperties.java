@@ -19,7 +19,14 @@ package fr.inria.eventcloud.configuration;
 import java.io.File;
 import java.util.UUID;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.*;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.ConfigurationParser;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyBoolean;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyClass;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyDouble;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyInteger;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.PropertyString;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.Validator;
 
 /**
  * Contains default values for EventCloud properties.
