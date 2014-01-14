@@ -1,0 +1,9 @@
+#!/bin/sh
+
+unset BUNDLE_HOME
+unset CLASSPATH
+unset CURRENT_DIR
+unset PATH_TO_LIBRARIES
+unset PATH_TO_RESOURCES
+unset SCRIPT_DIR
+

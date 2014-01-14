@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>proactive-p2p-structured</artifactId>
+		<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+		<version>1.7.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+	<artifactId>proactive-p2p-structured-can</artifactId>
+	<version>1.7.0-SNAPSHOT</version>
+
+	<name>proactive-p2p-structured-can</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-core</artifactId>
+			<version>1.7.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.objectweb.proactive.extensions.p2p.structured</groupId>
+			<artifactId>proactive-p2p-structured-core</artifactId>
+			<version>1.7.0-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<java.security.policy>${basedir}/src/test/resources/proactive.security.policy</java.security.policy>
+						<log4j.configuration>file://${basedir}/src/test/resources/log4j.xml</log4j.configuration>
+						<logback.configurationFile>file:${basedir}/src/test/resources/logback-test.xml</logback.configurationFile>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

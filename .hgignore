@@ -1,0 +1,14 @@
+syntax: glob
+
+.DS_Store
+.idea
+target
+bin
+
+*.classpath
+*.iml
+*.metadata
+*.orig
+*.project
+*.settings
+*~
