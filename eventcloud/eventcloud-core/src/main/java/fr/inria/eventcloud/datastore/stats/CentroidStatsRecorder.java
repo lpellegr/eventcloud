@@ -54,7 +54,7 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void _register(Node g, Node s, Node p, Node o) {
+    public void _register(Node g, Node s, Node p, Node o) {
         String gs = SemanticCoordinate.removePrefix(g);
         String ss = SemanticCoordinate.removePrefix(s);
         String ps = SemanticCoordinate.removePrefix(p);
@@ -70,22 +70,24 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
         Apint pw = new Apint(ps.length());
         Apint ow = new Apint(os.length());
 
-        this.gsum = this.gsum.add(gf.multiply(gw));
-        this.ssum = this.ssum.add(sf.multiply(sw));
-        this.psum = this.psum.add(pf.multiply(pw));
-        this.osum = this.osum.add(of.multiply(ow));
+        synchronized (this) {
+            this.gsum = this.gsum.add(gf.multiply(gw));
+            this.ssum = this.ssum.add(sf.multiply(sw));
+            this.psum = this.psum.add(pf.multiply(pw));
+            this.osum = this.osum.add(of.multiply(ow));
 
-        this.gwsum = this.gwsum.add(gw);
-        this.swsum = this.swsum.add(sw);
-        this.pwsum = this.pwsum.add(pw);
-        this.owsum = this.owsum.add(ow);
+            this.gwsum = this.gwsum.add(gw);
+            this.swsum = this.swsum.add(sw);
+            this.pwsum = this.pwsum.add(pw);
+            this.owsum = this.owsum.add(ow);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void _unregister(Node g, Node s, Node p, Node o) {
+    protected void _unregister(Node g, Node s, Node p, Node o) {
         String gs = SemanticCoordinate.removePrefix(g);
         String ss = SemanticCoordinate.removePrefix(s);
         String ps = SemanticCoordinate.removePrefix(p);
@@ -101,22 +103,24 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
         Apint pw = new Apint(ps.length());
         Apint ow = new Apint(os.length());
 
-        this.gsum = this.gsum.subtract(gf.multiply(gw));
-        this.ssum = this.ssum.subtract(sf.multiply(sw));
-        this.psum = this.psum.subtract(pf.multiply(pw));
-        this.osum = this.osum.subtract(of.multiply(ow));
+        synchronized (this) {
+            this.gsum = this.gsum.subtract(gf.multiply(gw));
+            this.ssum = this.ssum.subtract(sf.multiply(sw));
+            this.psum = this.psum.subtract(pf.multiply(pw));
+            this.osum = this.osum.subtract(of.multiply(ow));
 
-        this.gwsum = this.gwsum.subtract(gw);
-        this.swsum = this.swsum.subtract(sw);
-        this.pwsum = this.pwsum.subtract(pw);
-        this.owsum = this.owsum.subtract(ow);
+            this.gwsum = this.gwsum.subtract(gw);
+            this.swsum = this.swsum.subtract(sw);
+            this.pwsum = this.pwsum.subtract(pw);
+            this.owsum = this.owsum.subtract(ow);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeGraphEstimation() {
+    public synchronized Apfloat computeGraphEstimation() {
         return this.gsum.divide(this.gwsum);
     }
 
@@ -124,7 +128,7 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeSubjectEstimation() {
+    public synchronized Apfloat computeSubjectEstimation() {
         return this.ssum.divide(this.swsum);
     }
 
@@ -132,7 +136,7 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computePredicateEstimation() {
+    public synchronized Apfloat computePredicateEstimation() {
         return this.psum.divide(this.pwsum);
     }
 
@@ -140,8 +144,28 @@ public class CentroidStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeObjectEstimation() {
+    public synchronized Apfloat computeObjectEstimation() {
         return this.osum.divide(this.owsum);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reset() {
+        super.reset();
+
+        synchronized (this) {
+            this.gsum = Apfloat.ZERO;
+            this.ssum = Apfloat.ZERO;
+            this.psum = Apfloat.ZERO;
+            this.osum = Apfloat.ZERO;
+
+            this.gwsum = Apfloat.ZERO;
+            this.swsum = Apfloat.ZERO;
+            this.pwsum = Apfloat.ZERO;
+            this.owsum = Apfloat.ZERO;
+        }
     }
 
 }

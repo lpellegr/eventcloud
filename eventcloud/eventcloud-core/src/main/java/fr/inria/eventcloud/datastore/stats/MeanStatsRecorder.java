@@ -45,32 +45,36 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void _register(Node g, Node s, Node p, Node o) {
+    public void _register(Node g, Node s, Node p, Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);
         Apfloat of = toRadix10(o);
 
-        this.gsum = this.gsum.add(gf);
-        this.ssum = this.ssum.add(sf);
-        this.psum = this.psum.add(pf);
-        this.osum = this.osum.add(of);
+        synchronized (this) {
+            this.gsum = this.gsum.add(gf);
+            this.ssum = this.ssum.add(sf);
+            this.psum = this.psum.add(pf);
+            this.osum = this.osum.add(of);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void _unregister(Node g, Node s, Node p, Node o) {
+    protected void _unregister(Node g, Node s, Node p, Node o) {
         Apfloat gf = toRadix10(g);
         Apfloat sf = toRadix10(s);
         Apfloat pf = toRadix10(p);
         Apfloat of = toRadix10(o);
 
-        this.gsum = this.gsum.subtract(gf);
-        this.ssum = this.ssum.subtract(sf);
-        this.psum = this.psum.subtract(pf);
-        this.osum = this.osum.subtract(of);
+        synchronized (this) {
+            this.gsum = this.gsum.subtract(gf);
+            this.ssum = this.ssum.subtract(sf);
+            this.psum = this.psum.subtract(pf);
+            this.osum = this.osum.subtract(of);
+        }
     }
 
     private static final Apfloat toRadix10(Node n) {
@@ -81,7 +85,7 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeGraphEstimation() {
+    public synchronized Apfloat computeGraphEstimation() {
         return this.gsum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
@@ -89,7 +93,7 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeSubjectEstimation() {
+    public synchronized Apfloat computeSubjectEstimation() {
         return this.ssum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
@@ -97,7 +101,7 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computePredicateEstimation() {
+    public synchronized Apfloat computePredicateEstimation() {
         return this.psum.divide(new Apfloat(super.getNbQuadruples()));
     }
 
@@ -105,8 +109,23 @@ public class MeanStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
-    public Apfloat computeObjectEstimation() {
+    public synchronized Apfloat computeObjectEstimation() {
         return this.osum.divide(new Apfloat(super.getNbQuadruples()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reset() {
+        super.reset();
+
+        synchronized (this) {
+            this.gsum = Apfloat.ZERO;
+            this.ssum = Apfloat.ZERO;
+            this.psum = Apfloat.ZERO;
+            this.osum = Apfloat.ZERO;
+        }
     }
 
 }

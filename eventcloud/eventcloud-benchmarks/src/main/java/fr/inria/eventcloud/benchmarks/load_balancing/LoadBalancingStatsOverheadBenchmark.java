@@ -23,7 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
+import org.objectweb.proactive.extensions.p2p.structured.operations.BooleanResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
+import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkServiceAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
@@ -45,6 +51,7 @@ import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
+import fr.inria.eventcloud.benchmarks.pubsub.operations.ClearOperation;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -53,6 +60,8 @@ import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
 import fr.inria.eventcloud.factories.ProxyFactory;
 import fr.inria.eventcloud.messages.request.AddQuadrupleRequest;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.utils.RDFReader;
 
 /**
@@ -63,11 +72,11 @@ import fr.inria.eventcloud.utils.RDFReader;
  */
 public class LoadBalancingStatsOverheadBenchmark {
 
-    @Parameter(names = {"-if", "--input-file"}, description = "Read the quadruple to publish from a file", converter = FileConverter.class)
+    @Parameter(names = {"-if", "--input-file"}, description = "Path to input file (in TriG format) containing quadruples to load", converter = FileConverter.class)
     private File inputFile = null;
 
-    @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed", required = true)
-    private int nbRuns = 1;
+    @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed")
+    private int nbRuns = 3;
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish", required = true)
     private int nbPublications = -1;
@@ -76,9 +85,12 @@ public class LoadBalancingStatsOverheadBenchmark {
     private int nbCharacters = 10;
 
     @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
-    private int discardFirstRuns = 1;
+    private int discardFirstRuns = 3;
 
-    @Parameter(names = {"-srt", "--stats-recording-type"}, description = "Indicates which type of stats recording is performed", converter = StatsRecorderClassConverter.class)
+    @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
+    public boolean inMemoryDatastore = false;
+
+    @Parameter(names = {"-srt", "--stats-recording-type"}, description = "Indicates stats recording to apply (mean or centroid)", converter = StatsRecorderClassConverter.class)
     private Class<? extends StatsRecorder> statsRecorderClass = null;
 
     @Parameter(names = {"-h", "--help"}, help = true)
@@ -120,47 +132,94 @@ public class LoadBalancingStatsOverheadBenchmark {
 
         final List<Quadruple> quadruples = this.loadQuadruples();
 
+        if (quadruples.size() < this.nbPublications) {
+            throw new IllegalStateException("Not enough quadruples loaded: "
+                    + quadruples.size() + " but " + this.nbPublications
+                    + " required");
+        }
+
         MicroBenchmark microBenchmark =
                 new MicroBenchmark(
                         this.nbRuns, new MicroBenchmarkServiceAdapter() {
+
+                            private EventCloudDeployer deployer;
+
+                            private EventCloudsRegistry registry;
+
+                            private PutGetApi putget;
+
+                            @Override
+                            public void setup() throws Exception {
+                                this.deployer =
+                                        new EventCloudDeployer(
+                                                new EventCloudDescription(),
+                                                new EventCloudDeploymentDescriptor(
+                                                        new SemanticOverlayProvider(
+                                                                LoadBalancingStatsOverheadBenchmark.this.inMemoryDatastore)));
+                                this.deployer.deploy(1, 1);
+
+                                this.registry =
+                                        EventCloudsRegistryFactory.newEventCloudsRegistry();
+                                this.registry.register(this.deployer);
+
+                                String registryURL =
+                                        this.registry.register("registry");
+
+                                EventCloudId id =
+                                        this.deployer.getEventCloudDescription()
+                                                .getId();
+
+                                this.putget =
+                                        ProxyFactory.newPutGetProxy(
+                                                registryURL, id);
+                            }
+
+                            @Override
+                            public void clear() throws Exception {
+                                this.deployer.getRandomTracker()
+                                        .getRandomPeer()
+                                        .receive(new ClearOperation());
+                            }
 
                             @Override
                             public void run(StatsRecorder recorder)
                                     throws ProActiveException,
                                     EventCloudIdNotManaged {
-                                EventCloudDeployer deployer =
-                                        new EventCloudDeployer(
-                                                new EventCloudDescription(),
-                                                new EventCloudDeploymentDescriptor());
-                                deployer.deploy(1, 1);
-
-                                EventCloudsRegistry registry =
-                                        EventCloudsRegistryFactory.newEventCloudsRegistry();
-                                registry.register(deployer);
-
-                                String registryURL =
-                                        registry.register("registry");
-
-                                EventCloudId id =
-                                        deployer.getEventCloudDescription()
-                                                .getId();
-
-                                final PutGetApi putgetProxy =
-                                        ProxyFactory.newPutGetProxy(
-                                                registryURL, id);
-
-                                Stopwatch stopwatch =
+                                Stopwatch benchmarkStopwatch =
+                                        Stopwatch.createUnstarted();
+                                Stopwatch perQuadStopwatch =
                                         Stopwatch.createUnstarted();
 
+                                benchmarkStopwatch.start();
+
                                 for (int i = 0; i < LoadBalancingStatsOverheadBenchmark.this.nbPublications; i++) {
-                                    stopwatch.start();
-                                    putgetProxy.add(quadruples.get(i));
-                                    stopwatch.stop();
+                                    perQuadStopwatch.start();
+                                    this.putget.add(quadruples.get(i));
+                                    perQuadStopwatch.stop();
                                 }
 
+                                // ensures that all quadruples have been handled
+                                // by the stats recorder
+                                PAFuture.waitFor(this.deployer.getRandomTracker()
+                                        .getRandomPeer()
+                                        .receive(
+                                                new SyncStatsRecorderOperation()));
+
+                                benchmarkStopwatch.stop();
+
                                 recorder.reportValue(
-                                        MicroBenchmark.DEFAULT_CATEGORY_NAME,
-                                        stopwatch.elapsed(TimeUnit.MILLISECONDS));
+                                        "benchmarkStopwatch",
+                                        benchmarkStopwatch.elapsed(TimeUnit.MILLISECONDS));
+                                recorder.reportValue(
+                                        "perQuadStopwatch",
+                                        perQuadStopwatch.elapsed(TimeUnit.MILLISECONDS));
+                            }
+
+                            @Override
+                            public void teardown() throws Exception {
+                                ComponentUtils.terminateComponent(this.putget);
+                                this.registry.unregister();
+                                this.deployer.undeploy();
                             }
 
                         });
@@ -169,7 +228,7 @@ public class LoadBalancingStatsOverheadBenchmark {
         microBenchmark.execute();
 
         System.out.println(microBenchmark.getStatsRecorder().getCategory(
-                MicroBenchmark.DEFAULT_CATEGORY_NAME).getMean());
+                "benchmarkStopwatch").getMean());
     }
 
     private List<Quadruple> loadQuadruples() {
@@ -181,7 +240,7 @@ public class LoadBalancingStatsOverheadBenchmark {
                 QuadrupleIterator it =
                         RDFReader.pipe(
                                 new FileInputStream(this.inputFile),
-                                SerializationFormat.NQuads, false, true);
+                                SerializationFormat.TriG, false, true);
                 int c = 0;
                 while (it.hasNext()) {
                     quadruples.add(it.next());
@@ -201,6 +260,21 @@ public class LoadBalancingStatsOverheadBenchmark {
         }
 
         return quadruples;
+    }
+
+    private static final class SyncStatsRecorderOperation extends
+            CallableOperation {
+
+        private static final long serialVersionUID = 160L;
+
+        @Override
+        public ResponseOperation handle(StructuredOverlay overlay) {
+            ((SemanticCanOverlay) overlay).getMiscDatastore()
+                    .getStatsRecorder()
+                    .sync();
+            return BooleanResponseOperation.getPositiveInstance();
+        }
+
     }
 
 }
