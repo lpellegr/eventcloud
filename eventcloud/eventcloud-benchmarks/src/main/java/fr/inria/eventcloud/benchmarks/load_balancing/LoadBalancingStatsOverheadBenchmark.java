@@ -76,7 +76,7 @@ public class LoadBalancingStatsOverheadBenchmark {
     private File inputFile = null;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed")
-    private int nbRuns = 3;
+    private int nbRuns = 5;
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish", required = true)
     private int nbPublications = -1;
@@ -85,7 +85,7 @@ public class LoadBalancingStatsOverheadBenchmark {
     private int nbCharacters = 10;
 
     @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
-    private int discardFirstRuns = 3;
+    private int discardFirstRuns = 5;
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
