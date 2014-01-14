@@ -34,6 +34,7 @@ import com.google.common.collect.Iterators;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
+
 import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
@@ -187,10 +188,12 @@ public class CompoundEvent implements Event, Externalizable, List<Quadruple> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
+        }
 
         if (obj instanceof CompoundEvent) {
             CompoundEvent that = (CompoundEvent) obj;

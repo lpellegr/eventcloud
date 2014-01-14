@@ -21,7 +21,7 @@ import java.io.Serializable;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 
 /**
- * Provides load information. Mainly used to forward load to peers.
+ * Provides load information. Mainly used to disseminate load to others peers.
  * 
  * @author lpellegr
  */
