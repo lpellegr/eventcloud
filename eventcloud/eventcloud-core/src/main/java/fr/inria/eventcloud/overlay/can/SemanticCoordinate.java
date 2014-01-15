@@ -43,11 +43,15 @@ public class SemanticCoordinate extends StringCoordinate {
     public static LoadBalancingDopingFunction DOPING_FUNCTION;
 
     static {
-        if (EventCloudProperties.LOAD_BALANCING_DOPING_FUNCTION.getValue()
-                .equals("prefix-removal")) {
+        String dopingFunctionName =
+                EventCloudProperties.LOAD_BALANCING_DOPING_FUNCTION.getValue();
+
+        if (dopingFunctionName.equals("prefix-removal")) {
             DOPING_FUNCTION = createPrefixesRemovalDopingFunction();
-        } else {
+        } else if (dopingFunctionName.equals("reverse")) {
             DOPING_FUNCTION = createReverseDopingFunction();
+        } else {
+            DOPING_FUNCTION = createIdentityDopingFunction();
         }
     }
 
@@ -228,6 +232,21 @@ public class SemanticCoordinate extends StringCoordinate {
                 }
 
                 return new StringBuilder(string).reverse().toString();
+            }
+        };
+    }
+
+    public static LoadBalancingDopingFunction createIdentityDopingFunction() {
+        return new LoadBalancingDopingFunction() {
+            @Override
+            public String apply(Node value) {
+                String string = value.toString();
+
+                if (string.isEmpty()) {
+                    return EMPTY_STRING_ROUTING_CHARACTER;
+                }
+
+                return string;
             }
         };
     }
