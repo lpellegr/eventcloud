@@ -59,10 +59,11 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
     public AbstractStatsRecorder() {
         this.nbQuadruples = new AtomicLong();
 
-        if (EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue() > 0) {
-            this.recorder =
-                    new BackgroundRecorder(
-                            EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue());
+        int nbBackgroundThreads =
+                EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue();
+
+        if (nbBackgroundThreads > 0) {
+            this.recorder = new BackgroundRecorder(nbBackgroundThreads);
         } else {
             this.recorder = new SameThreadRecorder();
         }
