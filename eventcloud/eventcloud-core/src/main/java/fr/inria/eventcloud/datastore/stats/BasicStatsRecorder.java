@@ -16,6 +16,8 @@
  **/
 package fr.inria.eventcloud.datastore.stats;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apfloat.Apfloat;
 
 import com.hp.hpl.jena.graph.Node;
@@ -31,8 +33,11 @@ public class BasicStatsRecorder extends AbstractStatsRecorder {
 
     private static final long serialVersionUID = 160L;
 
+    private AtomicLong nbQuadruples;
+
     public BasicStatsRecorder() {
         super(0);
+        this.nbQuadruples = new AtomicLong();
     }
 
     /**
@@ -71,7 +76,16 @@ public class BasicStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
+    public long getNbQuadruples() {
+        return this.nbQuadruples.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void _register(Node g, Node s, Node p, Node o) {
+        this.nbQuadruples.incrementAndGet();
     }
 
     /**
@@ -79,6 +93,16 @@ public class BasicStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     protected void _unregister(Node g, Node s, Node p, Node o) {
+        this.nbQuadruples.decrementAndGet();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reset() {
+        super.reset();
+        this.nbQuadruples.set(0);
     }
 
 }

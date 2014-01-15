@@ -22,7 +22,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apfloat.Apfloat;
 import org.slf4j.Logger;
@@ -53,11 +52,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
     private final Recorder recorder;
 
-    private AtomicLong nbQuadruples;
-
     public AbstractStatsRecorder(int nbBackgroundThreads) {
-        this.nbQuadruples = new AtomicLong();
-
         if (nbBackgroundThreads > 0) {
             this.recorder = new BackgroundRecorder(nbBackgroundThreads);
         } else {
@@ -94,7 +89,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
     public SemanticCoordinate computeSplitEstimation(byte dimension) {
         Apfloat estimatedSplitValue = null;
 
-        if (this.nbQuadruples.get() == 0) {
+        if (this.getNbQuadruples() == 0) {
             // no quadruple has been recorded, no estimation can be computed
             return null;
         }
@@ -121,14 +116,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public long getNbQuadruples() {
-        return this.nbQuadruples.get();
-    }
-
-    /**
      * Statistics are computed in background by using threads. When this method
      * is called, we wait for the termination of all the threads. It is assumed
      * that the stats recorder is not registering new quadruples when this
@@ -145,7 +132,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
     @Override
     public void reset() {
         this.sync();
-        this.nbQuadruples.set(0);
     }
 
     private interface Recorder extends Serializable {
@@ -167,21 +153,14 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
                              final Node o) {
             AbstractStatsRecorder.this._register(g, s, p, o);
 
-            long quadrupleIndex =
-                    AbstractStatsRecorder.this.nbQuadruples.incrementAndGet();
-
-            log.trace("Registering quadruple {}", quadrupleIndex);
+            log.trace("Registering new quadruple");
         }
 
         @Override
         public void unregister(final Node g, final Node s, final Node p,
                                final Node o) {
             AbstractStatsRecorder.this._unregister(g, s, p, o);
-
-            long quadrupleIndex =
-                    AbstractStatsRecorder.this.nbQuadruples.decrementAndGet();
-
-            log.trace("Unregistering quadruple {}", quadrupleIndex);
+            log.trace("Unregistering quadruple");
         }
 
         @Override
@@ -214,7 +193,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
             final ListenableFuture<?> future =
                     this.threadPool.submit(new Runnable() {
-
                         @Override
                         public void run() {
                             BackgroundRecorder.super.register(g, s, p, o);
@@ -224,7 +202,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
             this.futures.add(future);
 
             future.addListener(new Runnable() {
-
                 @Override
                 public void run() {
                     BackgroundRecorder.this.futures.remove(future);
@@ -238,7 +215,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
                                final Node o) {
             final ListenableFuture<?> future =
                     this.threadPool.submit(new Runnable() {
-
                         @Override
                         public void run() {
                             BackgroundRecorder.super.unregister(g, s, p, o);
@@ -248,7 +224,6 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
             this.futures.add(future);
 
             future.addListener(new Runnable() {
-
                 @Override
                 public void run() {
                     BackgroundRecorder.this.futures.remove(future);
