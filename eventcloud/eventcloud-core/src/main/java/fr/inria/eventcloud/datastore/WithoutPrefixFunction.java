@@ -40,7 +40,7 @@ public class WithoutPrefixFunction extends FunctionBase1 {
      */
     @Override
     public NodeValue exec(NodeValue v) {
-        return NodeValue.makeString(SemanticCoordinate.removePrefix(v.asNode()));
+        return NodeValue.makeString(SemanticCoordinate.applyDopingFunction(v.asNode()));
     }
 
 }

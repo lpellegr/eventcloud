@@ -63,10 +63,10 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public void _register(Node g, Node s, Node p, Node o) {
-        String gs = SemanticCoordinate.removePrefix(g);
-        String ss = SemanticCoordinate.removePrefix(s);
-        String ps = SemanticCoordinate.removePrefix(p);
-        String os = SemanticCoordinate.removePrefix(o);
+        String gs = SemanticCoordinate.applyDopingFunction(g);
+        String ss = SemanticCoordinate.applyDopingFunction(s);
+        String ps = SemanticCoordinate.applyDopingFunction(p);
+        String os = SemanticCoordinate.applyDopingFunction(o);
 
         Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
         Apfloat sf = ApfloatUtils.toFloatRadix10(ss);
@@ -98,10 +98,10 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     protected void _unregister(Node g, Node s, Node p, Node o) {
-        String gs = SemanticCoordinate.removePrefix(g);
-        String ss = SemanticCoordinate.removePrefix(s);
-        String ps = SemanticCoordinate.removePrefix(p);
-        String os = SemanticCoordinate.removePrefix(o);
+        String gs = SemanticCoordinate.applyDopingFunction(g);
+        String ss = SemanticCoordinate.applyDopingFunction(s);
+        String ps = SemanticCoordinate.applyDopingFunction(p);
+        String os = SemanticCoordinate.applyDopingFunction(o);
 
         Apfloat gf = ApfloatUtils.toFloatRadix10(gs);
         Apfloat sf = ApfloatUtils.toFloatRadix10(ss);

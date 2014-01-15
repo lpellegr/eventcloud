@@ -90,7 +90,7 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
     }
 
     private static final Apfloat toRadix10(Node n) {
-        return ApfloatUtils.toFloatRadix10(SemanticCoordinate.removePrefix(n));
+        return ApfloatUtils.toFloatRadix10(SemanticCoordinate.applyDopingFunction(n));
     }
 
     /**

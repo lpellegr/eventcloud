@@ -61,16 +61,20 @@ public class QuadrupleStatsEvaluator {
             @Override
             public void quad(Quad quad) {
 
-                g.addValue(SemanticCoordinate.removePrefix(quad.getGraph())
+                g.addValue(SemanticCoordinate.applyDopingFunction(
+                        quad.getGraph())
                 // quad.getGraph().toString()
                         .length());
-                s.addValue(SemanticCoordinate.removePrefix(quad.getSubject())
+                s.addValue(SemanticCoordinate.applyDopingFunction(
+                        quad.getSubject())
                 // quad.getSubject().toString()
                         .length());
-                p.addValue(SemanticCoordinate.removePrefix(quad.getPredicate())
+                p.addValue(SemanticCoordinate.applyDopingFunction(
+                        quad.getPredicate())
                 // quad.getPredicate().toString()
                         .length());
-                o.addValue(SemanticCoordinate.removePrefix(quad.getObject())
+                o.addValue(SemanticCoordinate.applyDopingFunction(
+                        quad.getObject())
                 // quad.getObject().toString()
                         .length());
             }
