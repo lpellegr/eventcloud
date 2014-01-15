@@ -35,9 +35,11 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.FileConverter;
 
-import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.stats.BasicStatsRecorder;
 import fr.inria.eventcloud.messages.request.AddQuadrupleRequest;
 import fr.inria.eventcloud.overlay.can.StaticLoadBalancingTestBuilder;
+import fr.inria.eventcloud.overlay.can.StaticLoadBalancingTestBuilder.Test;
 
 /**
  * A simple benchmark to test the influence of the precision on the
@@ -51,13 +53,16 @@ public class LoadBalancingPrecisionBenchmark {
     private File trigResource;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed", required = true)
-    private int nbRuns = 1;
+    private int nbRuns = 4;
 
     @Parameter(names = {"-p", "--precision"}, description = "The precision to use", required = true)
     private long precision = ApfloatUtils.DEFAULT_PRECISION;
 
     @Parameter(names = {"-np", "--nb-peers"}, description = "The number of peers to inject")
-    private int nbPeersToInject = 10;
+    private int nbPeersToInject = 16;
+
+    @Parameter(names = {"-dslb", "--disable-static-load-balancing"}, description = "Indicates whether static load balancing must be disabled or not")
+    private boolean disableStaticLoadBalancing = false;
 
     @Parameter(names = {"-h", "--help"}, help = true)
     private boolean help;
@@ -95,6 +100,7 @@ public class LoadBalancingPrecisionBenchmark {
                 System.exit(0);
             }
         } catch (ParameterException e) {
+            e.printStackTrace();
             jCommander.usage();
             System.exit(1);
         }
@@ -112,14 +118,21 @@ public class LoadBalancingPrecisionBenchmark {
                         this.nbRuns, new MicroBenchmarkServiceAdapter() {
                             @Override
                             public void run(StatsRecorder recorder) {
-                                StaticLoadBalancingTestBuilder.Test test =
+                                StaticLoadBalancingTestBuilder builder =
                                         new StaticLoadBalancingTestBuilder(
-                                                LoadBalancingPrecisionBenchmark.this.trigResource.toString()).enableLoadBalancing(
-                                                CentroidStatsRecorder.class)
-                                                .setNbPeersToInject(
-                                                        LoadBalancingPrecisionBenchmark.this.nbPeersToInject)
-                                                .build();
+                                                LoadBalancingPrecisionBenchmark.this.trigResource.toString()).setNbPeersToInject(LoadBalancingPrecisionBenchmark.this.nbPeersToInject);
 
+                                @SuppressWarnings("unchecked")
+                                Class<? extends fr.inria.eventcloud.datastore.stats.StatsRecorder> statsRecordingClass =
+                                        (Class<? extends fr.inria.eventcloud.datastore.stats.StatsRecorder>) EventCloudProperties.STATS_RECORDER_CLASS.getValue();
+
+                                if (LoadBalancingPrecisionBenchmark.this.disableStaticLoadBalancing) {
+                                    builder.enableStatsRecording(BasicStatsRecorder.class);
+                                } else {
+                                    builder.enableLoadBalancing(statsRecordingClass);
+                                }
+
+                                Test test = builder.build();
                                 test.execute();
                                 recorder.reportValue(
                                         MicroBenchmark.DEFAULT_CATEGORY_NAME,
@@ -135,5 +148,4 @@ public class LoadBalancingPrecisionBenchmark {
                 + microBenchmark.getStatsRecorder().getCategory(
                         MicroBenchmark.DEFAULT_CATEGORY_NAME).getMean());
     }
-
 }

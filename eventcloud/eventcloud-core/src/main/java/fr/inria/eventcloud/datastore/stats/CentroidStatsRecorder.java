@@ -51,6 +51,11 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
 
     private Apint owsum = Apint.ZERO;
 
+    public CentroidStatsRecorder() {
+        super(
+                EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue());
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -47,7 +47,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.stats.AbstractStatsRecorder;
+import fr.inria.eventcloud.datastore.stats.BasicStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 import fr.inria.eventcloud.deployment.JunitEventCloudInfrastructureDeployer;
@@ -83,14 +83,15 @@ public class StaticLoadBalancingTestBuilder {
 
     private final int rdfTermSize;
 
-    private Class<? extends AbstractStatsRecorder> statsRecorderClass;
+    private Class<? extends StatsRecorder> statsRecorderClass =
+            BasicStatsRecorder.class;
 
     private String trigResource;
 
     public StaticLoadBalancingTestBuilder(String trigResource) {
-        this.trigResource = trigResource;
         this.nbQuadsToInsert = 1000;
         this.rdfTermSize = 10;
+        this.trigResource = trigResource;
     }
 
     public StaticLoadBalancingTestBuilder(int nbQuadsToInsert, int rdfTermSize) {
@@ -119,13 +120,13 @@ public class StaticLoadBalancingTestBuilder {
         return this;
     }
 
-    public StaticLoadBalancingTestBuilder enableStatsRecording(Class<? extends AbstractStatsRecorder> statsRecorderClass) {
+    public StaticLoadBalancingTestBuilder enableStatsRecording(Class<? extends StatsRecorder> statsRecorderClass) {
         this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
         return this;
     }
 
-    public StaticLoadBalancingTestBuilder enableLoadBalancing(Class<? extends AbstractStatsRecorder> statsRecorderClass) {
+    public StaticLoadBalancingTestBuilder enableLoadBalancing(Class<? extends StatsRecorder> statsRecorderClass) {
         this.enableLoadBalancing = true;
         this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
@@ -296,12 +297,14 @@ public class StaticLoadBalancingTestBuilder {
                     for (int i = 0; i < StaticLoadBalancingTestBuilder.this.nbPeersToInject; i++) {
                         long maxNumQuads = -1;
                         Peer electedPeer = null;
+                        List<Peer> peers =
+                                this.deployer.getRandomSemanticTracker(
+                                        this.eventCloudId).getPeers();
 
                         // we select the peer which has the higher number of
                         // quadruples in the misc datastore in order to
                         // perform the next split
-                        for (Peer p : this.deployer.getRandomSemanticTracker(
-                                this.eventCloudId).getPeers()) {
+                        for (Peer p : peers) {
                             GetStatsRecordeResponseOperation response =
                                     (GetStatsRecordeResponseOperation) PAFuture.getFutureValue(p.receive(new GetStatsRecorderOperation()));
 
