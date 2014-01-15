@@ -22,6 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
@@ -30,7 +31,7 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
  * 
  * @author lpellegr
  */
-public class CentroidStatsRecorder extends AbstractStatsRecorder {
+public final class CentroidStatsRecorder extends AbstractStatsRecorder {
 
     private static final long serialVersionUID = 160L;
 

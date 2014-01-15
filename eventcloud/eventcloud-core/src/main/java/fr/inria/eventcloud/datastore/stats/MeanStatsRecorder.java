@@ -29,7 +29,7 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
  * 
  * @author lpellegr
  */
-public class MeanStatsRecorder extends AbstractStatsRecorder {
+public final class MeanStatsRecorder extends AbstractStatsRecorder {
 
     private static final long serialVersionUID = 160L;
 

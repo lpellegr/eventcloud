@@ -28,7 +28,7 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
  * 
  * @author lpellegr
  */
-public class NullStatsRecorder implements StatsRecorder {
+public final class NullStatsRecorder implements StatsRecorder {
 
     private static final long serialVersionUID = 160L;
 
