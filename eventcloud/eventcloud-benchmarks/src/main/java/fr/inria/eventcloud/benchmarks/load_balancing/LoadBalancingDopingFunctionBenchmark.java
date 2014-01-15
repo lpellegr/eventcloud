@@ -48,7 +48,7 @@ import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.utils.RDFReader;
 
 /**
- * Benchmark class used to assess prefix removal.
+ * Benchmark class used to assess load balancing doping function.
  * 
  * @author lpellegr
  */
