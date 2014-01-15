@@ -65,7 +65,7 @@ import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 import fr.inria.eventcloud.utils.RDFReader;
 
 /**
- * Load-balancing benchmark to evaluate the impact of the stats computed in
+ * Load balancing benchmark to evaluate the impact of the stats computed in
  * background on the insertion time.
  * 
  * @author lpellegr
@@ -76,7 +76,7 @@ public class LoadBalancingStatsOverheadBenchmark {
     private File inputFile = null;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed")
-    private int nbRuns = 5;
+    private int nbRuns = 4;
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish", required = true)
     private int nbPublications = -1;
@@ -85,7 +85,7 @@ public class LoadBalancingStatsOverheadBenchmark {
     private int nbCharacters = 10;
 
     @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
-    private int discardFirstRuns = 5;
+    private int discardFirstRuns = 1;
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
