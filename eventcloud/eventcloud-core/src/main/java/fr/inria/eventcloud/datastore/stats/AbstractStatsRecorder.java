@@ -35,7 +35,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.api.Quadruple;
-import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
@@ -56,11 +55,8 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
     private AtomicLong nbQuadruples;
 
-    public AbstractStatsRecorder() {
+    public AbstractStatsRecorder(int nbBackgroundThreads) {
         this.nbQuadruples = new AtomicLong();
-
-        int nbBackgroundThreads =
-                EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue();
 
         if (nbBackgroundThreads > 0) {
             this.recorder = new BackgroundRecorder(nbBackgroundThreads);

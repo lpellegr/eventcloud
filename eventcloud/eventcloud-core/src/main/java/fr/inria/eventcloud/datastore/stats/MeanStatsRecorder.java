@@ -21,6 +21,7 @@ import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
@@ -40,6 +41,11 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
     private Apfloat psum = Apfloat.ZERO;
 
     private Apfloat osum = Apfloat.ZERO;
+
+    public MeanStatsRecorder() {
+        super(
+                EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue());
+    }
 
     /**
      * {@inheritDoc}
