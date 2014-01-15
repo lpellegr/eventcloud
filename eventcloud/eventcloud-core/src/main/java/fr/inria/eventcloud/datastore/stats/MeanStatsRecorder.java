@@ -42,6 +42,8 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
 
     private Apfloat osum = Apfloat.ZERO;
 
+    private long counter;
+
     public MeanStatsRecorder() {
         super(
                 EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue());
@@ -62,6 +64,8 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
             this.ssum = this.ssum.add(sf);
             this.psum = this.psum.add(pf);
             this.osum = this.osum.add(of);
+
+            this.counter++;
         }
     }
 
@@ -80,6 +84,8 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
             this.ssum = this.ssum.subtract(sf);
             this.psum = this.psum.subtract(pf);
             this.osum = this.osum.subtract(of);
+
+            this.counter--;
         }
     }
 
@@ -92,7 +98,7 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public synchronized Apfloat computeGraphEstimation() {
-        return this.gsum.divide(new Apfloat(super.getNbQuadruples()));
+        return this.gsum.divide(new Apfloat(this.counter));
     }
 
     /**
@@ -100,7 +106,7 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public synchronized Apfloat computeSubjectEstimation() {
-        return this.ssum.divide(new Apfloat(super.getNbQuadruples()));
+        return this.ssum.divide(new Apfloat(this.counter));
     }
 
     /**
@@ -108,7 +114,7 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public synchronized Apfloat computePredicateEstimation() {
-        return this.psum.divide(new Apfloat(super.getNbQuadruples()));
+        return this.psum.divide(new Apfloat(this.counter));
     }
 
     /**
@@ -116,7 +122,15 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
      */
     @Override
     public synchronized Apfloat computeObjectEstimation() {
-        return this.osum.divide(new Apfloat(super.getNbQuadruples()));
+        return this.osum.divide(new Apfloat(this.counter));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public long getNbQuadruples() {
+        return this.counter;
     }
 
     /**
@@ -131,6 +145,8 @@ public final class MeanStatsRecorder extends AbstractStatsRecorder {
             this.ssum = Apfloat.ZERO;
             this.psum = Apfloat.ZERO;
             this.osum = Apfloat.ZERO;
+
+            this.counter = 0;
         }
     }
 

@@ -51,6 +51,8 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
 
     private Apint owsum = Apint.ZERO;
 
+    private long counter;
+
     public CentroidStatsRecorder() {
         super(
                 EventCloudProperties.STATS_RECORDER_NB_BACKGROUND_THREADS.getValue());
@@ -86,6 +88,8 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
             this.swsum = this.swsum.add(sw);
             this.pwsum = this.pwsum.add(pw);
             this.owsum = this.owsum.add(ow);
+
+            this.counter++;
         }
     }
 
@@ -119,6 +123,8 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
             this.swsum = this.swsum.subtract(sw);
             this.pwsum = this.pwsum.subtract(pw);
             this.owsum = this.owsum.subtract(ow);
+
+            this.counter--;
         }
     }
 
@@ -158,6 +164,14 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
      * {@inheritDoc}
      */
     @Override
+    public long getNbQuadruples() {
+        return this.counter;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void reset() {
         super.reset();
 
@@ -171,6 +185,8 @@ public final class CentroidStatsRecorder extends AbstractStatsRecorder {
             this.swsum = Apfloat.ZERO;
             this.pwsum = Apfloat.ZERO;
             this.owsum = Apfloat.ZERO;
+
+            this.counter = 0;
         }
     }
 
