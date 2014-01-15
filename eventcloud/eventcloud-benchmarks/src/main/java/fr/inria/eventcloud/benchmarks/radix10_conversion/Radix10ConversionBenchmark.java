@@ -122,20 +122,24 @@ public class Radix10ConversionBenchmark {
                 Quad quad = it.next();
 
                 if (this.enableRdfStats) {
-                    // compute stats without prefix removal
+                    // compute stats without applying doping function
                     statsWithoutPrefixRemoval.addValue(size(quad.getGraph()));
                     statsWithoutPrefixRemoval.addValue(size(quad.getSubject()));
                     statsWithoutPrefixRemoval.addValue(size(quad.getPredicate()));
                     statsWithoutPrefixRemoval.addValue(size(quad.getObject()));
                 }
 
-                String g = SemanticCoordinate.removePrefix(quad.getGraph());
-                String s = SemanticCoordinate.removePrefix(quad.getSubject());
-                String p = SemanticCoordinate.removePrefix(quad.getPredicate());
-                String o = SemanticCoordinate.removePrefix(quad.getObject());
+                String g =
+                        SemanticCoordinate.applyDopingFunction(quad.getGraph());
+                String s =
+                        SemanticCoordinate.applyDopingFunction(quad.getSubject());
+                String p =
+                        SemanticCoordinate.applyDopingFunction(quad.getPredicate());
+                String o =
+                        SemanticCoordinate.applyDopingFunction(quad.getObject());
 
                 if (this.enableRdfStats) {
-                    // compute stats with prefix removal
+                    // compute stats by applying doping function
                     statsWithPrefixRemoval.addValue(g.length());
                     statsWithPrefixRemoval.addValue(s.length());
                     statsWithPrefixRemoval.addValue(p.length());

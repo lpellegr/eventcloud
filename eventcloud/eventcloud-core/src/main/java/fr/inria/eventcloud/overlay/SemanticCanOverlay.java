@@ -914,11 +914,10 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
                 Node p = binding.get(Var.alloc("p"));
                 Node o = binding.get(Var.alloc("o"));
 
-                // nodes after prefix removal
-                String gwp = SemanticCoordinate.removePrefix(g);
-                String swp = SemanticCoordinate.removePrefix(s);
-                String pwp = SemanticCoordinate.removePrefix(p);
-                String owp = SemanticCoordinate.removePrefix(o);
+                String gwp = SemanticCoordinate.applyDopingFunction(g);
+                String swp = SemanticCoordinate.applyDopingFunction(s);
+                String pwp = SemanticCoordinate.applyDopingFunction(p);
+                String owp = SemanticCoordinate.applyDopingFunction(o);
 
                 boolean gIsVar = isVariable(g);
                 boolean sIsVar = isVariable(s);

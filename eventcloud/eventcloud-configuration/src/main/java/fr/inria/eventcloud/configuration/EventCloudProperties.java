@@ -285,6 +285,16 @@ public class EventCloudProperties {
             new PropertyBoolean("eventcloud.load.balancing.static", false);
 
     /**
+     * Defines the load balancing function to apply on coordinate elements of
+     * resources in order to improve distribution on peers. It may consists in
+     * removing prefixes ({@code prefix-removal}) or reversing values (
+     * {@code reverse}). Default one is {@code reverse}.
+     */
+    public static final PropertyString LOAD_BALANCING_DOPING_FUNCTION =
+            new PropertyString(
+                    "eventcloud.load.balancing.doping.function", "reverse");
+
+    /**
      * This ratio is used to determine when a peer should report its load to
      * others. It may affect the load balancing convergence time but also the
      * accuracy.

@@ -52,13 +52,13 @@ import fr.inria.eventcloud.utils.RDFReader;
  * 
  * @author lpellegr
  */
-public class PrefixRemovalBenchmark {
+public class LoadBalancingDopingFunctionBenchmark {
 
     @Parameter(names = {"-if", "--input-file"}, description = "Path to input file (in TriG format) containing quadruples to load", converter = FileConverter.class, required = true)
     private File inputFile = null;
 
-    @Parameter(names = {"-rp", "--remove-prefixes"}, description = "Enable prefix removal or not")
-    private boolean removePrefixes = true;
+    @Parameter(names = {"-adf", "--apply-doping-function"}, description = "Apply doping function or not")
+    private boolean applyDopingFunction = true;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed")
     private int nbRuns = 5;
@@ -79,7 +79,8 @@ public class PrefixRemovalBenchmark {
                 (Logger) LoggerFactory.getLogger(AddQuadrupleRequest.class);
         root.setLevel(Level.OFF);
 
-        PrefixRemovalBenchmark benchmark = new PrefixRemovalBenchmark();
+        LoadBalancingDopingFunctionBenchmark benchmark =
+                new LoadBalancingDopingFunctionBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
 
@@ -102,11 +103,11 @@ public class PrefixRemovalBenchmark {
     }
 
     public void execute() {
-        if (this.removePrefixes) {
+        if (this.applyDopingFunction) {
             this.action = new Action() {
                 @Override
                 public String perform(Node value) {
-                    return SemanticCoordinate.removePrefix(value);
+                    return SemanticCoordinate.applyDopingFunction(value);
                 }
             };
         } else {
@@ -140,13 +141,13 @@ public class PrefixRemovalBenchmark {
 
                                 for (Quadruple q : quadruples) {
                                     this.result =
-                                            PrefixRemovalBenchmark.this.action.perform(q.getGraph());
+                                            LoadBalancingDopingFunctionBenchmark.this.action.perform(q.getGraph());
                                     this.result +=
-                                            PrefixRemovalBenchmark.this.action.perform(q.getSubject());
+                                            LoadBalancingDopingFunctionBenchmark.this.action.perform(q.getSubject());
                                     this.result +=
-                                            PrefixRemovalBenchmark.this.action.perform(q.getPredicate());
+                                            LoadBalancingDopingFunctionBenchmark.this.action.perform(q.getPredicate());
                                     this.result +=
-                                            PrefixRemovalBenchmark.this.action.perform(q.getObject());
+                                            LoadBalancingDopingFunctionBenchmark.this.action.perform(q.getObject());
                                 }
 
                                 stopwatch.stop();

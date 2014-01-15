@@ -175,11 +175,11 @@ public final class AtomicQueryConstraintsValidator extends
 
                     if (func.getArg1().isConstant()) {
                         constant =
-                                SemanticCoordinate.removePrefix(NodeFactory.createURI(expr1.getConstant()
+                                SemanticCoordinate.applyDopingFunction(NodeFactory.createURI(expr1.getConstant()
                                         .asString()));
                     } else {
                         constant =
-                                SemanticCoordinate.removePrefix(NodeFactory.createURI(expr2.getConstant()
+                                SemanticCoordinate.applyDopingFunction(NodeFactory.createURI(expr2.getConstant()
                                         .asString()));
                     }
 
@@ -187,14 +187,14 @@ public final class AtomicQueryConstraintsValidator extends
                             this.atomicQuery.getVarIndex(variable.getVarName());
 
                     int compareToLowerBound =
-                            SemanticCoordinate.removePrefix(
+                            SemanticCoordinate.applyDopingFunction(
                                     NodeFactory.createURI(this.zone.getLowerBound(
                                             (byte) dimension)
                                             .getValue()))
                                     .compareTo(constant);
 
                     int compareToUpperBound =
-                            SemanticCoordinate.removePrefix(
+                            SemanticCoordinate.applyDopingFunction(
                                     NodeFactory.createURI(this.zone.getUpperBound(
                                             (byte) dimension)
                                             .getValue()))
