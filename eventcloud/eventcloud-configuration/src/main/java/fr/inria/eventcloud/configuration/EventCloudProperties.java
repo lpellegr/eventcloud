@@ -293,7 +293,8 @@ public class EventCloudProperties {
      */
     public static final PropertyString LOAD_BALANCING_DOPING_FUNCTION =
             new PropertyString(
-                    "eventcloud.load.balancing.doping.function", "identity");
+                    "eventcloud.load.balancing.doping.function",
+                    "prefix-removal");
 
     /**
      * This ratio is used to determine when a peer should report its load to
