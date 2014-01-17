@@ -21,24 +21,29 @@ import com.beust.jcommander.JCommander;
 
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.MeanStatsRecorder;
+import fr.inria.eventcloud.datastore.stats.NullStatsRecorder;
+import fr.inria.eventcloud.datastore.stats.StatsRecorder;
 
 /**
  * Simple stats recorder class converter for {@link JCommander}.
  * 
  * @author lpellegr
  */
-public class StatsRecorderClassConverter implements IStringConverter<Class<?>> {
+public class StatsRecorderClassConverter implements
+        IStringConverter<Class<? extends StatsRecorder>> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Class<?> convert(String value) {
+    public Class<? extends StatsRecorder> convert(String value) {
 
         if (value.equalsIgnoreCase("centroid")) {
             return CentroidStatsRecorder.class;
         } else if (value.equalsIgnoreCase("mean")) {
             return MeanStatsRecorder.class;
+        } else if (value.equalsIgnoreCase("null")) {
+            return NullStatsRecorder.class;
         }
 
         throw new IllegalArgumentException(
