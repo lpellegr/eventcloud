@@ -76,7 +76,7 @@ public class LoadBalancingStatsOverheadBenchmark {
     private File inputFile = null;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of times the test is performed")
-    private int nbRuns = 4;
+    private int nbRuns = 3;
 
     @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish", required = true)
     private int nbPublications = -1;
@@ -85,13 +85,13 @@ public class LoadBalancingStatsOverheadBenchmark {
     private int nbCharacters = 10;
 
     @Parameter(names = {"-dfr", "--discard-first-runs"}, description = "Indicates the number of first runs to discard")
-    private int discardFirstRuns = 1;
+    private int discardFirstRuns = 2;
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
 
     @Parameter(names = {"-srt", "--stats-recording-type"}, description = "Indicates stats recording to apply (mean or centroid)", converter = StatsRecorderClassConverter.class)
-    private Class<? extends StatsRecorder> statsRecorderClass = null;
+    private Class<? extends fr.inria.eventcloud.datastore.stats.StatsRecorder> statsRecorderClass;
 
     @Parameter(names = {"-h", "--help"}, help = true)
     private boolean help;

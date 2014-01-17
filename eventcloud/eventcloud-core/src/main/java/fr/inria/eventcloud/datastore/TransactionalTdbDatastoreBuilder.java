@@ -57,7 +57,7 @@ public class TransactionalTdbDatastoreBuilder {
         this(location, NullStatsRecorder.getInstance());
     }
 
-    public TransactionalTdbDatastoreBuilder(Location location,
+    private TransactionalTdbDatastoreBuilder(Location location,
             StatsRecorder statsRecorder) {
         this.location = location;
         this.statsRecorder = statsRecorder;
