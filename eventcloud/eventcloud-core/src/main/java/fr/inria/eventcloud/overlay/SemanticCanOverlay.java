@@ -745,7 +745,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
             log.trace("Join {} T2 is {}", this.maintenanceId, startTime);
         }
 
-        this.getPublishSubscribeOperationsDelayer().flush();
+        this.getPublishSubscribeOperationsDelayer().sync();
 
         // We have to sync in order to ensure that there is no background
         // threads updating the stats fields otherwise when someone will
@@ -1149,7 +1149,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     }
 
     public void clear() {
-        this.getPublishSubscribeOperationsDelayer().flush();
+        this.getPublishSubscribeOperationsDelayer().sync();
 
         this.miscDatastore.getStatsRecorder().reset();
 
@@ -1193,7 +1193,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
             }
         }
 
-        this.publishSubscribeOperationsDelayer.flush();
+        this.publishSubscribeOperationsDelayer.sync();
 
         this.miscDatastore.close();
         this.subscriptionsDatastore.close();

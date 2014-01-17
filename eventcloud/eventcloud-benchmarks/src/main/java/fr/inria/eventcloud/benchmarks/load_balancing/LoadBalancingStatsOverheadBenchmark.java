@@ -202,8 +202,7 @@ public class LoadBalancingStatsOverheadBenchmark {
                                 // by the stats recorder
                                 PAFuture.waitFor(this.deployer.getRandomTracker()
                                         .getRandomPeer()
-                                        .receive(
-                                                new SyncStatsRecorderOperation()));
+                                        .receive(new SyncOperation()));
 
                                 benchmarkStopwatch.stop();
 
@@ -262,16 +261,18 @@ public class LoadBalancingStatsOverheadBenchmark {
         return quadruples;
     }
 
-    private static final class SyncStatsRecorderOperation extends
-            CallableOperation {
+    private static final class SyncOperation extends CallableOperation {
 
         private static final long serialVersionUID = 160L;
 
         @Override
         public ResponseOperation handle(StructuredOverlay overlay) {
+            ((SemanticCanOverlay) overlay).getPublishSubscribeOperationsDelayer()
+                    .sync();
             ((SemanticCanOverlay) overlay).getMiscDatastore()
                     .getStatsRecorder()
                     .sync();
+
             return BooleanResponseOperation.getPositiveInstance();
         }
 

@@ -155,7 +155,7 @@ public class Delayer<T> {
         }
     }
 
-    public void flush() {
+    public void sync() {
         if (this.commitThread != null) {
             try {
                 this.commitThread.join();
