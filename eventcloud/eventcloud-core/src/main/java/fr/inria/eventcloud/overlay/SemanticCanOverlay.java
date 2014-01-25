@@ -1112,8 +1112,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     protected HomogenousPair<? extends Zone<SemanticCoordinate>> splitZones(byte dimension) {
         try {
             if (EventCloudProperties.isStaticLoadBalancingEnabled()
-                    || this.loadBalancingManager.getLoadBalancingService()
-                            .getConfiguration() != null) {
+                    || (this.loadBalancingManager != null && this.loadBalancingManager.getLoadBalancingService()
+                            .getConfiguration() != null)) {
                 SemanticCoordinate estimatedMiddle =
                         this.miscDatastore.getStatsRecorder()
                                 .computeSplitEstimation(dimension);
