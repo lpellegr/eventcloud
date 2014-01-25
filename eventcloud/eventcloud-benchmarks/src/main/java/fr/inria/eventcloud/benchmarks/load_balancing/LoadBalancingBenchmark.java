@@ -16,9 +16,13 @@
  **/
 package fr.inria.eventcloud.benchmarks.load_balancing;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,16 +32,13 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.core.ProActiveException;
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
-import org.objectweb.proactive.extensions.p2p.structured.operations.CanOperations;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
-import org.objectweb.proactive.extensions.p2p.structured.operations.can.GetIdAndZoneResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.providers.InjectionConstraintsProvider;
+import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkService;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
@@ -48,28 +49,41 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.converters.FileConverter;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.hp.hpl.jena.graph.Node;
 
 import fr.inria.eventcloud.EventCloudDescription;
 import fr.inria.eventcloud.EventCloudsRegistry;
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.Event;
 import fr.inria.eventcloud.api.EventCloudId;
+import fr.inria.eventcloud.api.Quadruple;
+import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
+import fr.inria.eventcloud.benchmarks.load_balancing.converters.LoadBalancingStrategyConverter;
+import fr.inria.eventcloud.benchmarks.load_balancing.messages.CountQuadrupleRequest;
+import fr.inria.eventcloud.benchmarks.load_balancing.messages.CountQuadrupleResponse;
 import fr.inria.eventcloud.benchmarks.load_balancing.overlay.CustomSemanticOverlayProvider;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomPublishProxy;
-import fr.inria.eventcloud.benchmarks.pubsub.EventGenerator;
 import fr.inria.eventcloud.benchmarks.pubsub.operations.ClearOperation;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
 import fr.inria.eventcloud.deployment.EventCloudDeploymentDescriptor;
 import fr.inria.eventcloud.exceptions.EventCloudIdNotManaged;
 import fr.inria.eventcloud.factories.EventCloudComponentsManagerFactory;
 import fr.inria.eventcloud.factories.EventCloudsRegistryFactory;
-import fr.inria.eventcloud.load_balancing.configuration.NeighborsThresholdLoadBalancingConfiguration;
-import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
-import fr.inria.eventcloud.overlay.can.SemanticZone;
+import fr.inria.eventcloud.load_balancing.LoadBalancingStrategy;
+import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
+import fr.inria.eventcloud.load_balancing.criteria.Criterion;
+import fr.inria.eventcloud.load_balancing.criteria.QuadrupleCountCriterion;
+import fr.inria.eventcloud.utils.RDFReader;
 
 /**
- * Simple application to assess load balancing
+ * Simple application to assess load balancing. The network is initialized with
+ * one peer only. New ones are added thanks to the load balancing strategy that
+ * is applied.
  * 
  * @author lpellegr
  */
@@ -83,47 +97,35 @@ public class LoadBalancingBenchmark {
 
     // parameters
 
-    @Parameter(names = {"-np", "--nb-publications"}, description = "The number of events to publish")
-    public int nbPublications = 100;
-
-    @Parameter(names = {"-ces", "--compound-event-size"}, description = "The number of quadruples contained by each CE")
-    public int nbQuadruplesPerCompoundEvent = 10;
-
-    @Parameter(names = {"-if", "--input-file"}, description = "Path to file containing quadruples to load", converter = FileConverter.class)
+    @Parameter(names = {"-if", "--input-file"}, description = "File containing quadruples using TriG syntax", converter = FileConverter.class)
     public File inputFile;
 
-    @Parameter(names = {"-nr", "--nb-runs"}, description = "The number of runs to perform", required = true)
+    @Parameter(names = {"-nr", "--nb-runs"}, description = "The number of runs to perform")
     public int nbRuns = 1;
 
-    @Parameter(names = {"-k", "--maximum-nb-quads-per-peer"}, description = "The maximum number of quads per peer", required = true)
-    public int maximumNbQuadsPerPeer;
-
     @Parameter(names = {"-dr", "--dry-runs"}, description = "Indicates the number of first runs to discard")
-    public int discardFirstRuns = 1;
+    public int discardFirstRuns = 0;
 
     @Parameter(names = {"-imds", "--in-memory-datastore"}, description = "Specifies whether datastores on peers have to be persisted on disk or not")
     public boolean inMemoryDatastore = false;
 
-    @Parameter(names = {"-pq", "--publish-quadruples"}, description = "Indicates whether events must be emitted as quadruples (default CEs)")
-    public boolean publishIndependentQuadruples = false;
+    @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
+    public String gcmaDescriptor = null;
+
+    @Parameter(names = {"-p", "--nb-peers"}, description = "The maximum number of peers to inject into the P2P network")
+    public int nbPeers = 1;
+
+    @Parameter(names = {"-s", "--strategy"}, description = "Load balancing strategy to apply", converter = LoadBalancingStrategyConverter.class)
+    public LoadBalancingStrategy strategy;
 
     @Parameter(names = {"-h", "--help"}, description = "Print help", help = true)
     public boolean help;
 
-    @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
-    public String gcmaDescriptor = null;
+    private EventCloudComponentsManager componentsManager;
 
-    private EventCloudComponentsManager ecComponentsManager;
-
-    public int nbCompoundEvents;
-
-    public int nbPeers;
+    private int nbQuadruplesPublished;
 
     public static void main(String[] args) {
-        // alphabetic lower case interval
-        P2PStructuredProperties.CAN_LOWER_BOUND.setValue(0x61);
-        P2PStructuredProperties.CAN_UPPER_BOUND.setValue(0x7A);
-
         LoadBalancingBenchmark benchmark = new LoadBalancingBenchmark();
 
         JCommander jCommander = new JCommander(benchmark);
@@ -145,21 +147,7 @@ public class LoadBalancingBenchmark {
         System.exit(0);
     }
 
-    private void logParameterValues() {
-        log.info("Benchmark starting with the following parameters:");
-        log.info("  compoundEventSize -> {}", this.nbQuadruplesPerCompoundEvent);
-        log.info("  nbPublications -> {}", this.nbPublications);
-        log.info("  inputFile -> {}", this.inputFile);
-        log.info("  dryRuns -> {}", this.discardFirstRuns);
-        log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
-        log.info("  nbPeers -> {}", this.nbPeers);
-        log.info("  nbRuns -> {}", this.nbRuns);
-    }
-
     public StatsRecorder execute() {
-        this.nbPeers =
-                1 + (this.computeNumberOfQuadruplesExpected() / this.maximumNbQuadsPerPeer);
-
         this.logParameterValues();
 
         // creates and runs micro benchmark
@@ -182,27 +170,34 @@ public class LoadBalancingBenchmark {
 
                     @Override
                     public void setup() throws Exception {
+                        log.info(
+                                "Loading events from {}",
+                                LoadBalancingBenchmark.this.inputFile);
+                        this.events =
+                                LoadBalancingBenchmark.this.loadEvents(LoadBalancingBenchmark.this.inputFile);
+
+                        log.info(
+                                "{} compound events loaded", this.events.length);
+
                         this.collector =
                                 PAActiveObject.newActive(
                                         BenchmarkStatsCollector.class,
-                                        new Object[] {
-                                                LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected(),
-                                                LoadBalancingBenchmark.this.maximumNbQuadsPerPeer});
+                                        new Object[] {LoadBalancingBenchmark.this.nbQuadruplesPublished});
                         this.collectorURL =
                                 PAActiveObject.registerByName(
                                         this.collector,
                                         BENCHMARK_STATS_COLLECTOR_NAME);
 
                         this.nodeProvider =
-                                LoadBalancingBenchmark.this.createNodeProviderIfRequired();
+                                LoadBalancingBenchmark.this.createNodeProvider();
 
-                        LoadBalancingBenchmark.this.ecComponentsManager =
+                        LoadBalancingBenchmark.this.componentsManager =
                                 EventCloudComponentsManagerFactory.newComponentsManager(
                                         this.nodeProvider, 1,
                                         LoadBalancingBenchmark.this.nbPeers, 1,
                                         1, 0);
 
-                        LoadBalancingBenchmark.this.ecComponentsManager.start();
+                        LoadBalancingBenchmark.this.componentsManager.start();
 
                         EventCloudDeploymentDescriptor descriptor =
                                 this.createDeploymentDescriptor(
@@ -212,28 +207,8 @@ public class LoadBalancingBenchmark {
                                 new EventCloudDeployer(
                                         new EventCloudDescription(),
                                         descriptor,
-                                        LoadBalancingBenchmark.this.ecComponentsManager);
+                                        LoadBalancingBenchmark.this.componentsManager);
                         this.deployer.deploy(1, 1);
-
-                        SemanticZone[] zones =
-                                LoadBalancingBenchmark.this.retrievePeerZones(this.deployer);
-
-                        this.events =
-                                new Event[LoadBalancingBenchmark.this.nbPublications];
-
-                        for (int i = 0; i < this.events.length; i++) {
-                            if (LoadBalancingBenchmark.this.publishIndependentQuadruples) {
-                                this.events[i] =
-                                        EventGenerator.randomQuadruple(
-                                                zones[0], 10);
-                            } else {
-                                this.events[i] =
-                                        EventGenerator.randomCompoundEvent(
-                                                zones,
-                                                LoadBalancingBenchmark.this.nbQuadruplesPerCompoundEvent,
-                                                10, true);
-                            }
-                        }
 
                         this.registry =
                                 LoadBalancingBenchmark.this.deployRegistry(
@@ -254,26 +229,23 @@ public class LoadBalancingBenchmark {
                                 LoadBalancingBenchmark.this.createPublishProxies(
                                         this.nodeProvider, registryURL,
                                         eventCloudId);
-
-                        // log.info("Clearing recorded information before to start benchmark");
-                        // // clear();
-                        //
-                        // Thread.sleep(360000000);
                     }
 
                     private EventCloudDeploymentDescriptor createDeploymentDescriptor(NodeProvider nodeProvider,
                                                                                       String benchmarkStatsCollectorURL) {
+                        Criterion[] criteria = new Criterion[1];
+                        criteria[0] = new QuadrupleCountCriterion();
+
                         EventCloudDeploymentDescriptor descriptor =
                                 new EventCloudDeploymentDescriptor(
                                         new CustomSemanticOverlayProvider(
-                                                new NeighborsThresholdLoadBalancingConfiguration(
-                                                        LoadBalancingBenchmark.this.ecComponentsManager,
-                                                        LoadBalancingBenchmark.this.maximumNbQuadsPerPeer,
-                                                        1.5),
+                                                new LoadBalancingConfiguration(
+                                                        criteria,
+                                                        LoadBalancingBenchmark.this.componentsManager,
+                                                        LoadBalancingBenchmark.this.strategy),
                                                 this.collectorURL,
-                                                LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected(),
+                                                LoadBalancingBenchmark.this.nbQuadruplesPublished,
                                                 LoadBalancingBenchmark.this.inMemoryDatastore));
-                        descriptor.setInjectionConstraintsProvider(InjectionConstraintsProvider.newUniformInjectionConstraintsProvider());
 
                         return descriptor;
                     }
@@ -281,52 +253,71 @@ public class LoadBalancingBenchmark {
                     @Override
                     public void run(StatsRecorder recorder)
                             throws TimeoutException {
-                        log.info("Assign events");
+                        log.info("Assigning events");
                         this.publishProxies.assignEvents(this.events);
 
-                        log.info("Publishing generated events to trigger load balancing");
+                        log.info("Publishing events to trigger load balancing");
                         this.publishProxies.publish();
 
-                        // timeout after 1 hour
-                        this.collector.wait(3600000);
+                        while (!LoadBalancingBenchmark.this.componentsManager.isPeerComponentPoolEmpty()) {
+                            // timeout after 1 hour
+                            this.collector.wait(3600000);
+                        }
+
+                        // try {
+                        // Thread.sleep(15000);
+                        // } catch (InterruptedException e) {
+                        // e.printStackTrace();
+                        // }
 
                         log.info("Distribution on peers is:");
 
-                        Map<OverlayId, Integer> results =
-                                this.collector.getResults();
+                        // Map<OverlayId, Integer> results =
+                        // new HashMap<OverlayId, Integer>();
+
+                        // for (Peer peer :
+                        // this.deployer.getRandomSemanticTracker()
+                        // .getPeers()) {
+                        // GenericResponseOperation<Integer> result =
+                        // (GenericResponseOperation<Integer>)
+                        // PAFuture.getFutureValue(peer.receive(new
+                        // CountQuadruplesOperation(
+                        // false)));
+                        //
+                        // results.put(peer.getId(), result.getValue());
+                        // }
+
+                        Proxy proxy =
+                                org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory.newProxy(this.deployer.getTrackers());
+                        CountQuadrupleResponse response =
+                                (CountQuadrupleResponse) PAFuture.getFutureValue(proxy.send(new CountQuadrupleRequest()));
+
+                        Map<OverlayId, Long> results = response.getResult();
 
                         DescriptiveStatistics stats =
                                 new DescriptiveStatistics();
 
                         int count = 0;
-                        for (Entry<OverlayId, Integer> entry : results.entrySet()) {
+                        for (Entry<OverlayId, Long> entry : results.entrySet()) {
                             log.info("{}  {}", entry.getKey(), entry.getValue());
                             count += entry.getValue();
                             stats.addValue(entry.getValue());
                         }
 
+                        log.info("{} peers used", results.size());
                         log.info(
-                                "Sum of data managed by peers gives {}, standard deviation is {}, variability (stddev/average * 100) is {}%",
+                                "Peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
                                 count,
                                 stats.getStandardDeviation(),
                                 (stats.getStandardDeviation() / stats.getMean()) * 100);
-                        log.info(
-                                "Number of peers used is {} whereas {} only should be used with an uniform situation",
-                                results.size(),
-                                (int) Math.ceil(LoadBalancingBenchmark.this.computeNumberOfQuadruplesExpected()
-                                        / (double) LoadBalancingBenchmark.this.maximumNbQuadsPerPeer));
 
-                        // grep "Assign" LoadBalancingBenchmark
-                        // grep "Join" LoadBalancingBenchmark | grep
-                        // "has required"
-
-                        // TODO remove once clear is performed, we have to
-                        // perform multiple runs!
                         System.exit(1);
                     }
 
                     @Override
                     public void clear() throws Exception {
+                        log.info("Clearing previously recorded information before to start benchmark");
+
                         List<ResponseOperation> futures =
                                 new ArrayList<ResponseOperation>();
 
@@ -338,7 +329,6 @@ public class LoadBalancingBenchmark {
                         PAFuture.waitForAll(futures);
 
                         this.collector.clear();
-
                     }
 
                     @Override
@@ -353,32 +343,55 @@ public class LoadBalancingBenchmark {
         microBenchmark.showProgress();
         microBenchmark.execute();
 
-        // System.out.println(this.createBenchmarkReport(microBenchmark));
-
         return microBenchmark.getStatsRecorder();
     }
 
-    private int computeNumberOfQuadruplesExpected() {
-        if (this.publishIndependentQuadruples) {
-            return this.nbPublications;
-        } else {
-            return (this.nbQuadruplesPerCompoundEvent + 1)
-                    * this.nbPublications;
+    private Event[] loadEvents(File file) {
+        QuadrupleIterator iterator;
+
+        Multimap<Node, Quadruple> mmap = ArrayListMultimap.create();
+
+        try {
+            iterator =
+                    RDFReader.pipe(new BufferedInputStream(new FileInputStream(
+                            file)), SerializationFormat.TriG);
+
+            Quadruple q;
+
+            while (iterator.hasNext()) {
+                q = iterator.next();
+                mmap.put(q.getGraph(), q);
+                this.nbQuadruplesPublished++;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+
+        Collection<Collection<Quadruple>> compoundEvents =
+                mmap.asMap().values();
+        Event[] result = new Event[compoundEvents.size()];
+
+        int i = 0;
+        for (Collection<Quadruple> ce : compoundEvents) {
+            result[i] = new CompoundEvent(ce);
+            i++;
+        }
+
+        // meta quadruple added
+        this.nbQuadruplesPublished += compoundEvents.size();
+
+        return result;
     }
 
-    private SemanticZone[] retrievePeerZones(EventCloudDeployer deployer) {
-        List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
-        SemanticZone[] zones = new SemanticZone[peers.size()];
-
-        for (int i = 0; i < zones.length; i++) {
-            GetIdAndZoneResponseOperation<SemanticCoordinate> response =
-                    CanOperations.getIdAndZoneResponseOperation(peers.get(i));
-            SemanticZone zone = (SemanticZone) response.getPeerZone();
-            zones[i] = zone;
-        }
-
-        return zones;
+    private void logParameterValues() {
+        log.info("Benchmark starting with the following parameters:");
+        log.info("  inputFile -> {}", this.inputFile);
+        log.info("  nbRuns -> {}", this.nbRuns);
+        log.info("  dryRuns -> {}", this.discardFirstRuns);
+        log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
+        log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
+        log.info("  nbPeers -> {}", this.nbPeers);
+        log.info("  strategy -> {}", this.strategy);
     }
 
     private EventCloudsRegistry deployRegistry(EventCloudDeployer deployer,
@@ -408,7 +421,7 @@ public class LoadBalancingBenchmark {
         PAActiveObject.unregister(collectorURL);
     }
 
-    private NodeProvider createNodeProviderIfRequired() {
+    private NodeProvider createNodeProvider() {
         if (this.gcmaDescriptor != null) {
             return new GcmDeploymentNodeProvider(this.gcmaDescriptor);
         }

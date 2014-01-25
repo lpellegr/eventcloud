@@ -27,7 +27,7 @@ import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 
 /**
  * Simple quads writer to pre-generate quadruples that may be read and reused
- * for all load-balancing stats overhead benchmarks.
+ * for all load balancing stats overhead benchmarks.
  * 
  * @author lpellegr
  */

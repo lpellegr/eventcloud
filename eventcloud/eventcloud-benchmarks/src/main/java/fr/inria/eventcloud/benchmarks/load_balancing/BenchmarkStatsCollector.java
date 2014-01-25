@@ -31,7 +31,6 @@ import org.objectweb.proactive.annotation.multiactivity.DefineRules;
 import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
-import org.objectweb.proactive.core.node.NodeException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
@@ -48,11 +47,9 @@ import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 @DefineRules({@Compatible(value = {"notify", "wait"})})
 public class BenchmarkStatsCollector implements InitActive, RunActive {
 
-    private int nbQuadruplesExpected;
+    private int totalExpected;
 
-    private int maxNumberOfQuadruplesPerPeer;
-
-    private Map<OverlayId, Integer> results;
+    private Map<OverlayId, Long> results;
 
     private RequestExecutor requestExecutor;
 
@@ -62,11 +59,8 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         this.conditionSatisfied = false;
     }
 
-    public BenchmarkStatsCollector(int nbQuadruplesExpected,
-            int maxNumberOfQuadruplesPerPeer) {
-        this();
-        this.nbQuadruplesExpected = nbQuadruplesExpected;
-        this.maxNumberOfQuadruplesPerPeer = maxNumberOfQuadruplesPerPeer;
+    public BenchmarkStatsCollector(int totalExpected) {
+        this.totalExpected = totalExpected;
     }
 
     public boolean clear() {
@@ -79,11 +73,11 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
      */
     @Override
     public void initActivity(Body body) {
-        this.results = new HashMap<OverlayId, Integer>();
+        this.results = new HashMap<OverlayId, Long>();
     }
 
     @MemberOf("notify")
-    public int report(OverlayId overlayId, int nbQuadruples) {
+    public long report(OverlayId overlayId, long nbQuadruples) {
         this.results.put(overlayId, nbQuadruples);
 
         if (this.conditionSatisfied()) {
@@ -124,33 +118,22 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
             throw new TimeoutException("Notified about "
                     + this.totalNumberOfQuadruples()
                     + " quadruple(s) stored after " + timeout + " ms whereas "
-                    + this.nbQuadruplesExpected + " were expected.");
+                    + this.totalExpected + " were expected.");
         }
     }
 
     private boolean conditionSatisfied() {
-        for (Integer v : this.results.values()) {
-            if (v > this.maxNumberOfQuadruplesPerPeer) {
-                return false;
-            }
-        }
-
-        return this.totalNumberOfQuadruples() == this.nbQuadruplesExpected
-                && this.results.size() >= this.expectedNumberOfPeers();
+        return this.totalNumberOfQuadruples() == this.totalExpected;
     }
 
     private int totalNumberOfQuadruples() {
         int sum = 0;
 
-        for (Integer i : this.results.values()) {
+        for (long i : this.results.values()) {
             sum += i;
         }
 
         return sum;
-    }
-
-    private int expectedNumberOfPeers() {
-        return this.nbQuadruplesExpected / this.maxNumberOfQuadruplesPerPeer;
     }
 
     /**
@@ -162,52 +145,10 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         this.requestExecutor =
                 ((RequestExecutor) service.getServingController());
 
-        int maxNbPeers = this.expectedNumberOfPeers() * 2;
-
-        service.multiActiveServing(maxNbPeers, false, false);
+        service.multiActiveServing(30, false, false);
     }
 
-    /*
-     * Simple scenario to test the wait/notify mechanism.
-     */
-    public static void main(String[] args)
-            throws ActiveObjectCreationException, NodeException,
-            TimeoutException {
-        final BenchmarkStatsCollector collector =
-                PAActiveObject.newActive(
-                        BenchmarkStatsCollector.class, new Object[] {100});
-
-        final OverlayId oid1 = new OverlayId();
-        final OverlayId oid2 = new OverlayId();
-        final OverlayId oid3 = new OverlayId();
-
-        // simulate publishers
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-
-                    System.out.println("oid1 50");
-                    collector.report(oid1, 50);
-                    Thread.sleep(2000);
-                    System.out.println("oid2 20");
-                    collector.report(oid2, 20);
-                    Thread.sleep(500);
-                    System.out.println("oid3 30");
-                    collector.report(oid3, 30);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        collector.wait(5000);
-        System.out.println("Collector received all results");
-    }
-
-    public Map<OverlayId, Integer> getResults() {
+    public Map<OverlayId, Long> getResults() {
         return this.results;
     }
 

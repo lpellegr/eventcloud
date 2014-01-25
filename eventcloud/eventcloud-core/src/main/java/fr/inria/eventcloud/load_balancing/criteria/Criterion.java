@@ -16,14 +16,24 @@
  **/
 package fr.inria.eventcloud.load_balancing.criteria;
 
+import java.io.Serializable;
+
 import com.google.common.collect.Range;
 
+import fr.inria.eventcloud.load_balancing.LoadEvaluation;
+import fr.inria.eventcloud.load_balancing.balancer.LoadBalancer;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+
 /**
- * A load-balancing criterion.
+ * Class defining common fields and methods to imbalance criteria.
  * 
  * @author lpellegr
  */
-public abstract class Criterion {
+public abstract class Criterion implements Serializable {
+
+    private static final long serialVersionUID = 160L;
+
+    public int index;
 
     private final String name;
 
@@ -33,21 +43,36 @@ public abstract class Criterion {
 
     private final double emergencyThreshold;
 
-    private final int weight;
+    private final LoadBalancer loadBalancer;
 
-    public Criterion(String name, Range<Double> domain) {
-        this(name, domain, domain.upperEndpoint(), domain.lowerEndpoint(), 1);
+    public Criterion(String name, LoadBalancer loadBalancer,
+            Range<Double> domain) {
+        this(name, loadBalancer, domain, domain.upperEndpoint(),
+                domain.lowerEndpoint());
     }
 
-    public Criterion(String name, Range<Double> domain, double warmupThreshold,
-            double emergencyThreshold, int weight) {
+    public Criterion(String name, LoadBalancer loadBalancer,
+            Range<Double> domain, double warmupThreshold,
+            double emergencyThreshold) {
         this.name = name;
         this.domain = domain;
 
         this.warmupThreshold = warmupThreshold;
         this.emergencyThreshold = emergencyThreshold;
 
-        this.weight = weight;
+        this.loadBalancer = loadBalancer;
+    }
+
+    public abstract double getLoad(SemanticCanOverlay overlay);
+
+    public void balanceOverload(LoadEvaluation loadEstimate,
+                                SemanticCanOverlay overlay) {
+        this.loadBalancer.balanceOverload(loadEstimate, overlay);
+    }
+
+    public void balanceUnderload(LoadEvaluation loadEstimate,
+                                 SemanticCanOverlay overlay) {
+        this.loadBalancer.balanceUnderload(loadEstimate, overlay);
     }
 
     public String getName() {
@@ -68,12 +93,6 @@ public abstract class Criterion {
 
     public double normalize(double value) {
         return value / this.domain.upperEndpoint();
-    }
-
-    public abstract double getLoad();
-
-    public int getWeight() {
-        return this.weight;
     }
 
 }

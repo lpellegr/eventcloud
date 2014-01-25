@@ -14,13 +14,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.load_balancing;
+package fr.inria.eventcloud.load_balancing.balancer;
+
+import java.io.Serializable;
+
+import fr.inria.eventcloud.load_balancing.LoadEvaluation;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Defines the different load states in which a peer may fall.
+ * Defines methods to balance an overload and an underload.
  * 
  * @author lpellegr
  */
-public enum LoadState {
-    UNDERLOADED, NORMAL, OVERLOADED;
+public interface LoadBalancer extends Serializable {
+
+    void balanceOverload(LoadEvaluation loadEstimate, SemanticCanOverlay overlay);
+
+    void balanceUnderload(LoadEvaluation loadEstimate,
+                          SemanticCanOverlay overlay);
+
 }

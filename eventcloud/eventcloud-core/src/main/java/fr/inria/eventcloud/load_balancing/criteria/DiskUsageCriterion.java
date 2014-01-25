@@ -22,19 +22,25 @@ import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Range;
 
+import fr.inria.eventcloud.load_balancing.balancer.PeerAllocatorBalancer;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
+
 /**
- * Disk usage load-balancing criterion.
+ * Disk usage load balancing criterion.
  * 
  * @author lpellegr
  */
 public class DiskUsageCriterion extends Criterion {
+
+    private static final long serialVersionUID = 160L;
 
     private final File directory;
 
     private final long virtualCapacity;
 
     public DiskUsageCriterion(String directory, long virtualCapacity) {
-        super("disk usage", Range.closed(0.0, 100.0));
+        super("diskUsage", new PeerAllocatorBalancer(),
+                Range.closed(0.0, 100.0));
 
         this.directory = new File(directory);
 
@@ -53,7 +59,7 @@ public class DiskUsageCriterion extends Criterion {
      * {@inheritDoc}
      */
     @Override
-    public double getLoad() {
+    public double getLoad(SemanticCanOverlay overlay) {
         return ((FileUtils.sizeOfDirectory(this.directory) * 100) / (double) this.virtualCapacity);
     }
 

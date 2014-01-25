@@ -20,7 +20,8 @@ import fr.inria.eventcloud.load_balancing.LoadReport;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Gossip strategy based on random walks.
+ * Gossip strategy based on random walks. Forwards the load report to peers
+ * selected at random.
  * 
  * @author lpellegr
  */

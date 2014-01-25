@@ -72,6 +72,10 @@ public class Pool<R> implements Iterable<R> {
         this.resources.add(resource);
     }
 
+    public boolean isEmpty() {
+        return this.resources.isEmpty();
+    }
+
     public int size() {
         return this.resources.size();
     }

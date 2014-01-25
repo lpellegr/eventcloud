@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 
 import fr.inria.eventcloud.benchmarks.load_balancing.BenchmarkStatsCollector;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
@@ -42,6 +43,14 @@ public class CustomSemanticOverlay extends SemanticCanOverlay {
             TransactionalTdbDatastore colanderDatastore) {
         super(subscriptionsDatastore, miscDatastore, colanderDatastore);
         this.collector = collector;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void join(Peer landmarkPeer) {
+        super.join(landmarkPeer);
     }
 
     /**
