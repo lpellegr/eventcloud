@@ -18,10 +18,9 @@ package fr.inria.eventcloud.load_balancing;
 
 import java.io.Serializable;
 
-import fr.inria.eventcloud.load_balancing.criteria.Criterion;
-
 /**
- * Provides load information. Mainly used to disseminate load to others peers.
+ * Provides load information. Mainly used to disseminate load to other peers
+ * when a relative strategy is applied.
  * 
  * @author lpellegr
  */
@@ -29,36 +28,16 @@ public class LoadReport implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private final String peerURL;
-
     private final long creationTime;
+
+    private final String peerURL;
 
     private final double[] values;
 
-    protected LoadReport(String peerURL, Criterion[] criteria) {
-        this.peerURL = peerURL;
-        this.values = new double[criteria.length];
-
-        for (int i = 0; i < criteria.length; i++) {
-            this.values[i] = criteria[i].getLoad();
-        }
-
+    public LoadReport(String peerURL, double[] values) {
         this.creationTime = System.currentTimeMillis();
-    }
-
-    public double computeWeightedSum(Criterion[] criteria) {
-        if (criteria.length != this.values.length) {
-            throw new IllegalArgumentException(
-                    "Criteria length different from the number of load report values");
-        }
-
-        double result = 0;
-
-        for (int i = 0; i < criteria.length; i++) {
-            result += this.values[i] * criteria[i].getWeight();
-        }
-
-        return result;
+        this.peerURL = peerURL;
+        this.values = values;
     }
 
     public long getCreationTime() {

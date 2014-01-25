@@ -16,11 +16,15 @@
  **/
 package fr.inria.eventcloud.load_balancing;
 
+import fr.inria.eventcloud.load_balancing.services.LoadBalancingService;
+
 /**
- * Entity in charge of managing load-balancing features. All the job is
+ * Entity in charge of managing load balancing features. All the job is
  * delegated to the {@link LoadBalancingService} specified with the constructor.
  * 
  * @author lpellegr
+ * 
+ * @see LoadBalancingService
  */
 public class LoadBalancingManager {
 

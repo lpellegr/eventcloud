@@ -14,44 +14,43 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.load_balancing.configuration;
+package fr.inria.eventcloud.load_balancing.services;
 
-import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
-import fr.inria.eventcloud.load_balancing.LoadBalancingService;
-import fr.inria.eventcloud.load_balancing.UniformLoadBalancingService;
+import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * 
+ * Load balancing service taking decision about imbalances by using local
+ * knowledge only (i.e. predefined threshold values).
  * 
  * @author lpellegr
  */
-public class UniformLoadBalancingConfiguration extends
-        LoadBalancingConfiguration {
+public class AbsoluteLoadBalancingService extends LoadBalancingService {
 
-    private static final long serialVersionUID = 160L;
+    public AbsoluteLoadBalancingService(final SemanticCanOverlay overlay,
+            LoadBalancingConfiguration configuration) {
+        super(overlay, configuration);
 
-    private final Criterion[] criteria;
-
-    public UniformLoadBalancingConfiguration(
-            EventCloudComponentsManager eventCloudComponentsManager,
-
-            Criterion[] criteria) {
-        super(eventCloudComponentsManager);
-        this.criteria = criteria;
-    }
-
-    public Criterion[] getCriteria() {
-        return this.criteria;
+        // TODO: it should be possible to set k1 and k2 per criterion.
+        configuration.setK1(1);
+        configuration.setK2(0);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LoadBalancingService createLoadBalancingService(SemanticCanOverlay overlay) {
-        return new UniformLoadBalancingService(overlay, this);
+    public double getLoadEstimate(Criterion c) {
+        return super.configuration.getCriteria()[c.index].getEmergencyThreshold();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String serviceName() {
+        return "Absolute load balancing service";
     }
 
 }

@@ -75,6 +75,7 @@ import fr.inria.eventcloud.tracker.SemanticTracker;
  * <br>
  * 
  * @author bsauvan
+ * @author lpellegr
  */
 @DefineGroups({@Group(name = "parallel", selfCompatible = true)})
 public class EventCloudComponentsManager implements InitActive, RunActive,
@@ -409,6 +410,10 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
         assert this.isRunning();
         return this.putgetProxies.borrow(
                 deploymentConfiguration, registryURL, eventCloudId);
+    }
+
+    public boolean isPeerComponentPoolEmpty() {
+        return this.peers.isEmpty();
     }
 
     /**

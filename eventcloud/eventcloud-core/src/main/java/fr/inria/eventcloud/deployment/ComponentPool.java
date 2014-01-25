@@ -52,6 +52,10 @@ public class ComponentPool<T> implements Iterable<T> {
         this.pool.clear();
     }
 
+    public boolean isEmpty() {
+        return this.pool.isEmpty();
+    }
+
     public void release(T resource) {
         this.reset(resource);
         this.pool.release(resource);

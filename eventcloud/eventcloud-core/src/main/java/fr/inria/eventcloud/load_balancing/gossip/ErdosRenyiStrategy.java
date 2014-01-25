@@ -20,8 +20,8 @@ import fr.inria.eventcloud.load_balancing.LoadReport;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Gossip strategy based on Erdos-Renyi algorithm to generate random graphs. It
- * assumes that we have an approximation of the network size.
+ * Gossip strategy based on the Erdos-Renyi algorithm to generate random graphs.
+ * It assumes that we have an approximation of the network size.
  * 
  * @author lpellegr
  */

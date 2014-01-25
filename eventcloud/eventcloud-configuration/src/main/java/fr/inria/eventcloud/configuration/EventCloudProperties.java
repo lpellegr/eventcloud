@@ -297,37 +297,40 @@ public class EventCloudProperties {
                     "prefix-removal");
 
     /**
-     * This ratio is used to determine when a peer should report its load to
-     * others. It may affect the load balancing convergence time but also the
-     * accuracy.
-     */
-    public static final PropertyDouble LOAD_BALANCING_GOSSIP_RATIO =
-            new PropertyDouble("eventcloud.load.balancing.gossip.ratio", 2.0);
-
-    /**
      * Defines which gossip strategy is applied for reporting load. Any class
      * implementing GossipStrategy may be used.
      */
     public static final PropertyClass LOAD_BALANCING_GOSSIP_STRATEGY =
             new PropertyClass(
                     "eventcloud.load.balancing.gossip.strategy",
-                    "fr.inria.eventcloud.load_balancing.gossip.FloodingStrategy");
+                    "fr.inria.eventcloud.load_balancing.gossip.ImmediateNeighborsStrategy");
 
-    public static final PropertyInteger LOAD_BALANCING_HISTORY_TIME_WINDOW =
-            new PropertyInteger(
-                    "eventcloud.load.balancing.history.time.window", 3600000);
+    /**
+     * Defines load balancing parameter value for k1.
+     */
+    public static final PropertyDouble LOAD_BALANCING_PARAMETER_K1 =
+            new PropertyDouble("eventcloud.load.balancing.parameter.k1", 1.2);
 
-    public static final PropertyInteger LOAD_BALANCING_PROBING_TIMEOUT =
-            new PropertyInteger(
-                    "eventcloud.load.balancing.probing.timeout", 1000);
+    /**
+     * Defines load balancing parameter value for k2.
+     */
+    public static final PropertyDouble LOAD_BALANCING_PARAMETER_K2 =
+            new PropertyDouble("eventcloud.load.balancing.parameter.k2", 1.2);
 
-    public static final PropertyDouble LOAD_BALANCING_IMBALANCE_RATIO =
-            new PropertyDouble("eventcloud.load.balancing.imbalance.ratio", 2.0);
+    /**
+     * Defines the period in milliseconds to wait between each load balancing
+     * iteration.
+     */
+    public static final PropertyInteger LOAD_BALANCING_PERIOD =
+            new PropertyInteger("eventcloud.load.balancing.period", 500);
 
-    public static final PropertyDouble LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD =
+    /**
+     * Defines emergency threshold value for quadruple criterion.
+     */
+    public static final PropertyDouble LOAD_BALANCING_EMERGENCY_THRESHOLD_QUADRUPLE_CRITERION =
             new PropertyDouble(
-                    "eventcloud.load.balancing.criterion.nb.quadruples.stored.emergency.threshold",
-                    10000000.0);
+                    "eventcloud.load.balancing.emergency.threshold.quadruple.criterion",
+                    10000.0);
 
     /**
      * This property is used to have the possibility to restore a repository

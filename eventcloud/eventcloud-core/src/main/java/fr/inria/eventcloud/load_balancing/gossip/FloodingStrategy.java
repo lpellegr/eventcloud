@@ -23,14 +23,14 @@ import org.objectweb.proactive.extensions.p2p.structured.router.can.OptimalBroad
 import org.objectweb.proactive.extensions.p2p.structured.utils.SerializedValue;
 
 import fr.inria.eventcloud.load_balancing.LoadReport;
-import fr.inria.eventcloud.load_balancing.UniformLoadBalancingService;
+import fr.inria.eventcloud.load_balancing.services.RelativeLoadBalancingService;
 import fr.inria.eventcloud.messages.request.StatelessQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
 /**
- * Basic flooding strategy. The load is spread step by step to all peers by
- * using the optimal broadcast algorithm.
+ * Gossip strategy based on gossip. The load is spread step by step to all peers
+ * in the system by using the optimal broadcast algorithm.
  * 
  * @author lpellegr
  */
@@ -53,13 +53,7 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
 
         public FloodingLoadRequest(LoadReport loadReport) {
             super(null);
-
             this.loadReport = SerializedValue.create(loadReport);
-        }
-
-        public void onPeerValidatingKeyConstraints(CanOverlay<SemanticCoordinate> overlay) {
-            ((UniformLoadBalancingService) ((SemanticCanOverlay) overlay).getLoadBalancingManager()
-                    .getLoadBalancingService()).save(this.loadReport.getValue());
         }
 
         @Override
@@ -68,7 +62,8 @@ public class FloodingStrategy implements GossipStrategy<LoadReport> {
                 @Override
                 public void onPeerValidatingKeyConstraints(final CanOverlay<SemanticCoordinate> overlay,
                                                            final MulticastRequest<SemanticCoordinate> request) {
-                    FloodingLoadRequest.this.onPeerValidatingKeyConstraints(overlay);
+                    ((RelativeLoadBalancingService) ((SemanticCanOverlay) overlay).getLoadBalancingManager()
+                            .getLoadBalancingService()).register(FloodingLoadRequest.this.loadReport.getValue());
                 }
             };
         }

@@ -19,34 +19,33 @@ package fr.inria.eventcloud.load_balancing.criteria;
 import com.google.common.collect.Range;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
-import fr.inria.eventcloud.datastore.stats.StatsRecorder;
+import fr.inria.eventcloud.load_balancing.balancer.PeerAllocatorBalancer;
+import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Number of quadruples stored load-balancing criterion.
+ * Criterion related to the number of quadruples managed.
  * 
  * @author lpellegr
  */
-public class NbQuadrupleStoredCriterion extends Criterion {
+public class QuadrupleCountCriterion extends Criterion {
 
-    private final StatsRecorder statsRecorder;
+    private static final long serialVersionUID = 160L;
 
-    public NbQuadrupleStoredCriterion(StatsRecorder statsRecorder) {
+    public QuadrupleCountCriterion() {
         super(
-                "nb quadruples stored",
+                "nbQuadruples",
+                new PeerAllocatorBalancer(),
                 Range.closed(0.0, (double) Long.MAX_VALUE),
                 5,
-                EventCloudProperties.LOAD_BALANCING_CRITERION_NB_QUADS_STORED_EMERGENCY_THRESHOLD.getValue(),
-                1);
-
-        this.statsRecorder = statsRecorder;
+                EventCloudProperties.LOAD_BALANCING_EMERGENCY_THRESHOLD_QUADRUPLE_CRITERION.getValue());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public double getLoad() {
-        return this.statsRecorder.getNbQuadruples();
+    public double getLoad(SemanticCanOverlay overlay) {
+        return overlay.getMiscDatastore().getStatsRecorder().getNbQuadruples();
     }
 
 }

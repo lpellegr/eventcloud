@@ -27,6 +27,11 @@ import fr.inria.eventcloud.benchmarks.pubsub.overlay.CustomSemanticOverlay;
 import fr.inria.eventcloud.messages.request.StatefulQuadruplePatternRequest;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 
+/**
+ * Request to retrieve storage end times.
+ * 
+ * @author lpellegr
+ */
 public class RetrieveStorageEndTimesRequest extends
         StatefulQuadruplePatternRequest<StorageTimes> {
 

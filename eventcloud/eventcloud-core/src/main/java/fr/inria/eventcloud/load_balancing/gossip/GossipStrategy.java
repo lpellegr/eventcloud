@@ -19,24 +19,23 @@ package fr.inria.eventcloud.load_balancing.gossip;
 import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 
 /**
- * Defines the methods required for implementing a gossip strategy. We assume
- * that all gossip strategies rely on a push model and not a pull one since the
- * last incurs bad performances (e.g. higher bandwidth consumption due to the
- * round-trip). In anycase, we are aware that gossiping is slow and unsuitable
- * for real-time systems where speed is the goal.
+ * Defines the methods required for implementing a gossip strategy. It is
+ * assumes that all gossip strategies rely on a push model and not a pull one
+ * since the last incurs bad performances (e.g. higher bandwidth consumption due
+ * to the round-trip).
  * 
  * @author lpellegr
  * 
  * @param <T>
- *            the type of the rumor to propagate to neighbors.
+ *            rumor's type to propagate.
  */
 public interface GossipStrategy<T> {
 
     /**
-     * Pushes the specified rumour to the desired neighbors.
+     * Pushes the specified rumour to the desired peers.
      * 
      * @param overlay
-     *            the overlay from where the rumour should be triggered.
+     *            the overlay from where the rumour is triggered.
      * @param rumour
      *            the rumour to propagate.
      */

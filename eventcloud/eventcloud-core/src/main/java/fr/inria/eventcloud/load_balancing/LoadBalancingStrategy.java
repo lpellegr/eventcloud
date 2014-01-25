@@ -14,34 +14,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  **/
-package fr.inria.eventcloud.load_balancing.criteria;
+package fr.inria.eventcloud.load_balancing;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-
-import com.google.common.collect.Range;
+import fr.inria.eventcloud.load_balancing.services.AbsoluteLoadBalancingService;
+import fr.inria.eventcloud.load_balancing.services.RelativeLoadBalancingService;
 
 /**
- * System load criterion for load-balancing.
+ * Defines load balancing strategies.
  * 
  * @author lpellegr
+ * 
+ * @see AbsoluteLoadBalancingService
+ * @see RelativeLoadBalancingService
  */
-public class SystemLoadCriterion extends Criterion {
-
-    public SystemLoadCriterion() {
-        super("system load", Range.closed(0.0, 1.0));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public double getLoad() {
-        OperatingSystemMXBean operatingSystemBean =
-                ManagementFactory.getOperatingSystemMXBean();
-
-        return operatingSystemBean.getSystemLoadAverage()
-                / operatingSystemBean.getAvailableProcessors();
-    }
-
+public enum LoadBalancingStrategy {
+    ABSOLUTE, RELATIVE
 }

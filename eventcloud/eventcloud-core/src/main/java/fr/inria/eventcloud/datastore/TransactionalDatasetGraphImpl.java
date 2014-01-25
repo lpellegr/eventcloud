@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.tdb.transaction.DatasetGraphTxn;
 
 import fr.inria.eventcloud.api.Quadruple;
@@ -39,11 +40,14 @@ public final class TransactionalDatasetGraphImpl implements
 
     private final Dataset dataset;
 
+    private final DatasetGraph datasetGraph;
+
     private final StatsRecorder statsRecorder;
 
     public TransactionalDatasetGraphImpl(Dataset dataset,
             StatsRecorder statsRecorder) {
         this.dataset = dataset;
+        this.datasetGraph = dataset.asDatasetGraph();
         this.statsRecorder = statsRecorder;
     }
 
@@ -53,7 +57,7 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public void add(final Node g, final Node s, final Node p, final Node o) {
         this.statsRecorder.register(g, s, p, o);
-        this.dataset.asDatasetGraph().add(g, s, p, o);
+        this.datasetGraph.add(g, s, p, o);
     }
 
     /**
@@ -81,7 +85,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public boolean contains(Quadruple quadruple) {
-        return this.dataset.asDatasetGraph().contains(
+        return this.datasetGraph.contains(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -92,9 +96,16 @@ public final class TransactionalDatasetGraphImpl implements
     @Override
     public void delete(final Quadruple quadruple) {
         this.statsRecorder.unregister(
-                quadruple.getGraph(), quadruple.getSubject(),
+                quadruple.createMetaGraphNode(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
-        this.dataset.asDatasetGraph().delete(
+
+        // FIXME hack because we don't enforce quadruple storage with meta graph
+        // node, therefore deletion must be made with and without meta graph
+        // value
+        this.datasetGraph.delete(
+                quadruple.createMetaGraphNode(), quadruple.getSubject(),
+                quadruple.getPredicate(), quadruple.getObject());
+        this.datasetGraph.delete(
                 quadruple.getGraph(), quadruple.getSubject(),
                 quadruple.getPredicate(), quadruple.getObject());
     }
@@ -124,7 +135,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public void delete(Node g, Node s, Node p, Node o) {
-        this.dataset.asDatasetGraph().deleteAny(g, s, p, o);
+        this.datasetGraph.deleteAny(g, s, p, o);
 
         // TODO: perform unregister on the statsRecorder instance for the
         // quadruples that are removed
@@ -145,8 +156,7 @@ public final class TransactionalDatasetGraphImpl implements
      */
     @Override
     public QuadrupleIterator find(Node g, Node s, Node p, Node o) {
-        return new QuadrupleIterator(this.dataset.asDatasetGraph().findNG(
-                g, s, p, o));
+        return new QuadrupleIterator(this.datasetGraph.findNG(g, s, p, o));
     }
 
     /**
