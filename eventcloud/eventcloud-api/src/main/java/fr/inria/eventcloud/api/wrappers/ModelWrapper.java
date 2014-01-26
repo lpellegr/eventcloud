@@ -1712,4 +1712,36 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
         return super.object.isClosed();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetRDFReaderF() {
+        super.object.resetRDFReaderF();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String removeReader(String lang) throws IllegalArgumentException {
+        return super.object.removeReader(lang);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetRDFWriterF() {
+        super.object.resetRDFWriterF();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String removeWriter(String lang) throws IllegalArgumentException {
+        return super.object.removeWriter(lang);
+    }
+
 }
