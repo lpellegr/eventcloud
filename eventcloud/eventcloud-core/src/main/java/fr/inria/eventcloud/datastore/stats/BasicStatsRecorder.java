@@ -22,6 +22,8 @@ import org.apfloat.Apfloat;
 
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
+
 /**
  * Basic stats recorder whose the purpose is mainly to maintain the number of
  * quadruples managed. Other operations used to compute measurements about RDF
@@ -38,6 +40,14 @@ public class BasicStatsRecorder extends AbstractStatsRecorder {
     public BasicStatsRecorder() {
         super(0);
         this.nbQuadruples = new AtomicLong();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SemanticCoordinate computeSplitEstimation(byte dimension) {
+        return null;
     }
 
     /**

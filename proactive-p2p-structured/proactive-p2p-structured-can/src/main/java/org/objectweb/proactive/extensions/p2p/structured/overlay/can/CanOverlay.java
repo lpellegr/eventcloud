@@ -69,6 +69,7 @@ import org.objectweb.proactive.multiactivity.execution.RunnableRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 /**
@@ -612,6 +613,9 @@ public abstract class CanOverlay<E extends Coordinate> extends
      */
     @Override
     public void join(Peer landmarkPeer) {
+        Preconditions.checkNotNull(
+                landmarkPeer, "Landmark peer reference is null");
+
         PAFuture.waitFor(landmarkPeer.receive(new JoinIntroduceOperation<E>(
                 super.id, super.stub, super.maintenanceId)));
 

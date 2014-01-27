@@ -17,8 +17,9 @@
 package fr.inria.eventcloud.benchmarks.load_balancing;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.objectweb.proactive.ActiveObjectCreationException;
@@ -32,6 +33,7 @@ import org.objectweb.proactive.annotation.multiactivity.Group;
 import org.objectweb.proactive.annotation.multiactivity.MemberOf;
 import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.multiactivity.MultiActiveService;
 import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
 
@@ -42,72 +44,89 @@ import org.objectweb.proactive.multiactivity.execution.RequestExecutor;
  * @author lpellegr
  */
 @DefineGroups({
-        @Group(name = "notify", selfCompatible = false),
+        @Group(name = "parallel", selfCompatible = true),
+        @Group(name = "notify", selfCompatible = true),
         @Group(name = "wait", selfCompatible = false)})
-@DefineRules({@Compatible(value = {"notify", "wait"})})
+@DefineRules({
+        @Compatible(value = {"notify", "wait"}),
+        @Compatible(value = {"parallel", "wait"}),
+        @Compatible(value = {"parallel", "notify"})})
 public class BenchmarkStatsCollector implements InitActive, RunActive {
 
-    private int totalExpected;
+    private int poolSize;
 
-    private Map<OverlayId, Long> results;
+    private int nbJoinAcknowledged;
+
+    private int nbJoinIntroduceAcknowledged;
 
     private RequestExecutor requestExecutor;
 
     private boolean conditionSatisfied;
 
+    private List<Peer> peers;
+
+    public enum ReportType {
+        JOIN, JOIN_INTRODUCE
+    };
+
     public BenchmarkStatsCollector() {
         this.conditionSatisfied = false;
     }
 
-    public BenchmarkStatsCollector(int totalExpected) {
-        this.totalExpected = totalExpected;
+    public BenchmarkStatsCollector(int poolSize) {
+        this.poolSize = poolSize;
     }
 
-    public boolean clear() {
-        this.results.clear();
+    public synchronized boolean clear() {
+        this.nbJoinAcknowledged = 0;
+        this.nbJoinIntroduceAcknowledged = 0;
+        this.peers.clear();
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initActivity(Body body) {
-        this.results = new HashMap<OverlayId, Long>();
+    @MemberOf("parallel")
+    public void register(Peer peer) {
+        this.peers.add(peer);
+    }
+
+    @MemberOf("parallel")
+    public List<Peer> getPeers() {
+        return this.peers;
     }
 
     @MemberOf("notify")
-    public long report(OverlayId overlayId, long nbQuadruples) {
-        this.results.put(overlayId, nbQuadruples);
+    public synchronized boolean report(OverlayId overlayId, ReportType type) {
+        if (type == ReportType.JOIN) {
+            this.incrementNbJoinAcknowledged();
+        } else if (type == ReportType.JOIN_INTRODUCE) {
+            this.incrementNbJoinIntroduceAcknowledged();
+        } else {
+            throw new IllegalArgumentException("Unknow report type: " + type);
+        }
 
         if (this.conditionSatisfied()) {
             this.conditionSatisfied = true;
-
-            synchronized (this.results) {
-                this.results.notifyAll();
-            }
+            this.notifyAll();
         }
 
-        return nbQuadruples;
+        return this.conditionSatisfied;
     }
 
     @MemberOf("wait")
-    public void wait(int timeout) throws TimeoutException {
+    public synchronized void waitCondition(int timeout) throws TimeoutException {
         if (!this.conditionSatisfied()) {
-            synchronized (this.results) {
-                while (!this.conditionSatisfied()) {
-                    this.requestExecutor.incrementExtraActiveRequestCount(1);
-                    try {
-                        this.results.wait(timeout);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } finally {
-                        this.requestExecutor.decrementExtraActiveRequestCount(1);
-                    }
+            while (!this.conditionSatisfied()) {
+                this.requestExecutor.incrementExtraActiveRequestCount(1);
+                try {
+                    this.wait(timeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    this.requestExecutor.decrementExtraActiveRequestCount(1);
+                }
 
-                    if (!this.conditionSatisfied) {
-                        break;
-                    }
+                if (!this.conditionSatisfied) {
+                    break;
                 }
             }
         } else {
@@ -116,24 +135,32 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
 
         if (!this.conditionSatisfied) {
             throw new TimeoutException("Notified about "
-                    + this.totalNumberOfQuadruples()
-                    + " quadruple(s) stored after " + timeout + " ms whereas "
-                    + this.totalExpected + " were expected.");
+                    + this.nbJoinAcknowledged + " join(s) and "
+                    + this.nbJoinIntroduceAcknowledged
+                    + " joinIntroduce(s) after " + timeout + " ms whereas "
+                    + this.poolSize + " were expected.");
         }
     }
 
     private boolean conditionSatisfied() {
-        return this.totalNumberOfQuadruples() == this.totalExpected;
+        return this.nbJoinAcknowledged == this.poolSize
+                && this.nbJoinIntroduceAcknowledged == this.poolSize;
     }
 
-    private int totalNumberOfQuadruples() {
-        int sum = 0;
+    private void incrementNbJoinAcknowledged() {
+        this.nbJoinAcknowledged++;
+    }
 
-        for (long i : this.results.values()) {
-            sum += i;
-        }
+    private void incrementNbJoinIntroduceAcknowledged() {
+        this.nbJoinIntroduceAcknowledged++;
+    }
 
-        return sum;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initActivity(Body body) {
+        this.peers = Collections.synchronizedList(new ArrayList<Peer>());
     }
 
     /**
@@ -145,11 +172,7 @@ public class BenchmarkStatsCollector implements InitActive, RunActive {
         this.requestExecutor =
                 ((RequestExecutor) service.getServingController());
 
-        service.multiActiveServing(30, false, false);
-    }
-
-    public Map<OverlayId, Long> getResults() {
-        return this.results;
+        service.multiActiveServing(100, false, false);
     }
 
     public static BenchmarkStatsCollector lookup(String URL) {
