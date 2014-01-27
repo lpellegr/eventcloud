@@ -61,7 +61,7 @@ public final class NullStatsRecorder implements StatsRecorder {
      */
     @Override
     public Apfloat computeGraphEstimation() {
-        return Apfloat.ZERO;
+        return null;
     }
 
     /**
@@ -69,7 +69,7 @@ public final class NullStatsRecorder implements StatsRecorder {
      */
     @Override
     public Apfloat computeSubjectEstimation() {
-        return Apfloat.ZERO;
+        return null;
     }
 
     /**
@@ -77,7 +77,7 @@ public final class NullStatsRecorder implements StatsRecorder {
      */
     @Override
     public Apfloat computePredicateEstimation() {
-        return Apfloat.ZERO;
+        return null;
     }
 
     /**
@@ -85,7 +85,7 @@ public final class NullStatsRecorder implements StatsRecorder {
      */
     @Override
     public Apfloat computeObjectEstimation() {
-        return Apfloat.ZERO;
+        return null;
     }
 
     /**

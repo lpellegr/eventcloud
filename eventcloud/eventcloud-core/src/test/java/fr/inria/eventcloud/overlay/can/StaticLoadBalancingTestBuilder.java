@@ -17,28 +17,31 @@
 package fr.inria.eventcloud.overlay.can;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.util.Precision;
 import org.junit.Assert;
 import org.objectweb.proactive.api.PAFuture;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.NetworkAlreadyJoinedException;
 import org.objectweb.proactive.extensions.p2p.structured.exceptions.PeerNotActivatedException;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
 import org.objectweb.proactive.extensions.p2p.structured.utils.ComponentUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.graph.Node;
 
+import fr.inria.eventcloud.api.CompoundEvent;
 import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.PutGetApi;
 import fr.inria.eventcloud.api.Quadruple;
@@ -47,6 +50,7 @@ import fr.inria.eventcloud.api.QuadruplePattern;
 import fr.inria.eventcloud.api.generators.NodeGenerator;
 import fr.inria.eventcloud.api.generators.QuadrupleGenerator;
 import fr.inria.eventcloud.configuration.EventCloudProperties;
+import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.datastore.stats.BasicStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.CentroidStatsRecorder;
 import fr.inria.eventcloud.datastore.stats.StatsRecorder;
@@ -59,7 +63,6 @@ import fr.inria.eventcloud.operations.can.GetStatsRecorderOperation;
 import fr.inria.eventcloud.operations.can.Operations;
 import fr.inria.eventcloud.overlay.SemanticPeer;
 import fr.inria.eventcloud.providers.SemanticOverlayProvider;
-import fr.inria.eventcloud.utils.Callback;
 import fr.inria.eventcloud.utils.RDFReader;
 
 public class StaticLoadBalancingTestBuilder {
@@ -69,29 +72,27 @@ public class StaticLoadBalancingTestBuilder {
 
     private boolean enableLoadBalancing = false;
 
-    private boolean enableStatsRecording = false;
-
     private boolean insertSkewedData = false;
 
     private int nbLookupsAfterJoinOperations = -1;
 
-    private int nbPeersToInject = 0;
+    private int nbPeersToInject;
 
     private int nbQuadsPerCompoundEvent = -1;
 
-    private final int nbQuadsToInsert;
+    private int nbQuadsToInsert;
 
     private final int rdfTermSize;
 
     private Class<? extends StatsRecorder> statsRecorderClass =
             BasicStatsRecorder.class;
 
-    private String trigResource;
+    private File trigResource;
 
     public StaticLoadBalancingTestBuilder(String trigResource) {
         this.nbQuadsToInsert = 1000;
         this.rdfTermSize = 10;
-        this.trigResource = trigResource;
+        this.trigResource = new File(trigResource);
     }
 
     public StaticLoadBalancingTestBuilder(int nbQuadsToInsert, int rdfTermSize) {
@@ -121,14 +122,12 @@ public class StaticLoadBalancingTestBuilder {
     }
 
     public StaticLoadBalancingTestBuilder enableStatsRecording(Class<? extends StatsRecorder> statsRecorderClass) {
-        this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
         return this;
     }
 
     public StaticLoadBalancingTestBuilder enableLoadBalancing(Class<? extends StatsRecorder> statsRecorderClass) {
         this.enableLoadBalancing = true;
-        this.enableStatsRecording = true;
         this.statsRecorderClass = statsRecorderClass;
         return this;
     }
@@ -149,7 +148,6 @@ public class StaticLoadBalancingTestBuilder {
                     "http://zzz";
 
             @Override
-            @SuppressWarnings("resource")
             protected void _execute() throws EventCloudIdNotManaged,
                     NetworkAlreadyJoinedException, FileNotFoundException,
                     PeerNotActivatedException {
@@ -158,9 +156,7 @@ public class StaticLoadBalancingTestBuilder {
                     EventCloudProperties.STATIC_LOAD_BALANCING.setValue(true);
                 }
 
-                if (StaticLoadBalancingTestBuilder.this.enableStatsRecording) {
-                    EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
-                }
+                EventCloudProperties.RECORD_STATS_MISC_DATASTORE.setValue(true);
 
                 if (StaticLoadBalancingTestBuilder.this.statsRecorderClass != null) {
                     EventCloudProperties.STATS_RECORDER_CLASS.setValue(StaticLoadBalancingTestBuilder.this.statsRecorderClass);
@@ -222,32 +218,20 @@ public class StaticLoadBalancingTestBuilder {
                         stopwatch.stop();
                     }
                 } else {
-                    InputStream is = null;
+                    List<Quadruple> quads =
+                            StaticLoadBalancingTestBuilder.this.loadEvents(StaticLoadBalancingTestBuilder.this.trigResource);
+                    StaticLoadBalancingTestBuilder.this.nbQuadsToInsert =
+                            quads.size();
 
-                    try {
-                        is =
-                                new FileInputStream(
-                                        StaticLoadBalancingTestBuilder.this.trigResource);
-                    } catch (FileNotFoundException e) {
-                        is =
-                                StaticLoadBalancingTest.class.getResourceAsStream(StaticLoadBalancingTestBuilder.this.trigResource);
+                    log.info(
+                            "{} quadruples loaded from {}", quads.size(),
+                            StaticLoadBalancingTestBuilder.this.trigResource);
 
-                        if (is == null) {
-                            throw e;
-                        }
+                    for (Quadruple q : quads) {
+                        stopwatch.start();
+                        putgetProxy.add(q);
+                        stopwatch.stop();
                     }
-
-                    RDFReader.read(
-                            new BufferedInputStream(is),
-                            SerializationFormat.TriG,
-                            new Callback<Quadruple>() {
-                                @Override
-                                public void execute(Quadruple quad) {
-                                    stopwatch.start();
-                                    putgetProxy.add(quad);
-                                    stopwatch.stop();
-                                }
-                            });
                 }
 
                 if (StaticLoadBalancingTestBuilder.this.insertSkewedData
@@ -307,7 +291,6 @@ public class StaticLoadBalancingTestBuilder {
                         for (Peer p : peers) {
                             GetStatsRecordeResponseOperation response =
                                     (GetStatsRecordeResponseOperation) PAFuture.getFutureValue(p.receive(new GetStatsRecorderOperation()));
-
                             if (response.getStatsRecorder().getNbQuadruples() > maxNumQuads) {
                                 maxNumQuads =
                                         response.getStatsRecorder()
@@ -431,54 +414,77 @@ public class StaticLoadBalancingTestBuilder {
             try {
                 this._execute();
 
-                if (EventCloudProperties.isRecordStatsMiscDatastoreEnabled()) {
-                    Pair<String, Double> stats = this.computeStats();
+                SummaryStatistics stats = new SummaryStatistics();
+                StringBuilder distribution = new StringBuilder();
 
-                    logDistribution(stats.getFirst());
-                    logStandardDeviation(stats.getSecond());
+                List<Peer> peers =
+                        this.deployer.getRandomSemanticTracker(
+                                this.eventCloudId).getPeers();
+
+                int nbPeers = peers.size();
+
+                for (int i = 0; i < nbPeers; i++) {
+                    StatsRecorder statsRecorder =
+                            Operations.getStatsRecorder(peers.get(i));
+                    stats.addValue(statsRecorder.getNbQuadruples());
+
+                    distribution.append(statsRecorder.getNbQuadruples());
+                    if (i < peers.size() - 1) {
+                        distribution.append(' ');
+                    }
                 }
+
+                log.info("Distribution is [{}]", distribution);
+
+                log.info(
+                        "{} peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
+                        nbPeers, stats.getSum(), stats.getStandardDeviation(),
+                        (stats.getStandardDeviation() / stats.getMean()) * 100);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new IllegalStateException(e);
             } finally {
                 this.tearDown();
             }
         }
 
-        private Pair<String, Double> computeStats() {
-            SummaryStatistics stats = new SummaryStatistics();
-            StringBuilder distribution = new StringBuilder();
-
-            List<Peer> peers =
-                    this.deployer.getRandomSemanticTracker(this.eventCloudId)
-                            .getPeers();
-
-            for (int i = 0; i < peers.size(); i++) {
-                StatsRecorder statsRecorder =
-                        Operations.getStatsRecorder(peers.get(i));
-                stats.addValue(statsRecorder.getNbQuadruples());
-
-                distribution.append(statsRecorder.getNbQuadruples());
-                if (i < peers.size() - 1) {
-                    distribution.append(' ');
-                }
-            }
-
-            return Pair.create(
-                    distribution.toString(), stats.getStandardDeviation());
-        }
-
-        private static void logStandardDeviation(double stdVar) {
-            log.info("Standard deviation is {}", Precision.round(stdVar, 3));
-        }
-
-        private static void logDistribution(String distribution) {
-            log.info("Distribution is [{}]", distribution);
-        }
-
         public long getExecutionTime() {
             return this.executionTime;
         }
 
+    }
+
+    private List<Quadruple> loadEvents(File file) {
+        QuadrupleIterator iterator;
+
+        Multimap<Node, Quadruple> mmap = ArrayListMultimap.create();
+
+        try {
+            iterator =
+                    RDFReader.pipe(new BufferedInputStream(new FileInputStream(
+                            file)), SerializationFormat.TriG);
+
+            Quadruple q;
+
+            while (iterator.hasNext()) {
+                q = iterator.next();
+                mmap.put(q.getGraph(), q);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Collection<Collection<Quadruple>> compoundEvents =
+                mmap.asMap().values();
+
+        List<Quadruple> result = new ArrayList<Quadruple>();
+
+        for (Collection<Quadruple> ce : compoundEvents) {
+            result.addAll(ce);
+            result.add(CompoundEvent.createMetaQuadruple(new CompoundEvent(ce)));
+        }
+
+        return result;
     }
 
 }

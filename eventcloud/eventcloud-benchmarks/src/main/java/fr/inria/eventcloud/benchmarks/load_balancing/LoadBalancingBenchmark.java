@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,10 +36,10 @@ import org.objectweb.proactive.core.ProActiveException;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.NodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.gcmdeployment.GcmDeploymentNodeProvider;
 import org.objectweb.proactive.extensions.p2p.structured.deployment.local.LocalNodeProvider;
+import org.objectweb.proactive.extensions.p2p.structured.operations.GenericResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.ResponseOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.OverlayId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
-import org.objectweb.proactive.extensions.p2p.structured.proxies.Proxy;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkService;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
@@ -61,8 +62,6 @@ import fr.inria.eventcloud.api.EventCloudId;
 import fr.inria.eventcloud.api.Quadruple;
 import fr.inria.eventcloud.api.Quadruple.SerializationFormat;
 import fr.inria.eventcloud.benchmarks.load_balancing.converters.LoadBalancingStrategyConverter;
-import fr.inria.eventcloud.benchmarks.load_balancing.messages.CountQuadrupleRequest;
-import fr.inria.eventcloud.benchmarks.load_balancing.messages.CountQuadrupleResponse;
 import fr.inria.eventcloud.benchmarks.load_balancing.overlay.CustomSemanticOverlayProvider;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomPublishProxy;
@@ -78,6 +77,7 @@ import fr.inria.eventcloud.load_balancing.LoadBalancingStrategy;
 import fr.inria.eventcloud.load_balancing.configuration.LoadBalancingConfiguration;
 import fr.inria.eventcloud.load_balancing.criteria.Criterion;
 import fr.inria.eventcloud.load_balancing.criteria.QuadrupleCountCriterion;
+import fr.inria.eventcloud.operations.can.CountQuadruplesOperation;
 import fr.inria.eventcloud.utils.RDFReader;
 
 /**
@@ -97,7 +97,7 @@ public class LoadBalancingBenchmark {
 
     // parameters
 
-    @Parameter(names = {"-if", "--input-file"}, description = "File containing quadruples using TriG syntax", converter = FileConverter.class)
+    @Parameter(names = {"-if", "--input-file"}, description = "File containing quadruples using TriG syntax", converter = FileConverter.class, required = true)
     public File inputFile;
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "The number of runs to perform")
@@ -182,7 +182,7 @@ public class LoadBalancingBenchmark {
                         this.collector =
                                 PAActiveObject.newActive(
                                         BenchmarkStatsCollector.class,
-                                        new Object[] {LoadBalancingBenchmark.this.nbQuadruplesPublished});
+                                        new Object[] {LoadBalancingBenchmark.this.nbPeers - 1});
                         this.collectorURL =
                                 PAActiveObject.registerByName(
                                         this.collector,
@@ -236,13 +236,20 @@ public class LoadBalancingBenchmark {
                         Criterion[] criteria = new Criterion[1];
                         criteria[0] = new QuadrupleCountCriterion();
 
+                        LoadBalancingConfiguration configuration = null;
+
+                        if (LoadBalancingBenchmark.this.strategy != null) {
+                            configuration =
+                                    new LoadBalancingConfiguration(
+                                            criteria,
+                                            LoadBalancingBenchmark.this.componentsManager,
+                                            LoadBalancingBenchmark.this.strategy);
+                        }
+
                         EventCloudDeploymentDescriptor descriptor =
                                 new EventCloudDeploymentDescriptor(
                                         new CustomSemanticOverlayProvider(
-                                                new LoadBalancingConfiguration(
-                                                        criteria,
-                                                        LoadBalancingBenchmark.this.componentsManager,
-                                                        LoadBalancingBenchmark.this.strategy),
+                                                configuration,
                                                 this.collectorURL,
                                                 LoadBalancingBenchmark.this.nbQuadruplesPublished,
                                                 LoadBalancingBenchmark.this.inMemoryDatastore));
@@ -259,54 +266,55 @@ public class LoadBalancingBenchmark {
                         log.info("Publishing events to trigger load balancing");
                         this.publishProxies.publish();
 
-                        while (!LoadBalancingBenchmark.this.componentsManager.isPeerComponentPoolEmpty()) {
-                            // timeout after 1 hour
-                            this.collector.wait(3600000);
-                        }
-
-                        // try {
-                        // Thread.sleep(15000);
-                        // } catch (InterruptedException e) {
-                        // e.printStackTrace();
+                        // while
+                        // (!LoadBalancingBenchmark.this.componentsManager.isPeerComponentPoolEmpty())
+                        // {
+                        // timeout after 1 hour
+                        this.collector.waitCondition(3600000);
                         // }
+
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
 
                         log.info("Distribution on peers is:");
 
-                        // Map<OverlayId, Integer> results =
-                        // new HashMap<OverlayId, Integer>();
+                        Map<OverlayId, Integer> results =
+                                new HashMap<OverlayId, Integer>();
 
-                        // for (Peer peer :
-                        // this.deployer.getRandomSemanticTracker()
-                        // .getPeers()) {
-                        // GenericResponseOperation<Integer> result =
-                        // (GenericResponseOperation<Integer>)
-                        // PAFuture.getFutureValue(peer.receive(new
-                        // CountQuadruplesOperation(
-                        // false)));
+                        for (Peer peer : this.collector.getPeers()) {
+                            @SuppressWarnings("unchecked")
+                            GenericResponseOperation<Integer> result =
+                                    (GenericResponseOperation<Integer>) PAFuture.getFutureValue(peer.receive(new CountQuadruplesOperation(
+                                            false)));
+
+                            results.put(peer.getId(), result.getValue());
+                        }
+
+                        // Proxy proxy =
+                        // org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory.newProxy(this.deployer.getTrackers());
+                        // CountQuadrupleResponse response =
+                        // (CountQuadrupleResponse)
+                        // PAFuture.getFutureValue(proxy.send(new
+                        // CountQuadrupleRequest()));
                         //
-                        // results.put(peer.getId(), result.getValue());
-                        // }
-
-                        Proxy proxy =
-                                org.objectweb.proactive.extensions.p2p.structured.factories.ProxyFactory.newProxy(this.deployer.getTrackers());
-                        CountQuadrupleResponse response =
-                                (CountQuadrupleResponse) PAFuture.getFutureValue(proxy.send(new CountQuadrupleRequest()));
-
-                        Map<OverlayId, Long> results = response.getResult();
+                        // Map<OverlayId, Long> results = response.getResult();
 
                         DescriptiveStatistics stats =
                                 new DescriptiveStatistics();
 
                         int count = 0;
-                        for (Entry<OverlayId, Long> entry : results.entrySet()) {
+                        for (Entry<OverlayId, Integer> entry : results.entrySet()) {
                             log.info("{}  {}", entry.getKey(), entry.getValue());
                             count += entry.getValue();
                             stats.addValue(entry.getValue());
                         }
 
-                        log.info("{} peers used", results.size());
                         log.info(
-                                "Peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
+                                "{} peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
+                                results.size(),
                                 count,
                                 stats.getStandardDeviation(),
                                 (stats.getStandardDeviation() / stats.getMean()) * 100);
