@@ -21,7 +21,6 @@ import java.io.File;
 import org.apfloat.ApfloatContext;
 import org.apfloat.spi.BuilderFactory;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
-import org.objectweb.proactive.extensions.p2p.structured.utils.ApfloatUtils;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmark;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.MicroBenchmarkServiceAdapter;
 import org.objectweb.proactive.extensions.p2p.structured.utils.microbenchmarks.StatsRecorder;
@@ -56,7 +55,8 @@ public class LoadBalancingPrecisionBenchmark {
     private int nbRuns = 4;
 
     @Parameter(names = {"-p", "--precision"}, description = "The precision to use", required = true)
-    private long precision = ApfloatUtils.DEFAULT_PRECISION;
+    private int precision =
+            P2PStructuredProperties.CAN_COORDINATES_PRECISION.getValue();
 
     @Parameter(names = {"-np", "--nb-peers"}, description = "The number of peers to inject")
     private int nbPeersToInject = 16;
@@ -111,7 +111,7 @@ public class LoadBalancingPrecisionBenchmark {
     }
 
     public void execute() {
-        ApfloatUtils.DEFAULT_PRECISION = this.precision;
+        P2PStructuredProperties.CAN_COORDINATES_PRECISION.setValue(this.precision);
 
         MicroBenchmark microBenchmark =
                 new MicroBenchmark(

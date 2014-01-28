@@ -94,6 +94,9 @@ public class P2PStructuredProperties {
     public static final PropertyString CAN_ELEMENT_DISPLAY =
             new PropertyString("can.element.display", "codepoints");
 
+    public static final PropertyInteger CAN_COORDINATES_PRECISION =
+            new PropertyInteger("can.coordinates.precision", 350);
+
     /**
      * Defines the soft limit used by each peer that runs with multi-active
      * objects. Default value is set to 6 and is currently the optimal value for
