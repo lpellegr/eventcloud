@@ -47,14 +47,14 @@ public abstract class Coordinate implements Cloneable, Comparable<Coordinate>,
      * respectively the specified elements <code>e1</code> and <code>e2</code>.
      * 
      * @param e1
-     *            the first bound.
+     *            the first bound, inclusive.
      * 
      * @param e2
-     *            the second bound.
+     *            the second bound, exclusive.
      * 
-     * @return <code>true</code> whether <code>e1<0 and this in [e1;e2[</code>
-     *         or <code>e1 > e2 and this in [e2;e1[</code>, <code>false</code>
-     *         otherwise.
+     * @return <code>true</code> if <code>e1 < e2</code> and this in
+     *         <code>[e1;e2[</code> or <code>e1 > e2 and this in [e2;e1[</code>,
+     *         <code>false</code> otherwise.
      */
     public boolean isBetween(Coordinate e1, Coordinate e2) {
         if (e1.compareTo(e2) < 0) {
