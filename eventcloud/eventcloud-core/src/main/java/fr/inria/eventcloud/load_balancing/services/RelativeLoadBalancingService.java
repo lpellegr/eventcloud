@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import com.google.common.math.DoubleMath;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.load_balancing.LoadEvaluation;
@@ -70,7 +71,13 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
     }
 
     protected void gossipLoad() {
-        this.gossiper.push(this.overlay, this.createLoadReport());
+        LoadReport report = this.createLoadReport();
+
+        // TODO: support multiple criteria
+        // does not send report is load is null
+        if (!DoubleMath.fuzzyEquals(report.getValues()[0], 0, 0.1)) {
+            this.gossiper.push(this.overlay, this.createLoadReport());
+        }
     }
 
     protected LoadReport createLoadReport() {
