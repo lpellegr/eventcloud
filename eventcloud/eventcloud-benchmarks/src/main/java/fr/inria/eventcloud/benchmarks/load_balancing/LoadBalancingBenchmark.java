@@ -267,12 +267,7 @@ public class LoadBalancingBenchmark {
                         log.info("Publishing events to trigger load balancing");
                         this.publishProxies.publish();
 
-                        // while
-                        // (!LoadBalancingBenchmark.this.componentsManager.isPeerComponentPoolEmpty())
-                        // {
-                        // timeout after 1 hour
                         this.collector.waitCondition(3600000);
-                        // }
 
                         try {
                             Thread.sleep(10000);

@@ -22,6 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.math.DoubleMath;
 import com.google.common.util.concurrent.AbstractScheduledService;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
@@ -124,6 +125,10 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
         for (Criterion c : criteria) {
             measurement = c.getLoad(this.overlay);
             estimate = this.getLoadEstimate(c);
+
+            if (DoubleMath.fuzzyEquals(estimate, 0, 0.1)) {
+                continue;
+            }
 
             if (measurement >= estimate * k1) {
                 imbalanceCriterion = c;
