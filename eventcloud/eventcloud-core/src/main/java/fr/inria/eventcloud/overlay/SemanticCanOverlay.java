@@ -1250,7 +1250,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         return super.areCompatibleCallableOperationRunnableOperation(
                 callableOperation, runnableOperation);
     }
-
+    
     private static final class SubscriptionNotFoundException extends Exception {
 
         private static final long serialVersionUID = 160L;
