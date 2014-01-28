@@ -27,8 +27,6 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  */
 public class ApfloatUtils {
 
-    public static long DEFAULT_PRECISION = 350;
-
     private static final Apint RADIX = new Apint(
             P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
                     - P2PStructuredProperties.CAN_LOWER_BOUND.getValue() + 1);
@@ -42,7 +40,9 @@ public class ApfloatUtils {
      * is a digit radix StringElement#RADIX
      */
     public static Apfloat toFloatRadix10(String value, Apint radix) {
-        return toFloatRadix10(value, radix, DEFAULT_PRECISION);
+        return toFloatRadix10(
+                value, radix,
+                P2PStructuredProperties.CAN_COORDINATES_PRECISION.getValue());
     }
 
     public static Apfloat toFloatRadix10(String value, long precision) {
@@ -86,7 +86,9 @@ public class ApfloatUtils {
     }
 
     public static String toString(Apfloat apfloat) {
-        return toString(apfloat, DEFAULT_PRECISION);
+        return toString(
+                apfloat,
+                P2PStructuredProperties.CAN_COORDINATES_PRECISION.getValue());
     }
 
     // http://mathforum.org/library/drmath/view/55744.html
