@@ -23,66 +23,17 @@ package org.objectweb.proactive.extensions.p2p.structured.configuration;
  */
 public class PropertyClass extends Property<Class<?>> {
 
-    private final String defaultClassName;
-
-    private String className;
+    public PropertyClass(String name, String defaultValue) {
+        super(name, transform(defaultValue));
+    }
 
     public PropertyClass(String name, Class<?> defaultValue) {
         super(name, defaultValue);
-
-        this.defaultClassName = defaultValue.getName();
-        this.className = this.defaultClassName;
-    }
-
-    public PropertyClass(String name, String className) {
-        super(name, null);
-
-        this.defaultClassName = className;
-        this.className = this.defaultClassName;
     }
 
     public PropertyClass(String name, Class<?> defaultValue,
             Validator<Class<?>> validator) {
         super(name, defaultValue, validator);
-
-        this.defaultClassName = defaultValue.getName();
-        this.className = this.defaultClassName;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<?> getDefaultValue() {
-        return transform(this.defaultClassName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<?> getValue() {
-        return transform(this.className);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(Class<?> value) {
-        if (this.validator != null) {
-            this.validator.checkValidity(this.name, value);
-        }
-
-        this.className = value.getName();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValueAsString(String value) {
-        this.className = value;
     }
 
     /**
