@@ -419,7 +419,8 @@ public class PeerImpl extends AbstractComponent implements PeerInterface,
 
     protected boolean areCompatible(CallableOperation callableOperation,
                                     RunnableOperation runnableOperation) {
-        return false;
+        return this.overlay.areCompatibleCallableOperationRunnableOperation(
+                callableOperation, runnableOperation);
     }
 
     protected boolean isCallableOperationCompatibleWithJoin(CallableOperation callableOperation) {

@@ -80,9 +80,7 @@ public class CustomSemanticOverlay extends SemanticCanOverlay {
         EmptyResponseOperation response =
                 super.handleJoinIntroduceOperation(msg);
 
-        // if (super.getLoadBalancingManager() != null) {
         this.collector.report(this.id, ReportType.JOIN_INTRODUCE);
-        // }
 
         return response;
     };

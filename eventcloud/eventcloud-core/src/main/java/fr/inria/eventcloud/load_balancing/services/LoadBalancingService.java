@@ -45,6 +45,8 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
 
     protected final LoadBalancingConfiguration configuration;
 
+    protected long iteration;
+
     public LoadBalancingService(SemanticCanOverlay overlay,
             LoadBalancingConfiguration loadBalancingConfiguration) {
         this.overlay = overlay;
@@ -65,6 +67,14 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
         }
 
         this.loadBalancingIteration();
+
+        if (log.isTraceEnabled()) {
+            log.trace(
+                    "Iteration {} performed on {}peer {}", this.iteration,
+                    this.overlay.isBootstrappingPeer()
+                            ? "bootstrapping " : "", this.overlay.getId());
+            this.iteration++;
+        }
     }
 
     protected void loadBalancingIteration() {
@@ -76,8 +86,8 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
 
         if (loadEstimate.loadState != LoadState.NORMAL) {
             log.info(
-                    "Peer {} detected as {} ({})", this.overlay.getId(),
-                    loadEstimate.loadState, loadEstimate);
+                    "Peer {} detected as {}", this.overlay.getId(),
+                    loadEstimate.loadState);
         }
 
         // check whether load balancing is required
@@ -126,6 +136,18 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
                 loadState = LoadState.UNDERLOADED;
                 break;
             }
+        }
+
+        if (log.isTraceEnabled() && imbalanceCriterion != null) {
+            log.trace(
+                    "{} detected for criterion {} on peer {} ({} {} {} * {})",
+                    loadState == LoadState.OVERLOADED
+                            ? "Overload" : "Underload",
+                    imbalanceCriterion.getName(), this.overlay.getId(),
+                    measurement, loadState == LoadState.OVERLOADED
+                            ? ">=" : "<", estimate,
+                    loadState == LoadState.OVERLOADED
+                            ? k1 : k2);
         }
 
         return new LoadEvaluation(
