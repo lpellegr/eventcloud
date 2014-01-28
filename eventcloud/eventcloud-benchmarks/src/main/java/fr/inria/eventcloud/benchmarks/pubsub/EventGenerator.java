@@ -113,6 +113,7 @@ public class EventGenerator {
                                                                 int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
+                                                                int objectSize,
                                                                 int nbRewrites,
                                                                 boolean shuffle) {
 
@@ -145,7 +146,7 @@ public class EventGenerator {
             object =
                     randomNode(
                             zone.getLowerBound(dimensionIndex),
-                            zone.getUpperBound(dimensionIndex), -1, nodeSize);
+                            zone.getUpperBound(dimensionIndex), -1, objectSize);
 
             if (fixedPredicateNodes != null && fixedPredicateNodes.length > 0) {
                 predicate = fixedPredicateNodes[i];
@@ -180,11 +181,12 @@ public class EventGenerator {
                                                                 int eventIndex,
                                                                 int nbQuadruples,
                                                                 int nodeSize,
+                                                                int objectSize,
                                                                 int nbRewrites,
                                                                 boolean shuffle) {
         return randomCompoundEventForRewriting(
                 ImmutableList.copyOf(zones), fixedPredicateNodes, eventIndex,
-                nbQuadruples, nodeSize, nbRewrites, shuffle);
+                nbQuadruples, nodeSize, objectSize, nbRewrites, shuffle);
     }
 
     private static Node randomGraphNode(SemanticZone zone, int nodeSize) {
@@ -311,7 +313,7 @@ public class EventGenerator {
 
         CompoundEvent ce =
                 randomCompoundEventForRewriting(
-                        zones, new Node[0], 0, 10, 10, 3, false);
+                        zones, new Node[0], 0, 10, 10, 10, 3, false);
 
         for (Quadruple q : ce) {
             System.out.println(q.toString(StringRepresentation.UTF_16));

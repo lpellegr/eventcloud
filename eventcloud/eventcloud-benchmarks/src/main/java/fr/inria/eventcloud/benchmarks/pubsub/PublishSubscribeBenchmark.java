@@ -184,6 +184,9 @@ public class PublishSubscribeBenchmark {
     @Parameter(names = {"-rts", "--rdf-term-size"}, description = "The size of each RDF term generated")
     private int rdfTermSize = 10;
 
+    @Parameter(names = {"-ots", "--object-term-size"}, description = "Size of RDF term object values")
+    private int objectTermSize = -1;
+
     @Parameter(names = {"-gcma", "--gcma-descriptor"}, description = "Path to the GCMA descriptor to use for deploying the benchmark entities on several machines")
     public String gcmaDescriptor = null;
 
@@ -369,6 +372,8 @@ public class PublishSubscribeBenchmark {
                 this.nbSubscriptionsPerSubscriber);
         log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
         log.info("  rewritingLevel -> {}", this.rewritingLevel);
+        log.info("  objectTermSize -> {}", this.objectTermSize);
+        log.info("  rdfTermSize -> {}", this.rdfTermSize);
         log.info(
                 "  disableInterCompoundEventsShuffling -> {}",
                 this.disableInterCompoundEventsShuffling);
@@ -381,6 +386,10 @@ public class PublishSubscribeBenchmark {
     }
 
     public StatsRecorder execute() {
+        if (this.objectTermSize == -1) {
+            this.objectTermSize = this.rdfTermSize;
+        }
+
         this.logParameterValues();
         this.initInstanceFields();
 
@@ -1027,6 +1036,7 @@ public class PublishSubscribeBenchmark {
             Event[] generatedEvents =
                     this.generateEvents(
                             deployer, zones, nbEvents, fixedPredicates);
+            System.out.println(Arrays.toString(generatedEvents));
             Integer[] distribution = new Integer[zones.length];
             for (int j = 0; j < distribution.length; j++) {
                 distribution[j] = 0;
@@ -1168,6 +1178,7 @@ public class PublishSubscribeBenchmark {
                         eventIndex,
                         nbQuadruplesPerCE,
                         rdfTermSize,
+                        PublishSubscribeBenchmark.this.objectTermSize,
                         PublishSubscribeBenchmark.this.rewritingLevel,
                         !PublishSubscribeBenchmark.this.disableIntraCompoundEventsShuffling);
             }
