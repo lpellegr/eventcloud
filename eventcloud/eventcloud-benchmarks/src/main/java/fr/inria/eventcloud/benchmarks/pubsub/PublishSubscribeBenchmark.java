@@ -1036,7 +1036,7 @@ public class PublishSubscribeBenchmark {
             Event[] generatedEvents =
                     this.generateEvents(
                             deployer, zones, nbEvents, fixedPredicates);
-            System.out.println(Arrays.toString(generatedEvents));
+
             Integer[] distribution = new Integer[zones.length];
             for (int j = 0; j < distribution.length; j++) {
                 distribution[j] = 0;
