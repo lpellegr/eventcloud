@@ -30,4 +30,20 @@ public class RegisterLoadReportOperation extends RunnableOperation {
                 .getLoadBalancingService()).register(this.loadReport);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatible(RunnableOperation other) {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isCompatibleWithRouting() {
+        return true;
+    }
+
 }

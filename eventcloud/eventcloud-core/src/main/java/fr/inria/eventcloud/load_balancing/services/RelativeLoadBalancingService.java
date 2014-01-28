@@ -95,11 +95,14 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
             Criterion c = this.configuration.getCriteria()[0];
             LoadState loadState = LoadState.NORMAL;
 
-            if (c.getLoad(this.overlay) >= c.getEmergencyThreshold()) {
+            double measurement = c.getLoad(this.overlay);
+            double estimate = c.getEmergencyThreshold();
+
+            if (measurement >= estimate) {
                 loadState = LoadState.OVERLOADED;
             }
 
-            return new LoadEvaluation(c, loadState, 0, 0);
+            return new LoadEvaluation(c, loadState, measurement, estimate);
         } else {
             return super.evaluateLoadState();
         }

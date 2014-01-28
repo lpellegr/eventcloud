@@ -66,6 +66,7 @@ import fr.inria.eventcloud.benchmarks.load_balancing.overlay.CustomSemanticOverl
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomProxyFactory;
 import fr.inria.eventcloud.benchmarks.load_balancing.proxies.CustomPublishProxy;
 import fr.inria.eventcloud.benchmarks.pubsub.operations.ClearOperation;
+import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.datastore.QuadrupleIterator;
 import fr.inria.eventcloud.deployment.EventCloudComponentsManager;
 import fr.inria.eventcloud.deployment.EventCloudDeployer;
@@ -400,6 +401,13 @@ public class LoadBalancingBenchmark {
         log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
         log.info("  nbPeers -> {}", this.nbPeers);
         log.info("  strategy -> {}", this.strategy);
+
+        if (this.strategy == LoadBalancingStrategy.RELATIVE) {
+            log.info(
+                    "  gossip protocol -> {}",
+                    EventCloudProperties.LOAD_BALANCING_GOSSIP_STRATEGY.getValue()
+                            .getSimpleName());
+        }
     }
 
     private EventCloudsRegistry deployRegistry(EventCloudDeployer deployer,

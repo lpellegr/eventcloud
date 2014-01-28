@@ -38,6 +38,7 @@ import org.objectweb.proactive.api.PAActiveObject;
 import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.operations.CallableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyResponseOperation;
+import org.objectweb.proactive.extensions.p2p.structured.operations.RunnableOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinIntroduceOperation;
 import org.objectweb.proactive.extensions.p2p.structured.operations.can.JoinWelcomeOperation;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.Peer;
@@ -76,6 +77,7 @@ import fr.inria.eventcloud.datastore.TransactionalDatasetGraph;
 import fr.inria.eventcloud.datastore.TransactionalTdbDatastore;
 import fr.inria.eventcloud.delayers.PublishSubscribeDelayer;
 import fr.inria.eventcloud.load_balancing.LoadBalancingManager;
+import fr.inria.eventcloud.operations.can.RegisterLoadReportOperation;
 import fr.inria.eventcloud.operations.can.RetrieveEstimatedNumberOfQuadruplesOperation;
 import fr.inria.eventcloud.overlay.can.SemanticCoordinate;
 import fr.inria.eventcloud.overlay.can.SemanticZone;
@@ -112,6 +114,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
     private LoadBalancingManager loadBalancingManager;
 
+    private boolean isBootstrappingPeer;
+
     /*
      * Timestamp that indicates at which time the last maintenance operation has started. 
      */
@@ -136,6 +140,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
             TransactionalTdbDatastore miscDatastore,
             TransactionalTdbDatastore colanderDatastore) {
         super(new SemanticRequestResponseManager(colanderDatastore));
+
+        this.isBootstrappingPeer = false;
 
         this.miscDatastore = miscDatastore;
         this.subscriptionsDatastore = subscriptionsDatastore;
@@ -334,6 +340,18 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     public long getLastMaintenanceTimestamp() {
         return this.lastMaintenanceTimestamp;
+    }
+
+    /**
+     * Returns {@code true} if this is the overlay instance associated to the
+     * peer that has initially created the P2P network.
+     * 
+     * @return {@code true} if the overlay instance is associated to the peer
+     *         that has initially created the P2P network, {@code false}
+     *         otherwise.
+     */
+    public boolean isBootstrappingPeer() {
+        return this.isBootstrappingPeer;
     }
 
     public boolean isLoadBalancingClaimed() {
@@ -692,6 +710,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         if (this.isLoadBalancingClaimed()) {
             this.loadBalancingManager.start();
         }
+
+        this.isBootstrappingPeer = true;
     }
 
     /**
@@ -813,6 +833,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         }
 
         super.leave();
+
+        this.isBootstrappingPeer = false;
 
         this.clear();
     }
@@ -1207,16 +1229,26 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     protected boolean areCompatible(CallableOperation op1, CallableOperation op2) {
-        if (super.areCompatible(op1, op2)) {
-            return true;
-        }
-
         if (op1.getClass() == RetrieveEstimatedNumberOfQuadruplesOperation.class
                 || op2.getClass() == RetrieveEstimatedNumberOfQuadruplesOperation.class) {
             return true;
         }
 
-        return false;
+        return super.areCompatible(op1, op2);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean areCompatibleCallableOperationRunnableOperation(CallableOperation callableOperation,
+                                                                      RunnableOperation runnableOperation) {
+        if (runnableOperation.getClass() == RegisterLoadReportOperation.class) {
+            return true;
+        }
+
+        return super.areCompatibleCallableOperationRunnableOperation(
+                callableOperation, runnableOperation);
     }
 
     private static final class SubscriptionNotFoundException extends Exception {
