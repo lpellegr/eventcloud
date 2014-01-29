@@ -17,12 +17,13 @@
 package fr.inria.eventcloud.load_balancing.services;
 
 import java.util.Iterator;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Sets;
+import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.load_balancing.LoadEvaluation;
@@ -45,7 +46,7 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
 
     private final GossipStrategy<LoadReport> gossiper;
 
-    private final Set<LoadReport> loadReports;
+    private final ConcurrentMap<String, LoadReport> loadReports;
 
     private ScheduledExecutorService gossipService;
 
@@ -54,7 +55,9 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
             LoadBalancingConfiguration loadBalancingConfiguration) {
         super(overlay, loadBalancingConfiguration);
 
-        this.loadReports = Sets.newConcurrentHashSet();
+        this.loadReports =
+                new ConcurrentHashMap<String, LoadReport>(
+                        2 * P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue());
 
         try {
             this.gossiper =
@@ -149,7 +152,7 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
     }
 
     public void register(LoadReport loadReport) {
-        this.loadReports.add(loadReport);
+        this.loadReports.put(loadReport.getPeerURL(), loadReport);
     }
 
     /**
@@ -160,7 +163,7 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
         double sum = 0;
         int count = 0;
 
-        Iterator<LoadReport> it = this.loadReports.iterator();
+        Iterator<LoadReport> it = this.loadReports.values().iterator();
 
         while (it.hasNext()) {
             sum += it.next().getValues()[c.index];
