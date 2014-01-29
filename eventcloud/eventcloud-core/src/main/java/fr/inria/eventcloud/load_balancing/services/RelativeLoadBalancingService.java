@@ -18,9 +18,11 @@ package fr.inria.eventcloud.load_balancing.services;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Sets;
-import com.google.common.math.DoubleMath;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.load_balancing.LoadEvaluation;
@@ -45,6 +47,8 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
 
     private final Set<LoadReport> loadReports;
 
+    private ScheduledExecutorService gossipService;
+
     @SuppressWarnings("unchecked")
     public RelativeLoadBalancingService(SemanticCanOverlay overlay,
             LoadBalancingConfiguration loadBalancingConfiguration) {
@@ -59,6 +63,25 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+
+        this.gossipService = Executors.newScheduledThreadPool(1);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void startUp() throws Exception {
+        this.gossipService.scheduleAtFixedRate(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        RelativeLoadBalancingService.this.gossipLoad();
+                    }
+                },
+                EventCloudProperties.LOAD_BALANCING_GOSSIP_PERIOD.getValue(),
+                EventCloudProperties.LOAD_BALANCING_GOSSIP_PERIOD.getValue(),
+                TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -66,8 +89,18 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
      */
     @Override
     protected void loadBalancingIteration() {
-        this.gossipLoad();
         super.balanceLoad();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void shutDown() throws Exception {
+        this.gossipService.shutdownNow();
+        this.gossipService.awaitTermination(
+                2 * EventCloudProperties.LOAD_BALANCING_GOSSIP_PERIOD.getValue(),
+                TimeUnit.MILLISECONDS);
     }
 
     protected void gossipLoad() {
@@ -75,9 +108,9 @@ public class RelativeLoadBalancingService extends LoadBalancingService {
 
         // TODO: support multiple criteria
         // does not send report is load is null
-        if (!DoubleMath.fuzzyEquals(report.getValues()[0], 0, 0.1)) {
-            this.gossiper.push(this.overlay, this.createLoadReport());
-        }
+        // if (!DoubleMath.fuzzyEquals(report.getValues()[0], 0, 0.1)) {
+        this.gossiper.push(this.overlay, report);
+        // }
     }
 
     protected LoadReport createLoadReport() {
