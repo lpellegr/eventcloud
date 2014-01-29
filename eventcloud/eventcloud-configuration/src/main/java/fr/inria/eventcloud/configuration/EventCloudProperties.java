@@ -309,20 +309,27 @@ public class EventCloudProperties {
      * Defines load balancing parameter value for k1.
      */
     public static final PropertyDouble LOAD_BALANCING_PARAMETER_K1 =
-            new PropertyDouble("eventcloud.load.balancing.parameter.k1", 1.2);
+            new PropertyDouble("eventcloud.load.balancing.parameter.k1", 1.0);
 
     /**
      * Defines load balancing parameter value for k2.
      */
     public static final PropertyDouble LOAD_BALANCING_PARAMETER_K2 =
-            new PropertyDouble("eventcloud.load.balancing.parameter.k2", 1.2);
+            new PropertyDouble("eventcloud.load.balancing.parameter.k2", 1.0);
 
     /**
      * Defines the period in milliseconds to wait between each load balancing
      * iteration.
      */
     public static final PropertyInteger LOAD_BALANCING_PERIOD =
-            new PropertyInteger("eventcloud.load.balancing.period", 500);
+            new PropertyInteger("eventcloud.load.balancing.period", 5000);
+
+    /**
+     * Defines the period in milliseconds to wait between each gossip iteration
+     * when relative load balancing is used.
+     */
+    public static final PropertyInteger LOAD_BALANCING_GOSSIP_PERIOD =
+            new PropertyInteger("eventcloud.load.balancing.gossip.period", 500);
 
     /**
      * Defines emergency threshold value for quadruple criterion.
