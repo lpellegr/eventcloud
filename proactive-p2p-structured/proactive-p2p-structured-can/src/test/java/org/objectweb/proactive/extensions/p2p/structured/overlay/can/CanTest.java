@@ -488,7 +488,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                                         peer)
                                         .getPeerZone();
 
-                        Assert.assertTrue(zone.neighbors(entry.getZone()) != -1);
+                        Assert.assertTrue(zone.neighbors(entry.getZone()));
                     }
                 }
             }

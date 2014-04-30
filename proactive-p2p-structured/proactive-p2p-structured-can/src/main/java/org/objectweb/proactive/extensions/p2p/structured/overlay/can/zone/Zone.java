@@ -184,9 +184,10 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
         E c = zone.getLowerBound(dimension);
         E d = zone.getUpperBound(dimension);
 
-        return (((a.compareTo(c) >= 0) && (a.compareTo(d) < 0))
+        return ((a.compareTo(c) >= 0) && (a.compareTo(d) < 0))
                 || ((b.compareTo(c) > 0) && (b.compareTo(d) <= 0))
-                || ((c.compareTo(a) >= 0) && (c.compareTo(b) < 0)) || ((d.compareTo(a) > 0) && (d.compareTo(b) <= 0)));
+                || ((c.compareTo(a) >= 0) && (c.compareTo(b) < 0))
+                || ((d.compareTo(a) > 0) && (d.compareTo(b) <= 0));
     }
 
     /**
@@ -227,11 +228,15 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
      * @return a boolean indicating if the specified {@code zone} abuts the
      *         current zone.
      */
-    public boolean abuts(Zone<E> zone, byte dimension, boolean direction) {
-        return (direction && (this.lowerBound.getCoordinate(dimension)
-                .compareTo(zone.getUpperBound(dimension)) == 0))
-                || (!direction && (this.upperBound.getCoordinate(dimension)
-                        .compareTo(zone.getLowerBound(dimension)) == 0));
+    public boolean abuts(Zone<E> zone, byte dimension) {
+        return this.lowerBound.getCoordinate(dimension).compareTo(
+                zone.getUpperBound(dimension)) == 0
+                || this.upperBound.getCoordinate(dimension).compareTo(
+                        zone.getLowerBound(dimension)) == 0
+                || this.lowerBound.getCoordinate(dimension).compareTo(
+                        zone.getLowerBound(dimension)) == 0
+                || this.upperBound.getCoordinate(dimension).compareTo(
+                        zone.getUpperBound(dimension)) == 0;
     }
 
     /**
@@ -239,9 +244,7 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
      * current one. The result is the dimension number or {@code -1} if the
      * specified zone does not neighbor the current zone.
      * <p>
-     * In a d-dimensional space, two zones are neighbors if their edges overlap
-     * in exactly {@code d-1} dimensions and abut in exactly {@code 1}
-     * dimension.
+     * 
      * 
      * @param zone
      *            the zone to compare with.
@@ -249,29 +252,45 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
      * @return the dimension on which the given {@code zone} neighbors the
      *         current one.
      */
-    public byte neighbors(Zone<E> zone) {
-        byte overlaps = 0;
-        byte abuts = 0;
-        byte abutsDimension = -1;
 
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+    /**
+     * Checks whether the specified {@code zone} is adjacent to the current one.
+     * <p>
+     * In a d-dimensional space, two zones are adjacent if their edges overlap
+     * in {@code d-1} dimensions and abut in exactly {@code 1} dimension.
+     * 
+     * @param zone
+     *            the zone to compare with.
+     * 
+     * @return {@code true} if zones are adjacent, {@code false} otherwise.
+     */
+    public boolean neighbors(Zone<E> zone) {
+        assert this.getLowerBound().size() == zone.getLowerBound().size();
+        assert this.getUpperBound().size() == zone.getUpperBound().size();
+
+        byte overlaps = 0;
+
+        int nbDimensions = zone.getLowerBound().size();
+
+        boolean abut = false;
+
+        for (byte dimension = 0; dimension < nbDimensions; dimension++) {
             if (this.overlaps(zone, dimension)) {
                 overlaps++;
+
+                for (byte dim2 = 0; dim2 < nbDimensions; dim2++) {
+                    if (dim2 != dimension) {
+                        if (this.abuts(zone, dim2)) {
+                            abut |= true;
+                        }
+                    }
+                }
+
             }
 
-            if (this.abuts(zone, dimension, true)
-                    || this.abuts(zone, dimension, false)) {
-                abutsDimension = dimension;
-                abuts++;
-            }
         }
 
-        if (abuts == 1
-                && overlaps == P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue() - 1) {
-            return abutsDimension;
-        }
-
-        return -1;
+        return abut && overlaps == nbDimensions - 1;
     }
 
     /**
@@ -336,11 +355,13 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
      * 
      * @param zone
      *            the zone to merge with.
+     * @param dimension
+     *            the dimension on which the merge is performed.
      * 
      * @return a new zone which is the merge between the current zone and the
      *         specified one.
      */
-    public abstract Zone<E> merge(Zone<E> zone);
+    public abstract Zone<E> merge(Zone<E> zone, byte dimension);
 
     public void enlarge(byte dimension, byte direction, E element) {
         Point<E> bound = direction > 0
@@ -349,17 +370,18 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
         bound.setCoordinate(dimension, element);
     }
 
-    protected HomogenousPair<Point<E>> mergeCoordinates(Zone<E> zone) {
-        byte d = this.neighbors(zone);
-
+    protected HomogenousPair<Point<E>> mergeCoordinates(Zone<E> zone,
+                                                        byte dimension) {
         try {
             Point<E> lowerBoundCopy = this.lowerBound.clone();
             Point<E> upperBoundCopy = this.upperBound.clone();
 
-            lowerBoundCopy.setCoordinate(d, Coordinate.min(
-                    this.lowerBound.getCoordinate(d), zone.getLowerBound(d)));
-            upperBoundCopy.setCoordinate(d, Coordinate.max(
-                    this.upperBound.getCoordinate(d), zone.getUpperBound(d)));
+            lowerBoundCopy.setCoordinate(dimension, Coordinate.min(
+                    this.lowerBound.getCoordinate(dimension),
+                    zone.getLowerBound(dimension)));
+            upperBoundCopy.setCoordinate(dimension, Coordinate.max(
+                    this.upperBound.getCoordinate(dimension),
+                    zone.getUpperBound(dimension)));
 
             return HomogenousPair.createHomogenous(
                     lowerBoundCopy, upperBoundCopy);

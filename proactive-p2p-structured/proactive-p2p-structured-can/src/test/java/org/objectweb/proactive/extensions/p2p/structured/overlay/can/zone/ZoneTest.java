@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.StringCoordinate;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.PointFactory;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 
@@ -61,13 +62,167 @@ public class ZoneTest {
                         PointFactory.newStringCoordinate("a"),
                         PointFactory.newStringCoordinate("z"));
 
-        HomogenousPair<UnicodeZone<StringCoordinate>> newZones =
-                z.split(CanOverlay.getRandomDimension());
+        byte dimension = CanOverlay.getRandomDimension();
 
-        Zone<StringCoordinate> mergedZone =
-                newZones.getFirst().merge(newZones.getSecond());
+        HomogenousPair<UnicodeZone<StringCoordinate>> newZones =
+                z.split(dimension);
+
+        UnicodeZone<StringCoordinate> z1 = newZones.getFirst();
+        UnicodeZone<StringCoordinate> z2 = newZones.getSecond();
+
+        Zone<StringCoordinate> mergedZone = z1.merge(z2, dimension);
 
         Assert.assertEquals(z, mergedZone);
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInTwoDimensions_1() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("c"),
+                                new StringCoordinate("e")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("z"),
+                                new StringCoordinate("z")));
+
+        Assert.assertFalse(z1.neighbors(z2));
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInTwoDimensions_2() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("c"),
+                                new StringCoordinate("d")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("cbb"),
+                                new StringCoordinate("z")));
+
+        Assert.assertTrue(z1.neighbors(z2));
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInTwoDimensions_3() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("e"),
+                                new StringCoordinate("b")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("t"),
+                                new StringCoordinate("d")));
+
+        Assert.assertFalse(z1.neighbors(z2));
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInThreeDimensions_1() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("b"),
+                                new StringCoordinate("b"),
+                                new StringCoordinate("t")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("c"),
+                                new StringCoordinate("c"),
+                                new StringCoordinate("z")));
+
+        Assert.assertFalse(z1.neighbors(z2));
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInThreeDimensions_2() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("b"),
+                                new StringCoordinate("b"),
+                                new StringCoordinate("d")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("c"),
+                                new StringCoordinate("c"),
+                                new StringCoordinate("z")));
+
+        Assert.assertTrue(z1.neighbors(z2));
+    }
+
+    @Test
+    public void testWhetherZonesAreAdjacentInThreeDimensions_3() {
+        StringZone z1 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a"),
+                                new StringCoordinate("a")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d"),
+                                new StringCoordinate("d")));
+
+        StringZone z2 =
+                new StringZone(
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("b"),
+                                new StringCoordinate("b"),
+                                new StringCoordinate("0")),
+                        new Point<StringCoordinate>(
+                                new StringCoordinate("c"),
+                                new StringCoordinate("c"),
+                                new StringCoordinate("a")));
+
+        Assert.assertTrue(z1.neighbors(z2));
     }
 
 }

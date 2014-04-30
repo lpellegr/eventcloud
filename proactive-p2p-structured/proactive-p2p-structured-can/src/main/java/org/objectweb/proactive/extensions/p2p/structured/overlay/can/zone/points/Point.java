@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStructuredProperties;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.Zone;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
@@ -52,14 +51,6 @@ public final class Point<E extends Coordinate> implements Cloneable,
      *            the coordinates that characterize the point.
      */
     public Point(E... coordinates) {
-        if (coordinates.length != P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()) {
-            throw new AssertionError("The number of coordinate elements ("
-                    + coordinates.length
-                    + ") is not equals to the number of dimensions ("
-                    + P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue()
-                    + ")");
-        }
-
         this.coordinates = coordinates;
     }
 

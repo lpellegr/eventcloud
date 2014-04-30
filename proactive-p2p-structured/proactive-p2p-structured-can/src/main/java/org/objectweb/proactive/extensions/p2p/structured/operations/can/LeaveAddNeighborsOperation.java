@@ -22,7 +22,7 @@ import org.objectweb.proactive.extensions.p2p.structured.operations.EmptyRespons
 import org.objectweb.proactive.extensions.p2p.structured.overlay.MaintenanceId;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.StructuredOverlay;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.CanOverlay;
-import org.objectweb.proactive.extensions.p2p.structured.overlay.can.NeighborEntry;
+import org.objectweb.proactive.extensions.p2p.structured.overlay.can.ExtendedNeighborEntry;
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordinates.Coordinate;
 
 /**
@@ -39,10 +39,10 @@ public class LeaveAddNeighborsOperation<E extends Coordinate> extends
 
     private static final long serialVersionUID = 160L;
 
-    private final Collection<NeighborEntry<E>> possibleNewNeighbors;
+    private final Collection<ExtendedNeighborEntry<E>> possibleNewNeighbors;
 
     public LeaveAddNeighborsOperation(
-            Collection<NeighborEntry<E>> possibleNewNeighbors,
+            Collection<ExtendedNeighborEntry<E>> possibleNewNeighbors,
             MaintenanceId maintenanceId) {
         super(maintenanceId);
         this.possibleNewNeighbors = possibleNewNeighbors;
@@ -56,17 +56,15 @@ public class LeaveAddNeighborsOperation<E extends Coordinate> extends
     public EmptyResponseOperation handle(StructuredOverlay overlay) {
         CanOverlay<E> canOverlay = (CanOverlay<E>) overlay;
 
-        for (NeighborEntry<E> entry : this.possibleNewNeighbors) {
-            byte abutDimension =
-                    canOverlay.getZone().neighbors(entry.getZone());
+        for (ExtendedNeighborEntry<E> entry : this.possibleNewNeighbors) {
+            if (entry.getId().equals(canOverlay.getId())) {
+                continue;
+            }
 
-            if (abutDimension != -1) {
-                byte abutDirection =
-                        canOverlay.getZone().neighbors(
-                                entry.getZone(), abutDimension);
+            if (canOverlay.getZone().neighbors(entry.getZone())) {
 
                 canOverlay.getNeighborTable().putIfAbsent(
-                        entry, abutDimension, abutDirection);
+                        entry, entry.getDimension(), entry.getDirection());
             }
         }
 
