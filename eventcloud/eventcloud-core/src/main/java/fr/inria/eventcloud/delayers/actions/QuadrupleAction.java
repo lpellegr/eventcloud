@@ -17,6 +17,7 @@
 package fr.inria.eventcloud.delayers.actions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,7 @@ public final class QuadrupleAction extends Action<Quadruple> {
         TransactionalDatasetGraph txnGraph;
 
         QueryIterator it = null;
-        List<MatchingResult> matchingResults = null;
+        List<MatchingResult> matchingResults = Collections.emptyList();
 
         // meta-quadruples are not necessary to find the subscriptions that are
         // matched

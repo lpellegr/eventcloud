@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.deployment;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.etsi.uri.gcm.util.GCM;
@@ -34,7 +35,9 @@ import fr.inria.eventcloud.utils.Pool;
  * 
  * @author lpellegr
  */
-public class ComponentPool<T> implements Iterable<T> {
+public class ComponentPool<T> implements Iterable<T>, Serializable {
+
+    private static final long serialVersionUID = 160L;
 
     // use encapsulation since we do not want to expose the method borrow
     // without parameters
