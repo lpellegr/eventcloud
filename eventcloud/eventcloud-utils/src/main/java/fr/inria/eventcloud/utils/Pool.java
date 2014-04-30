@@ -16,6 +16,7 @@
  **/
 package fr.inria.eventcloud.utils;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -37,7 +38,9 @@ import com.google.common.base.Supplier;
  * 
  * @author lpellegr
  */
-public class Pool<R> implements Iterable<R> {
+public class Pool<R> implements Iterable<R>, Serializable {
+
+    private static final long serialVersionUID = 160L;
 
     protected ConcurrentLinkedQueue<R> resources;
 

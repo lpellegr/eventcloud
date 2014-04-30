@@ -74,7 +74,7 @@ public class LogReader {
                     try {
                         startingDate = JobLogger.getDateFormat().parse(line);
                     } catch (ParseException e) {
-                        e.printStackTrace();
+                        throw new IllegalStateException(e);
                     }
                 }
                 // The other lines contain the metrics
@@ -125,6 +125,11 @@ public class LogReader {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+
+        if (startingDate == null) {
+            throw new IllegalStateException("Starting date not found");
+        }
+
         // Finding the timestamp of the last broadcast message received
         // (first reception -> reception delay)
         Date maxFirstReceptionDate = startingDate;

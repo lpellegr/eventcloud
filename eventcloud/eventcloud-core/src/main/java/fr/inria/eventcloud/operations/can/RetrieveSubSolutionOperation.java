@@ -130,20 +130,24 @@ public class RetrieveSubSolutionOperation extends RunnableOperation {
             txnGraph.end();
         }
 
-        try {
-            Subscription.getSubscriberProxy(subscriberURL).receiveSbce1Or2(
-                    new BindingNotification(
-                            this.notificationId, null,
-                            PAActiveObject.getUrl(semanticOverlay.getStub()),
-                            bmap));
-        } catch (ExecutionException e) {
-            log.error("No SubscribeProxy found under the given URL: "
-                    + subscriberURL, e);
+        if (subscriberURL != null) {
+            try {
+                Subscription.getSubscriberProxy(subscriberURL)
+                        .receiveSbce1Or2(
+                                new BindingNotification(
+                                        this.notificationId,
+                                        null,
+                                        PAActiveObject.getUrl(semanticOverlay.getStub()),
+                                        bmap));
+            } catch (ExecutionException e) {
+                log.error("No SubscribeProxy found under the given URL: "
+                        + subscriberURL, e);
 
-            // TODO: this could be due to a subscriber which has left
-            // without unsubscribing. In that case we can remove the
-            // subscription information associated to this subscriber
-            // and also send a message
+                // TODO: this could be due to a subscriber which has left
+                // without unsubscribing. In that case we can remove the
+                // subscription information associated to this subscriber
+                // and also send a message
+            }
         }
     }
 
