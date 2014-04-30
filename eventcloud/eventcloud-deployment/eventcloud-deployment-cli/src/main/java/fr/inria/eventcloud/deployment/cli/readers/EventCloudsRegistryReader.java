@@ -58,7 +58,6 @@ public class EventCloudsRegistryReader {
         new EventCloudsRegistryReader().run(args);
     }
 
-    @SuppressWarnings("unchecked")
     public void run(String[] args) {
         JCommander jCommander = new JCommander(this);
         jCommander.setProgramName(EventCloudsRegistryReader.class.getCanonicalName());

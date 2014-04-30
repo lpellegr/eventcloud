@@ -50,6 +50,7 @@ public final class Point<E extends Coordinate> implements Cloneable,
      * @param coordinates
      *            the coordinates that characterize the point.
      */
+    @SafeVarargs
     public Point(E... coordinates) {
         this.coordinates = coordinates;
     }
