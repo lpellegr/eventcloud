@@ -268,24 +268,24 @@ public abstract class Zone<E extends Coordinate> implements Serializable {
         assert this.getLowerBound().size() == zone.getLowerBound().size();
         assert this.getUpperBound().size() == zone.getUpperBound().size();
 
-        byte overlaps = 0;
-
-        int nbDimensions = zone.getLowerBound().size();
-
         boolean abut = false;
+        byte overlaps = 0;
+        int nbDimensions = zone.getLowerBound().size();
 
         for (byte dimension = 0; dimension < nbDimensions; dimension++) {
             if (this.overlaps(zone, dimension)) {
                 overlaps++;
 
-                for (byte dim2 = 0; dim2 < nbDimensions; dim2++) {
-                    if (dim2 != dimension) {
-                        if (this.abuts(zone, dim2)) {
-                            abut |= true;
+                if (!abut) {
+                    for (byte dim2 = 0; dim2 < nbDimensions; dim2++) {
+                        if (dim2 != dimension) {
+                            if (this.abuts(zone, dim2)) {
+                                abut |= true;
+                                break;
+                            }
                         }
                     }
                 }
-
             }
 
         }
