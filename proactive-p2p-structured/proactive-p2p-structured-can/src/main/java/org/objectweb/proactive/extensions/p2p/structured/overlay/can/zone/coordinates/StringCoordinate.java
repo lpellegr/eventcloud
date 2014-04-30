@@ -57,7 +57,17 @@ public class StringCoordinate extends Coordinate {
         Apfloat e2 =
                 ApfloatUtils.toFloatRadix10(((StringCoordinate) elt).value);
 
-        return this.newStringCoordinate(e1.add(e2).divide(new Apfloat(2)));
+        Apfloat tmp;
+
+        if (e1.compareTo(e2) > 0) {
+            tmp = e2;
+            e2 = e1;
+            e1 = tmp;
+        }
+
+        tmp = e1.add(e2.subtract(e1).divide(ApfloatUtils.TWO));
+
+        return this.newStringCoordinate(tmp);
     }
 
     protected StringCoordinate newStringCoordinate(Apfloat apfloat) {

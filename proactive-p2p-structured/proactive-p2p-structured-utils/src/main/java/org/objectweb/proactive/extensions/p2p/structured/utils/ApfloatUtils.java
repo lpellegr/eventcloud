@@ -27,6 +27,11 @@ import org.objectweb.proactive.extensions.p2p.structured.configuration.P2PStruct
  */
 public class ApfloatUtils {
 
+    /**
+     * The constant two associated to default apfloat radix.
+     */
+    public static Apfloat TWO = new Apfloat(2);
+
     private static final Apint RADIX = new Apint(
             P2PStructuredProperties.CAN_UPPER_BOUND.getValue()
                     - P2PStructuredProperties.CAN_LOWER_BOUND.getValue() + 1);
@@ -66,7 +71,7 @@ public class ApfloatUtils {
         // are supposed to be between a lower and upper bound that is made of
         // one character, and hence one digit radix the upper bound value (e.g.
         // 2^16).
-        Apint pow = new Apint(1);
+        Apint pow = Apint.ONE;
 
         // ... + codepoints[i]*RADIX^{-i} + codepoints[i+1]*RADIX^{-i-1} + ...
         for (int i = 1; i < codepoints.length; i++) {

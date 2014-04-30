@@ -64,8 +64,9 @@ public abstract class UnicodeZone<E extends StringCoordinate> extends Zone<E> {
      * {@inheritDoc}
      */
     @Override
-    public Zone<E> merge(Zone<E> zone) {
-        HomogenousPair<Point<E>> coords = super.mergeCoordinates(zone);
+    public Zone<E> merge(Zone<E> zone, byte dimension) {
+        HomogenousPair<Point<E>> coords =
+                super.mergeCoordinates(zone, dimension);
 
         return this.newZone(coords.getFirst(), coords.getSecond());
     }

@@ -84,8 +84,7 @@ public class NeighborEntry<E extends Coordinate> implements
      */
     @Override
     public int hashCode() {
-        return this.neighborIdentifier.hashCode() + 31
-                * this.neighborZone.hashCode();
+        return this.neighborIdentifier.hashCode();
     }
 
     /**
@@ -94,8 +93,7 @@ public class NeighborEntry<E extends Coordinate> implements
     @Override
     public boolean equals(Object obj) {
         return obj instanceof NeighborEntry
-                && this.neighborIdentifier.equals(((NeighborEntry<?>) obj).getId())
-                && this.neighborZone.equals(((NeighborEntry<?>) obj).getZone());
+                && this.neighborIdentifier.equals(((NeighborEntry<?>) obj).getId());
 
     }
 

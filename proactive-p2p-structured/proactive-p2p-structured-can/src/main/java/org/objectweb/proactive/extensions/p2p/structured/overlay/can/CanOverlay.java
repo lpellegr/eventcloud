@@ -16,7 +16,6 @@
  **/
 package org.objectweb.proactive.extensions.p2p.structured.overlay.can;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,7 +63,6 @@ import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.coordi
 import org.objectweb.proactive.extensions.p2p.structured.overlay.can.zone.points.Point;
 import org.objectweb.proactive.extensions.p2p.structured.utils.HomogenousPair;
 import org.objectweb.proactive.extensions.p2p.structured.utils.RandomUtils;
-import org.objectweb.proactive.extensions.p2p.structured.utils.converters.MakeDeepCopy;
 import org.objectweb.proactive.multiactivity.execution.RunnableRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +130,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
             for (byte direction = 0; direction < 2; direction++) {
                 it = this.neighborTable.get(dim, direction).values().iterator();
                 while (it.hasNext()) {
-                    if (this.zone.neighbors(it.next().getZone()) == -1) {
+                    if (!this.zone.neighbors(it.next().getZone())) {
                         it.remove();
                     }
                 }
@@ -187,7 +185,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                 neighbors.get(RandomUtils.nextInt(neighbors.size()));
 
         if (log.isDebugEnabled()) {
-            if (this.zone.neighbors(entry.getZone()) == -1) {
+            if (!this.zone.neighbors(entry.getZone())) {
                 log.error("Neighbor chosen to route the message is "
                         + entry.getZone()
                         + ". However it does not neighbor the current peer.");
@@ -391,7 +389,6 @@ public abstract class CanOverlay<E extends Coordinate> extends
      * 
      * @return a response associated to the initial message.
      */
-    @SuppressWarnings("unchecked")
     public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<E> op) {
         List<NeighborEntry<E>> neighbors =
                 this.neighborTable.getFirstLevelNeighbors();
@@ -399,29 +396,8 @@ public abstract class CanOverlay<E extends Coordinate> extends
                 op.getPeerID(), op.getRemotePeer(), null));
         Collections.sort(neighbors);
 
-        @SuppressWarnings("unused")
-        boolean rcs =
-                super.mutualExclusionManager.requestCriticalSection(
-                        NeighborTable.filter(neighbors), op.getMaintenanceId());
-
-        // while (!(rcs =
-        // super.mutualExclusionManager.requestCriticalSection(
-        // neighbors, op.getMaintenanceId()))) {
-        // log.debug(
-        // "Request critical section, immediate={}, peer={}. mID={}",
-        // rcs, super.id, op.getMaintenanceId());
-        // super.mutualExclusionManager.releaseCriticalSection();
-        //
-        // // neighbors.clear();
-        // //
-        // neighbors.addAll(this.neighborTable.getFirstTwoLevelsNeighbors(super.id));
-        // // if (!neighbors.contains(op.getRemotePeer())) {
-        // // neighbors.add(op.getRemotePeer());
-        // // }
-        // }
-        // log.debug(
-        // "Request critical section, immediate={}, peer={}. mID={}", rcs,
-        // super.id, op.getMaintenanceId());
+        super.mutualExclusionManager.requestCriticalSection(
+                NeighborTable.filter(neighbors), op.getMaintenanceId());
 
         byte dimension = 0;
         // TODO: choose the direction according to the number of
@@ -430,7 +406,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
         byte directionInv = CanOverlay.getOppositeDirection(direction);
 
         this.lastDirectionUsedForZoneAssignation =
-                (byte) ((this.lastDirectionUsedForZoneAssignation + 1) % 2);
+                CanOverlay.getOppositeDirection(lastDirectionUsedForZoneAssignation);
 
         // gets the next dimension to split into
         if (!this.splitHistory.isEmpty()) {
@@ -441,6 +417,15 @@ public abstract class CanOverlay<E extends Coordinate> extends
 
         // splits the current peer zone to share it
         HomogenousPair<? extends Zone<E>> newZones = this.splitZones(dimension);
+
+        Zone<E> newLandmarkPeerZone = newZones.get(direction);
+        Zone<E> newPeerZone = newZones.get(directionInv);
+
+        NeighborEntry<E> landmarkPeerEntry =
+                new NeighborEntry<E>(this.id, this.stub, newLandmarkPeerZone);
+        NeighborEntry<E> newPeerEntry =
+                new NeighborEntry<E>(
+                        op.getPeerID(), op.getRemotePeer(), newPeerZone);
 
         // neighbors affected for the new peer which joins the network
         NeighborTable<E> pendingNewNeighborhood = new NeighborTable<E>();
@@ -459,7 +444,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                         // adds to the new peer neighborhood iff the new peer
                         // zone neighbors the current neighbor
                         if (newZones.get(directionInv).neighbors(
-                                entry.getZone()) != -1) {
+                                entry.getZone())) {
                             pendingNewNeighborhood.add(entry, dim, dir);
                         }
                     }
@@ -467,41 +452,27 @@ public abstract class CanOverlay<E extends Coordinate> extends
             }
         }
 
-        // adds the landmark peer in the neighborhood of the peer which is
-        // joining
-        pendingNewNeighborhood.add(
-                new NeighborEntry<E>(
-                        super.id, super.stub, newZones.get(direction)),
-                dimension, direction);
+        // the landmark peer must be in the neighborhood of the new peer
+        pendingNewNeighborhood.add(landmarkPeerEntry, dimension, direction);
 
         long timestamp = System.currentTimeMillis();
 
-        LinkedList<SplitEntry> historyToTransfert = null;
-        try {
-            historyToTransfert =
-                    (LinkedList<SplitEntry>) MakeDeepCopy.makeDeepCopy(this.splitHistory);
-            historyToTransfert.add(new SplitEntry(
-                    dimension, directionInv, timestamp));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        LinkedList<SplitEntry> splitHistoryToTransfert = null;
+        splitHistoryToTransfert = new LinkedList<SplitEntry>(this.splitHistory);
+        splitHistoryToTransfert.add(new SplitEntry(
+                dimension, directionInv, timestamp));
 
         // updates overlay information due to the split
         this.splitHistory.add(new SplitEntry(dimension, direction, timestamp));
         this.zone = newZones.get(direction);
-        this.neighborTable.add(
-                new NeighborEntry<E>(
-                        op.getPeerID(), op.getRemotePeer(),
-                        newZones.get(directionInv)), dimension, directionInv);
+        this.neighborTable.add(newPeerEntry, dimension, directionInv);
 
         // sends back information to the new peer before to notify neighbors
         // about this new peer
         PAFuture.waitFor(op.getRemotePeer().receive(
                 new JoinWelcomeOperation<E>(
                         super.id, newZones.get(directionInv),
-                        historyToTransfert, pendingNewNeighborhood,
+                        splitHistoryToTransfert, pendingNewNeighborhood,
                         this.removeDataIn(newZones.get(directionInv)),
                         op.getMaintenanceId())));
 
@@ -529,7 +500,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                                 getOppositeDirection(dir),
                                 op.getMaintenanceId());
                         it.remove();
-                    } else if (entry.getZone().neighbors(this.zone) == -1) {
+                    } else if (!entry.getZone().neighbors(this.zone)) {
                         // the old neighbor does not neighbors us with the new
                         // zone affected
                         CanOperations.removeNeighbor(
@@ -754,22 +725,31 @@ public abstract class CanOverlay<E extends Coordinate> extends
             }
         }
 
-        List<NeighborEntry<E>> neighborsNotReassigned =
-                new ArrayList<NeighborEntry<E>>();
+        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
+            for (byte direction = 0; direction < 2; direction++) {
+                for (NeighborEntry<E> entry : this.neighborTable.get(
+                        dimension, direction).values()) {
 
-        // add new neighbors to necessary peers
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> entry : this.neighborTable.get(
-                        dimension, direction).values()) {
-                    neighborsNotReassigned.add(entry);
-                }
-            }
-        }
-        for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
-            for (byte direction = 0; direction < 2; direction++) {
-                for (NeighborEntry<E> entry : this.neighborTable.get(
-                        dimension, direction).values()) {
+                    List<ExtendedNeighborEntry<E>> neighborsNotReassigned =
+                            new ArrayList<ExtendedNeighborEntry<E>>();
+
+                    // add new neighbors to necessary peers
+                    for (byte dim2 = 0; dim2 < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dim2++) {
+                        for (byte dir2 = 0; dir2 < 2; dir2++) {
+                            for (NeighborEntry<E> entry2 : this.neighborTable.get(
+                                    dim2, dir2)
+                                    .values()) {
+
+                                if (entry2.getZone().neighbors(entry.getZone())) {
+                                    neighborsNotReassigned.add(new ExtendedNeighborEntry<E>(
+                                            entry2,
+                                            dim2,
+                                            CanOverlay.getOppositeDirection(dir2)));
+                                }
+                            }
+                        }
+                    }
+
                     PAFuture.waitFor(entry.getStub()
                             .receive(
                                     new LeaveAddNeighborsOperation<E>(
@@ -925,7 +905,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
         byte dir =
                 this.neighborTable.findDirection(operation.getPeerLeavingId());
 
-        this.zone = this.zone.merge(operation.getPeerLeavingZone());
+        this.zone = this.zone.merge(operation.getPeerLeavingZone(), dim);
 
         if (operation.getData() != null) {
             this.assignDataReceived(operation.getData());
