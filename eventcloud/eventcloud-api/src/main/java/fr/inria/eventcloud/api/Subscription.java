@@ -19,10 +19,19 @@ package fr.inria.eventcloud.api;
 import java.io.Serializable;
 
 /**
- * A subscription expresses what are the notifications you are interested in. It
- * is based on a subset of the SPARQL query language. The subscription takes
- * effect when it is created (i.e. all the events which are published after this
- * creation time and that are matching your constraints will be delivered).
+ * A subscription expresses what are the notifications a subscriber is
+ * interested in. It is based on a subset of the SPARQL query language. The
+ * subscription takes effect when it is created (i.e. all the events which are
+ * published after this creation time and that are matching your constraints
+ * will be delivered).
+ * <p>
+ * Our subscription model allows a SPARQL query as subscription if this last a)
+ * uses the SELECT query form; b) contains at most one group GRAPH pattern with
+ * a graph variable; c) returns the graph variable declared in the GRAPH
+ * pattern. Multiple triple patterns may be used inside the graph pattern
+ * defined in the subscription. One or more FILTER clauses are also allowed to
+ * restrict solutions. Standard logical operators but also filter functions like
+ * REGEX, STRSTARTS, etc. are permitted.
  * 
  * @author lpellegr
  */

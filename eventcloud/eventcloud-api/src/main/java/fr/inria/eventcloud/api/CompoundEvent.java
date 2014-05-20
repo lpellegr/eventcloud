@@ -38,9 +38,13 @@ import com.hp.hpl.jena.graph.Triple;
 import fr.inria.eventcloud.utils.NodeSerializer;
 
 /**
- * A compound event is a list of {@link Quadruple}s so that each quadruple share
- * the same graph value. The graph value could be kept separated from the triple
- * value for backward compatibility with linked data tools.
+ * Each compound event is a list of {@link Quadruple}s where quadruples share a
+ * common term called graph value. This term is built with a combination of a
+ * unique source identifier and a timestamp. The purpose of this graph value is
+ * threefold. It is used to identify the event source, the event itself but also
+ * to offer the possibility to link together several quadruples for emulating
+ * unbounded multi-attribute values like in conventional publish/subscribe
+ * systems.
  * <p>
  * Please note that a compound event is not alterable. Any attempt to update the
  * content of a compound event by calling {@link #getTriples()} followed by

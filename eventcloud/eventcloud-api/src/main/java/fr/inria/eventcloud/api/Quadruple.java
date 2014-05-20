@@ -84,8 +84,8 @@ public class Quadruple implements Externalizable, Event {
     private transient int nodesHashCode;
 
     /**
-     * Defines the different formats that are allowed to read quadruples or to
-     * write quadruples from and/or to an input stream.
+     * Defines the different formats that are allowed to read or write
+     * quadruples from and to an input stream.
      */
     public enum SerializationFormat {
         NQuads, TriG;

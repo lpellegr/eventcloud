@@ -23,8 +23,7 @@ import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 
 /**
- * Defines constants that are regularly used by the publish/subscribe
- * algorithms.
+ * Defines constants that are used by the publish/subscribe algorithms.
  * 
  * @author lpellegr
  */
