@@ -521,6 +521,8 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
     private static class TrackerComponentPool extends
             ComponentPool<SemanticTracker> {
 
+        private static final long serialVersionUID = 160L;
+
         public TrackerComponentPool(Supplier<? extends SemanticTracker> supplier) {
             super(supplier);
         }
@@ -539,6 +541,8 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
 
     private static class PeerComponentPool extends ComponentPool<SemanticPeer> {
 
+        private static final long serialVersionUID = 160L;
+
         public PeerComponentPool(Supplier<? extends SemanticPeer> supplier) {
             super(supplier);
         }
@@ -556,6 +560,8 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
 
     private static class PublishProxyComponentPool extends
             ComponentPool<PublishProxy> {
+
+        private static final long serialVersionUID = 160L;
 
         public PublishProxyComponentPool(
                 Supplier<? extends PublishProxy> supplier) {
@@ -579,6 +585,8 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
     private static class SubscribeProxyComponentPool extends
             ComponentPool<SubscribeProxy> {
 
+        private static final long serialVersionUID = 160L;
+
         public SubscribeProxyComponentPool(
                 Supplier<? extends SubscribeProxy> supplier) {
             super(supplier);
@@ -601,6 +609,8 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
 
     private static class PutGetProxyComponentPool extends
             ComponentPool<PutGetProxy> {
+
+        private static final long serialVersionUID = 160L;
 
         public PutGetProxyComponentPool(Supplier<? extends PutGetProxy> supplier) {
             super(supplier);
