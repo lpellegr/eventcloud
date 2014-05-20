@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Can2dVisualizer extends JFrame {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(Can2dVisualizer.class);
 
     private static final long serialVersionUID = 160L;
@@ -225,7 +225,7 @@ public class Can2dVisualizer extends JFrame {
                         return;
                     }
 
-                    log.debug(entry.getStub().dump());
+                    LOG.debug(entry.getStub().dump());
 
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         if (Can2dVisualizer.this.mode == Mode.JOIN) {
@@ -261,7 +261,7 @@ public class Can2dVisualizer extends JFrame {
 
                         Canvas.this.repaint();
 
-                        log.info("Clicked in (" + e.getX() + "," + e.getY()
+                        LOG.info("Clicked in (" + e.getX() + "," + e.getY()
                                 + ") wich is contained by zone "
                                 + entry.getZone());
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
@@ -600,12 +600,12 @@ public class Can2dVisualizer extends JFrame {
 
         Neighborhoods neighborhoods = CanHelper.checkNeighborhood(peers);
 
-        log.info(
+        LOG.info(
                 "Neighborhood has been checked, valid? {}",
                 neighborhoods.areValid());
 
         if (!neighborhoods.areValid()) {
-            log.info("identified errors are:\n{}", neighborhoods);
+            LOG.info("identified errors are:\n{}", neighborhoods);
         }
 
         SwingUtilities.invokeLater(new Runnable() {

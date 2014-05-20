@@ -42,7 +42,7 @@ import fr.inria.eventcloud.webservices.api.PublishWsnApi;
 public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
         PublishWsnApi {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PublishWsnServiceImpl.class);
 
     /**
@@ -110,15 +110,15 @@ public class PublishWsnServiceImpl extends WsnService<PublishProxy> implements
                     CompoundEvent compoundEvent =
                             super.translator.translate(notificationMessage);
 
-                    log.info("Translation output:\n{}", compoundEvent);
+                    LOG.info("Translation output:\n{}", compoundEvent);
 
                     super.proxy.publish(compoundEvent);
                 } catch (TranslationException e) {
-                    log.error("Translation error", e);
+                    LOG.error("Translation error", e);
                 }
             }
         } else {
-            log.error("Notify message received does not contain any notification message");
+            LOG.error("Notify message received does not contain any notification message");
         }
     }
 

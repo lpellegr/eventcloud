@@ -66,7 +66,7 @@ import fr.inria.eventcloud.utils.RDFReader;
 
 public class StaticLoadBalancingTestBuilder {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(StaticLoadBalancingTestBuilder.class);
 
     private boolean enableLoadBalancing = false;
@@ -222,7 +222,7 @@ public class StaticLoadBalancingTestBuilder {
                     StaticLoadBalancingTestBuilder.this.nbQuadsToInsert =
                             quads.size();
 
-                    log.info(
+                    LOG.info(
                             "{} quadruples loaded from {}", quads.size(),
                             StaticLoadBalancingTestBuilder.this.trigResource);
 
@@ -266,7 +266,7 @@ public class StaticLoadBalancingTestBuilder {
                     }
                 }
 
-                log.info(
+                LOG.info(
                         "It took {} to insert {} quadruples",
                         stopwatch.toString(),
                         StaticLoadBalancingTestBuilder.this.nbQuadsToInsert);
@@ -274,7 +274,7 @@ public class StaticLoadBalancingTestBuilder {
                 this.executionTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
                 if (StaticLoadBalancingTestBuilder.this.nbPeersToInject > 0) {
-                    log.info("Before join, first peer dump:\n"
+                    LOG.info("Before join, first peer dump:\n"
                             + firstPeer.dump());
 
                     for (int i = 0; i < StaticLoadBalancingTestBuilder.this.nbPeersToInject; i++) {
@@ -307,13 +307,13 @@ public class StaticLoadBalancingTestBuilder {
                         this.deployer.getRandomSemanticTracker(
                                 this.eventCloudId).storePeer(newPeer);
 
-                        log.info("Join operation " + (i + 1));
+                        LOG.info("Join operation " + (i + 1));
                     }
 
-                    log.info("After injections, other peers dump:\n");
+                    LOG.info("After injections, other peers dump:\n");
                     for (Peer p : this.deployer.getRandomSemanticTracker(
                             this.eventCloudId).getPeers()) {
-                        log.info(p.dump());
+                        LOG.info(p.dump());
                     }
 
                     if (StaticLoadBalancingTestBuilder.this.nbLookupsAfterJoinOperations > 0) {
@@ -327,7 +327,7 @@ public class StaticLoadBalancingTestBuilder {
                         }
                     }
                 } else {
-                    log.info("Peer dump:\n" + firstPeer.dump());
+                    LOG.info("Peer dump:\n" + firstPeer.dump());
                 }
 
                 ComponentUtils.terminateComponent(putgetProxy);
@@ -432,9 +432,9 @@ public class StaticLoadBalancingTestBuilder {
                     }
                 }
 
-                log.info("Distribution is [{}]", distribution);
+                LOG.info("Distribution is [{}]", distribution);
 
-                log.info(
+                LOG.info(
                         "{} peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
                         nbPeers, stats.getSum(), stats.getStandardDeviation(),
                         (stats.getStandardDeviation() / stats.getMean()) * 100);

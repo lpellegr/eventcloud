@@ -47,7 +47,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(AbstractStatsRecorder.class);
 
     private final Recorder recorder;
@@ -153,14 +153,14 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
                              final Node o) {
             AbstractStatsRecorder.this._register(g, s, p, o);
 
-            log.trace("Registering new quadruple");
+            LOG.trace("Registering new quadruple");
         }
 
         @Override
         public void unregister(final Node g, final Node s, final Node p,
                                final Node o) {
             AbstractStatsRecorder.this._unregister(g, s, p, o);
-            log.trace("Unregistering quadruple");
+            LOG.trace("Unregistering quadruple");
         }
 
         @Override
@@ -235,7 +235,7 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
         public void sync() {
             long start = 0;
 
-            if (log.isTraceEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 start = System.currentTimeMillis();
             }
 
@@ -257,8 +257,8 @@ public abstract class AbstractStatsRecorder implements StatsRecorder {
                 }
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace("Sync performed in "
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Sync performed in "
                         + (System.currentTimeMillis() - start) + " ms");
             }
         }

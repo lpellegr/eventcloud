@@ -38,7 +38,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public abstract class LoadBalancingService extends AbstractScheduledService {
 
-    protected static final Logger log =
+    protected static final Logger LOG =
             LoggerFactory.getLogger(LoadBalancingService.class);
 
     protected final SemanticCanOverlay overlay;
@@ -68,8 +68,8 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
 
         this.loadBalancingIteration();
 
-        if (log.isTraceEnabled()) {
-            log.trace(
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(
                     "Iteration {} performed on {}peer {}", this.iteration,
                     this.overlay.isBootstrappingPeer()
                             ? "bootstrapping " : "", this.overlay.getId());
@@ -85,7 +85,7 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
         LoadEvaluation loadEstimate = this.evaluateLoadState();
 
         if (loadEstimate.loadState != LoadState.NORMAL) {
-            log.info(
+            LOG.info(
                     "Peer {} detected as {}", this.overlay.getId(),
                     loadEstimate.loadState);
         }
@@ -98,7 +98,7 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
                         loadEstimate, this.overlay);
                 break;
             case NORMAL:
-                log.trace(
+                LOG.trace(
                         "No imbalance detected on peer {}",
                         this.overlay.getId());
                 break;
@@ -138,8 +138,8 @@ public abstract class LoadBalancingService extends AbstractScheduledService {
             }
         }
 
-        if (log.isTraceEnabled() && imbalanceCriterion != null) {
-            log.trace(
+        if (LOG.isTraceEnabled() && imbalanceCriterion != null) {
+            LOG.trace(
                     "{} detected for criterion {} on peer {} ({} {} {} * {})",
                     loadState == LoadState.OVERLOADED
                             ? "Overload" : "Underload",

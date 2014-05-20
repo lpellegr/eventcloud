@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Coordinate>
         extends Router<EfficientBroadcastRequest<E>, Point<E>> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(EfficientBroadcastRequestRouter.class);
 
     public EfficientBroadcastRequestRouter() {
@@ -98,7 +98,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                log.error("Cannot log broadcast algorithm : "
+                LOG.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
@@ -106,7 +106,7 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
 
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            log.debug(
+            LOG.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
@@ -133,8 +133,8 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
         } else {
             // the current overlay validates the constraints
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Request " + request.getId() + " is on peer "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
@@ -218,8 +218,8 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
             // operation and the current peer must await for the number
             // of responses sent.
             else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sending request " + request.getId() + " to "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -249,8 +249,8 @@ public class EfficientBroadcastRequestRouter<T extends MulticastRequest<E>, E ex
                             NeighborEntryWrapper<E> neighborEntry = it.next();
                             Peer p = neighborEntry.getNeighborEntry().getStub();
 
-                            if (log.isDebugEnabled()) {
-                                log.debug("Sending request " + request.getId()
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Sending request " + request.getId()
                                         + " from " + overlay + " to " + p);
                             }
 

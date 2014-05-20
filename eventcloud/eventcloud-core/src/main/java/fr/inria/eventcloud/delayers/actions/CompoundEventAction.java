@@ -83,7 +83,7 @@ import fr.inria.eventcloud.pubsub.notifications.SignalNotification;
  */
 public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(CompoundEventAction.class);
 
     public CompoundEventAction(SemanticCanOverlay overlay, int threadPoolSize) {
@@ -191,7 +191,7 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
                                         break;
                                 }
 
-                                log.debug(
+                                LOG.debug(
                                         "Notification sent at time {} for graph {} because subscription {} and triggering condition satisfied on peer {}",
                                         System.currentTimeMillis(),
                                         compoundEvent.getGraph(),
@@ -213,7 +213,7 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
                                         subscription);
                             }
                         } else {
-                            if (log.isTraceEnabled()) {
+                            if (LOG.isTraceEnabled()) {
                                 String reason;
 
                                 if (result == null) {
@@ -228,7 +228,7 @@ public final class CompoundEventAction extends Action<ExtendedCompoundEvent> {
                                                     + result.getSecond();
                                 }
 
-                                log.trace(
+                                LOG.trace(
                                         "Notification not sent for graph {} with subscription {} on peer {} because {}",
                                         compoundEvent.getGraph(),
                                         matchingResult.subscriptionId,

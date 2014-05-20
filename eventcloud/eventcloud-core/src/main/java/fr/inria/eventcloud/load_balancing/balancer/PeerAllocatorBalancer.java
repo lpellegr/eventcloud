@@ -36,7 +36,7 @@ public class PeerAllocatorBalancer implements LoadBalancer {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PeerAllocatorBalancer.class);
 
     /**
@@ -45,7 +45,7 @@ public class PeerAllocatorBalancer implements LoadBalancer {
     @Override
     public void balanceOverload(LoadEvaluation loadEstimate,
                                 SemanticCanOverlay overlay) {
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
 
         long startTime = 0;
         long allocationTime = 0;
@@ -77,13 +77,13 @@ public class PeerAllocatorBalancer implements LoadBalancer {
 
             if (isTraceEnabled) {
                 joinTime = System.currentTimeMillis() - startTime;
-                log.trace(
+                LOG.trace(
                         "Peer allocated in {} ms and load balancer with a join in {} ms",
                         allocationTime, joinTime);
             }
         } else {
             // all preallocated peers have been borrowed, stop balancing
-            log.trace("Peer components pool empty, no balancing performed");
+            LOG.trace("Peer components pool empty, no balancing performed");
         }
 
     }

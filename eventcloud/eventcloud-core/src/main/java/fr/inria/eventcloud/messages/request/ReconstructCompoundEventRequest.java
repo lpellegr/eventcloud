@@ -54,7 +54,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(ReconstructCompoundEventRequest.class);
 
     // the hash values associated to the quadruples which have been already
@@ -119,7 +119,7 @@ public class ReconstructCompoundEventRequest extends QuadruplePatternRequest {
                 }
             }
 
-            log.info(
+            LOG.info(
                     "Retrieved {} new event(s) on {} for meta graph node {}",
                     new Object[] {
                             result.size(), overlay,

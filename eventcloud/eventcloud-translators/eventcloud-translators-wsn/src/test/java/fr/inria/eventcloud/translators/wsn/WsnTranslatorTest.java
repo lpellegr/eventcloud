@@ -45,7 +45,7 @@ import fr.inria.eventcloud.utils.RDFReader;
  */
 public class WsnTranslatorTest {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(WsnTranslatorTest.class);
 
     private WsnTranslator translator;
@@ -63,7 +63,7 @@ public class WsnTranslatorTest {
                                 "/notification-01.trig"),
                         SerializationFormat.TriG));
 
-        log.info("Initial quadruples are:");
+        LOG.info("Initial quadruples are:");
         logInfo(initialEvent);
 
         CompoundEvent event = initialEvent;
@@ -71,7 +71,7 @@ public class WsnTranslatorTest {
         for (int i = 0; i < 2; i++) {
             message = this.translator.translateXmlCompoundEvent(event);
 
-            log.info(
+            LOG.info(
                     "Message payload:\n{}",
                     asString((Element) message.getMessage().getAny()));
 
@@ -88,7 +88,7 @@ public class WsnTranslatorTest {
             // TODO: add assertions about the event which is issued from the
             // translation
 
-            log.info("Event issued from translation {}:", i + 1);
+            LOG.info("Event issued from translation {}:", i + 1);
             logInfo(event);
 
             Assert.assertEquals(
@@ -124,7 +124,7 @@ public class WsnTranslatorTest {
 
     private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
-            log.info(quad.toString());
+            LOG.info(quad.toString());
         }
     }
 

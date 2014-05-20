@@ -80,7 +80,7 @@ import fr.inria.eventcloud.runners.EachPublishSubscribeAlgorithm;
 @RunWith(EachPublishSubscribeAlgorithm.class)
 public class PubSubTest {
 
-    private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PubSubTest.class);
 
     private static List<CompoundEvent> events = new ArrayList<CompoundEvent>();
 
@@ -258,7 +258,7 @@ public class PubSubTest {
                             quadruples.add(q);
                         }
 
-                        log.debug(
+                        LOG.debug(
                                 "Publishing an event composed of {} quadruples from thread {}",
                                 quadruples.size(), threadIndex);
 
@@ -755,7 +755,7 @@ public class PubSubTest {
 
         for (Peer p : this.deployer.getRandomSemanticTracker(this.eventCloudId)
                 .getPeers()) {
-            log.info(
+            LOG.info(
                     "Before unsubscribe peer {} contains the following subscriptions:\n{}",
                     p,
                     QuadruplesFormatter.toString(Operations.findQuadruplesOperation(
@@ -792,7 +792,7 @@ public class PubSubTest {
                         Operations.findQuadruplesOperation(
                                 p, QuadruplePattern.ANY, true);
 
-                log.info(
+                LOG.info(
                         "After unsubscribe peer {} contains the following subscriptions:\n{}",
                         p, QuadruplesFormatter.toString(subscriptionData, true));
                 Assert.assertEquals(0, subscriptionData.size());
@@ -805,11 +805,11 @@ public class PubSubTest {
         ComponentUtils.terminateComponent(this.publishProxy);
         ComponentUtils.terminateComponent(this.subscribeProxy);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Peers dump:");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Peers dump:");
             for (Peer p : this.deployer.getRandomSemanticTracker(
                     this.eventCloudId).getPeers()) {
-                log.debug(p.dump());
+                LOG.debug(p.dump());
             }
         }
 
@@ -842,7 +842,7 @@ public class PubSubTest {
                 bindings.notifyAll();
             }
 
-            log.info("New binding received:\n{}", solution);
+            LOG.info("New binding received:\n{}", solution);
         }
 
     }
@@ -862,7 +862,7 @@ public class PubSubTest {
                 events.notifyAll();
             }
 
-            log.info("New event received:\n{}", solution);
+            LOG.info("New event received:\n{}", solution);
         }
     }
 
@@ -881,7 +881,7 @@ public class PubSubTest {
                 signals.notifyAll();
             }
 
-            log.info("New signal received");
+            LOG.info("New signal received");
         }
     }
 

@@ -91,7 +91,7 @@ import fr.inria.eventcloud.utils.RDFReader;
 public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
         PutGetProxyAttributeController {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PutGetProxyImpl.class);
 
     /**
@@ -333,7 +333,7 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
             throws MalformedSparqlQueryException {
         Stopwatch stopwatch = null;
 
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             stopwatch = Stopwatch.createStarted();
         }
 
@@ -354,8 +354,8 @@ public class PutGetProxyImpl extends EventCloudProxy implements PutGetProxy,
                     + sparqlQuery);
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("It took " + stopwatch.elapsed(TimeUnit.MILLISECONDS)
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("It took " + stopwatch.elapsed(TimeUnit.MILLISECONDS)
                     + " ms to execute '" + sparqlQuery + "', "
                     + result.getStats());
         }

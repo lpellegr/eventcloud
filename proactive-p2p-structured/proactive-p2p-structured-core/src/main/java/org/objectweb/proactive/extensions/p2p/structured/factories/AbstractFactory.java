@@ -36,46 +36,46 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(AbstractFactory.class);
 
     static {
         if (CentralPAPropertyRepository.JAVA_SECURITY_POLICY.getValue() == null) {
-            log.warn("Java property \""
+            LOG.warn("Java property \""
                     + CentralPAPropertyRepository.JAVA_SECURITY_POLICY.getName()
                     + "\" is not set");
         }
 
         if (!CentralPAPropertyRepository.PA_COMMUNICATION_PROTOCOL.getValue()
                 .equals("pnp")) {
-            log.warn("Java property \""
+            LOG.warn("Java property \""
                     + CentralPAPropertyRepository.PA_COMMUNICATION_PROTOCOL.getName()
                     + "\" is not set to pnp");
         }
 
         if (PNPConfig.PA_PNP_PORT.getValue() == 0) {
-            log.warn("Java property \"" + PNPConfig.PA_PNP_PORT.getName()
+            LOG.warn("Java property \"" + PNPConfig.PA_PNP_PORT.getName()
                     + "\" is not set");
-        } else if (log.isDebugEnabled()) {
-            log.debug("Java property \"" + PNPConfig.PA_PNP_PORT.getName()
+        } else if (LOG.isDebugEnabled()) {
+            LOG.debug("Java property \"" + PNPConfig.PA_PNP_PORT.getName()
                     + "\" set to " + PNPConfig.PA_PNP_PORT.getValue());
         }
 
         if ((CentralPAPropertyRepository.PA_HOSTNAME.getValue() == null)
                 && (CentralPAPropertyRepository.PA_NET_INTERFACE.getValue() == null)) {
-            log.warn("Neither the java property \""
+            LOG.warn("Neither the java property \""
                     + CentralPAPropertyRepository.PA_HOSTNAME.getName()
                     + "\" nor the java property "
                     + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
                     + " are set");
-        } else if (log.isDebugEnabled()) {
+        } else if (LOG.isDebugEnabled()) {
             if (CentralPAPropertyRepository.PA_HOSTNAME.getValue() != null) {
-                log.debug("Java property \""
+                LOG.debug("Java property \""
                         + CentralPAPropertyRepository.PA_HOSTNAME.getName()
                         + "\" set to "
                         + CentralPAPropertyRepository.PA_HOSTNAME.getValue());
             } else {
-                log.debug("Java property \""
+                LOG.debug("Java property \""
                         + CentralPAPropertyRepository.PA_NET_INTERFACE.getName()
                         + "\" set to "
                         + CentralPAPropertyRepository.PA_NET_INTERFACE.getValue());

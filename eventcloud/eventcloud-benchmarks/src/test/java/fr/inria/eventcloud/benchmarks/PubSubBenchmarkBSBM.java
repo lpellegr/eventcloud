@@ -73,7 +73,7 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
 @RunWith(Parameterized.class)
 public class PubSubBenchmarkBSBM {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PubSubBenchmarkBSBM.class);
 
     private static Map<SubscriptionId, AtomicLong> nbEventsReceivedBySubscriber =
@@ -149,7 +149,7 @@ public class PubSubBenchmarkBSBM {
 
     @Test(timeout = 1800000)
     public void execute() throws EventCloudIdNotManaged {
-        log.info(
+        LOG.info(
                 "Benchmark with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
                 new Object[] {
                         this.nbPeers, this.nbPublishers, this.nbSubscribers,
@@ -261,7 +261,7 @@ public class PubSubBenchmarkBSBM {
 
         this.receiveExpectedEventsStopwatch.stop();
 
-        log.info(
+        LOG.info(
                 "It takes {} to receive {} events (~{} per second) with {} peer(s), {} publisher(s) and {} subscriber(s) using {}",
                 new Object[] {
                         this.receiveExpectedEventsStopwatch,
@@ -353,7 +353,7 @@ public class PubSubBenchmarkBSBM {
 
         @Override
         public void onNotification(SubscriptionId id, Binding solution) {
-            log.trace(
+            LOG.trace(
                     "New binding received for subscription {}: {}", id,
                     solution);
             handleNewEvent(id);
@@ -366,7 +366,7 @@ public class PubSubBenchmarkBSBM {
 
         @Override
         public void onNotification(SubscriptionId id, CompoundEvent solution) {
-            log.trace(
+            LOG.trace(
                     "New compound event received for subscription {}: {}", id,
                     solution);
             handleNewEvent(id);
@@ -379,7 +379,7 @@ public class PubSubBenchmarkBSBM {
 
         @Override
         public void onNotification(SubscriptionId id, String eventId) {
-            log.trace("New signal received for subscription {}", id);
+            LOG.trace("New signal received for subscription {}", id);
             handleNewEvent(id);
         }
     }

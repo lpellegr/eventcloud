@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class PeerFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PeerFactory.class);
 
     private PeerFactory() {
@@ -226,7 +226,7 @@ public final class PeerFactory extends AbstractFactory {
             peerAttributeController.initAttributes(
                     peer, deploymentConfiguration, overlayProvider);
 
-            log.info("Peer {} created", peer.getId());
+            LOG.info("Peer {} created", peer.getId());
 
             return peer;
         } catch (NoSuchInterfaceException e) {

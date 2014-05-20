@@ -36,7 +36,7 @@ import fr.inria.eventcloud.utils.RDFReader;
  */
 public class SemanticNotificationTranslatorTest {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticNotificationTranslatorTest.class);
 
     private WsnTranslator translator;
@@ -52,7 +52,7 @@ public class SemanticNotificationTranslatorTest {
                         this.getClass().getResourceAsStream("/example.trig"),
                         SerializationFormat.TriG));
 
-        log.info("Initial quadruples are:");
+        LOG.info("Initial quadruples are:");
         logInfo(initialEvent);
         // printQuadruples(initialEvent.getQuadruples());
 
@@ -62,14 +62,14 @@ public class SemanticNotificationTranslatorTest {
         for (int i = 0; i < 2; i++) {
             message = this.translator.translateSemanticCompoundEvent(event);
 
-            log.info("Message payload:\n{}", message.getMessage().getAny());
+            LOG.info("Message payload:\n{}", message.getMessage().getAny());
             event =
             // this.translator.translateNotificationMessageToEvent(message);
                     this.translator.translateSemanticNotification(message);
             // TODO: add assertions about the event which is issued from the
             // translation
 
-            log.info("Event issued from translation {}:", i + 1);
+            LOG.info("Event issued from translation {}:", i + 1);
             logInfo(event);
 
             Assert.assertEquals(
@@ -109,7 +109,7 @@ public class SemanticNotificationTranslatorTest {
 
     private static void logInfo(CompoundEvent event) {
         for (Quadruple quad : event) {
-            log.info(quad.toString());
+            LOG.info(quad.toString());
         }
     }
 

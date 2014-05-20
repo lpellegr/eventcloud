@@ -64,7 +64,7 @@ public class Quadruple implements Externalizable, Event {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log = LoggerFactory.getLogger(Quadruple.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Quadruple.class);
 
     public static final String PUBLICATION_TIME_SEPARATOR = "$$";
 
@@ -439,7 +439,7 @@ public class Quadruple implements Externalizable, Event {
         }
 
         if (this.publicationTime > 0) {
-            log.warn(
+            LOG.warn(
                     "Publication time {} overriden by {}",
                     this.publicationTime, publicationTime);
         }
@@ -473,7 +473,7 @@ public class Quadruple implements Externalizable, Event {
         }
 
         if (this.publicationSource != null) {
-            log.warn(
+            LOG.warn(
                     "Publication source '{}' overriden by '{}'",
                     this.publicationSource, source);
         }

@@ -53,7 +53,7 @@ import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProvider
  * @author The ProActive Team
  */
 public class NodeProviderRegistry {
-    private static final Logger logger =
+    private static final Logger LOG =
             ProActiveLogger.getLogger(NodeProviderRegistry.class);
 
     private final Map<UniqueID, NodeRequest> nodeRequests;
@@ -87,8 +87,8 @@ public class NodeProviderRegistry {
             this.nodeRequests.put(nodeRequestID, new NodeRequest(
                     nodeRequestID, nbNodes));
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Node request #" + nodeRequestID + " for "
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Node request #" + nodeRequestID + " for "
                         + nbNodes + " nodes added");
             }
         }
@@ -108,7 +108,7 @@ public class NodeProviderRegistry {
         } else {
             task.release();
 
-            logger.error("Node provider task tried to register to node request #"
+            LOG.error("Node provider task tried to register to node request #"
                     + nodeRequestID + " but there is no such node request ID");
         }
     }
@@ -127,7 +127,7 @@ public class NodeProviderRegistry {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             return this.nodeRequests.get(nodeRequestID).isDeploymentFinished();
         } else {
-            logger.error("No such node request #" + nodeRequestID);
+            LOG.error("No such node request #" + nodeRequestID);
 
             return false;
         }
@@ -146,7 +146,7 @@ public class NodeProviderRegistry {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             return this.nodeRequests.get(nodeRequestID).getNodes();
         } else {
-            logger.error("No such node request #" + nodeRequestID);
+            LOG.error("No such node request #" + nodeRequestID);
 
             return null;
         }
@@ -163,7 +163,7 @@ public class NodeProviderRegistry {
         if (this.nodeRequests.containsKey(nodeRequestID)) {
             this.nodeRequests.remove(nodeRequestID).releaseNodes();
         } else {
-            logger.error("No such node request #" + nodeRequestID);
+            LOG.error("No such node request #" + nodeRequestID);
         }
     }
 }

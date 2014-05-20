@@ -43,7 +43,7 @@ public class WsnCompoundEventNotificationListener extends
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(WsnCompoundEventNotificationListener.class);
 
     private final QName streamQName;
@@ -113,13 +113,13 @@ public class WsnCompoundEventNotificationListener extends
                                                     WsnConstants.SIMPLE_TOPIC_EXPRESSION_MARKER),
                                     this.getTranslator().translate(solution)));
 
-            log.info(
+            LOG.info(
                     "Subscriber {} notified about:\n{}",
                     this.subscriberWsEndpointUrl, solution);
         } catch (TranslationException e) {
-            log.error("Error during translation", e);
+            LOG.error("Error during translation", e);
         } catch (WebServiceException e) {
-            log.error("Failed to send notification to "
+            LOG.error("Failed to send notification to "
                     + this.subscriberWsEndpointUrl, e.getCause());
         }
     }

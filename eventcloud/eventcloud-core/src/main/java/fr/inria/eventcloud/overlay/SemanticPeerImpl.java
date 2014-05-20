@@ -73,7 +73,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticPeerImpl.class);
 
     /**
@@ -242,7 +242,7 @@ public class SemanticPeerImpl extends PeerImpl implements SemanticPeer,
         try {
             super.route(new IndexSubscriptionRequest(subscription));
         } catch (DecompositionException e) {
-            log.error("Illegal subscription syntax: "
+            LOG.error("Illegal subscription syntax: "
                     + subscription.getSparqlQuery(), e);
         }
     }

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RicartAgrawalaManager implements MutualExclusionManager {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(RicartAgrawalaManager.class);
 
     // egrep "Requesting|Waiting|Entering|Received|CS reply|Releasing|Critical"
@@ -79,7 +79,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
     @Override
     public boolean requestCriticalSection(Collection<Peer> processes,
                                           MaintenanceId maintenanceId) {
-        log.trace(
+        LOG.trace(
                 "Requesting critical section on {} with {} processes {}",
                 this.overlay.getId(), processes.size(), processes);
 
@@ -98,7 +98,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
 
         this.overlay.incrementExtraActiveRequestCount(1);
 
-        log.trace(
+        LOG.trace(
                 "Waiting for {} replies on {}", this.nbRepliesMissing,
                 this.overlay.getId());
 
@@ -114,7 +114,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
 
         this.overlay.decrementExtraActiveRequestCount(1);
 
-        log.trace("Entering critical section on {}", this.overlay.getId());
+        LOG.trace("Entering critical section on {}", this.overlay.getId());
 
         return !this.deferred;
     }
@@ -122,7 +122,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
     public void receiveRequest(RicartAgrawalaRequest request) {
         long k = request.getRequesterSequenceNumber();
 
-        log.trace(
+        LOG.trace(
                 "Received CS request on {}, requestingCS={}, highestSN={}, requesterSN={}, requesterID={}",
                 this.overlay.getId(), this.requestingCS,
                 this.highestSequenceNumber, k, request.getRequesterId());
@@ -142,12 +142,12 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
 
         if (deferReply) {
             this.repliesDeferred.add(request.getRequester());
-            log.trace(
+            LOG.trace(
                     "CS reply deferred on {} for requesterSN={} and requesterID={}",
                     this.overlay.getId(), k, request.getRequesterId());
         } else {
             request.getRequester().receive(this.nonDeferredReply);
-            log.trace(
+            LOG.trace(
                     "CS reply sent from {} to {} for requesterSN={} and requesterID={}",
                     this.overlay.getId(), request.getRequesterId(), k,
                     request.getRequesterId());
@@ -155,13 +155,13 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
     }
 
     public void receiveReply(RicartAgrawalaReply reply) {
-        log.trace("Received CS reply on {}", this.overlay.getId());
+        LOG.trace("Received CS reply on {}", this.overlay.getId());
         synchronized (this) {
             this.nbRepliesMissing--;
             this.deferred |= reply.wasDeferred();
 
             if (this.nbRepliesMissing == 0) {
-                log.trace(
+                LOG.trace(
                         "All replies received for CS on {}",
                         this.overlay.getId());
 
@@ -176,7 +176,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
      */
     @Override
     public void releaseCriticalSection() {
-        log.trace("Releasing critical section on {}", this.overlay.getId());
+        LOG.trace("Releasing critical section on {}", this.overlay.getId());
 
         this.requestingCS = false;
 
@@ -185,7 +185,7 @@ public class RicartAgrawalaManager implements MutualExclusionManager {
         }
         this.repliesDeferred.clear();
 
-        log.trace("Critical section released on {}", this.overlay.getId());
+        LOG.trace("Critical section released on {}", this.overlay.getId());
     }
 
 }

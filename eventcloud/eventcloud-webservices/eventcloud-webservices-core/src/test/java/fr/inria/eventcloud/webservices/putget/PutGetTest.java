@@ -50,7 +50,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  */
 public class PutGetTest extends WsTest {
 
-    private static final Logger log = LoggerFactory.getLogger(PutGetTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PutGetTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
@@ -88,9 +88,9 @@ public class PutGetTest extends WsTest {
                 NodeFactory.createLiteral("26", XSDDatatype.XSDint)));
 
         List<Quadruple> result = this.putgetWsClient.find(QuadruplePattern.ANY);
-        log.info("Quadruples contained by the EventCloud:");
+        LOG.info("Quadruples contained by the EventCloud:");
         for (Quadruple quad : result) {
-            log.info(quad.toString());
+            LOG.info(quad.toString());
         }
         Assert.assertEquals(3, result.size());
 
@@ -101,8 +101,8 @@ public class PutGetTest extends WsTest {
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
 
-        log.info("Answer for SPARQL query {}:", sparqlQuery);
-        log.info(resultNode.toString());
+        LOG.info("Answer for SPARQL query {}:", sparqlQuery);
+        LOG.info(resultNode.toString());
 
         Assert.assertEquals(expectedNodeResult, resultNode);
     }

@@ -120,7 +120,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
      */
     public static final String SUBSCRIBE_PROXY_VN = "SubscribeProxyVN";
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SubscribeProxyImpl.class);
 
     // contains the ids of the events that have been delivered.
@@ -363,7 +363,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
         super.selectPeer().subscribe(internalSubscription);
 
-        log.info(
+        LOG.info(
                 "New subscription has been registered from {} with id {}",
                 PAActiveObject.getBodyOnThis().getUrl(),
                 internalSubscription.getId());
@@ -535,8 +535,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             return;
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("Received quadruples notification subscriptionId="
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Received quadruples notification subscriptionId="
                     + subscriptionId
                     + ", contentSize="
                     + notification.getContent().size()
@@ -596,7 +596,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     }
 
     private void handleReceiveDuplicateSolution(QuadruplesNotification notification) {
-        log.info(
+        LOG.info(
                 "Received some quadruple duplicates for a CE that has already been delivered. They will be ignored:\n{}",
                 notification);
 
@@ -735,11 +735,11 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
     }
 
     private void logNumberOfActiveAndWaitingMAOThreads() {
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             Thread[] threads =
                     ThreadUtils.getAllThreads("MAOs Executor Thread.*SubscribeProxyImpl.*");
 
-            log.trace(
+            LOG.trace(
                     "Dump Threads SubscribeProxy {}, total={} active={} waiting={}",
                     System.identityHashCode(this), threads.length,
                     ThreadUtils.countActive(threads),
@@ -778,14 +778,14 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
         int nbReconstructRequestSent = 0;
         long reconstructionStartTime = 0;
 
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             reconstructionStartTime = System.currentTimeMillis();
         }
 
         // perform polling while all the quadruples have not been retrieved
         while (quadsReceived.size() != expectedNbQuadruples) {
-            if (log.isInfoEnabled()) {
-                log.info(
+            if (LOG.isInfoEnabled()) {
+                LOG.info(
                         "Reconstructing compound event for subscription {} and graph value {} ({}/{})",
                         new Object[] {
                                 subscriptionId, eventId, quadsReceived.size(),
@@ -843,8 +843,8 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             }
         }
 
-        if (log.isTraceEnabled()) {
-            log.trace("Reconstruction for eventId " + eventId
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Reconstruction for eventId " + eventId
                     + " has required " + (nbReconstructRequestSent + 1)
                     + " requests and "
                     + (System.currentTimeMillis() - reconstructionStartTime)
@@ -876,7 +876,7 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
 
     private void logIntegrationInformation(String graph) {
         // log information for integration test purposes
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             String msg = "EventCloud Exit";
 
             if (graph != null) {
@@ -888,13 +888,13 @@ public class SubscribeProxyImpl extends EventCloudProxy implements
             msg += " ";
             msg += super.eventCloudCache.getId().getStreamUrl();
 
-            log.trace(msg);
+            LOG.trace(msg);
         }
     }
 
     private void logNotificationReception(Notification<?> notification) {
-        if (log.isDebugEnabled()) {
-            log.debug(
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
                     "New notification received {} on {} for subscription id {}",
                     new Object[] {
                             notification.getId(), super.url,

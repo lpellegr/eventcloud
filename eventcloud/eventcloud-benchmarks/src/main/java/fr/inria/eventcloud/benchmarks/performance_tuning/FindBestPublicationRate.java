@@ -39,7 +39,7 @@ import fr.inria.eventcloud.delayers.Delayer;
  */
 public class FindBestPublicationRate {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(FindBestPublicationRate.class);
 
     @Parameter(names = {"-nr", "--nb-runs"}, description = "Number of runs")
@@ -104,7 +104,7 @@ public class FindBestPublicationRate {
         while (this.nbPublicationsMin != this.nbPublicationsMax) {
             int m = middle(this.nbPublicationsMin, this.nbPublicationsMax);
 
-            log.info(
+            LOG.info(
                     "Testing with m={}, {}, nbPublicationsMin={}, nbPublicationsMax={}, bestThroughput={}",
                     m, inc
                             ? "inc" : "dec", this.nbPublicationsMin,
@@ -132,13 +132,13 @@ public class FindBestPublicationRate {
                 }
             }
 
-            log.info(
+            LOG.info(
                     "nbPublicationsMin={}, nbPublicationsMax={}, lastThroughput={}, throughput={}",
                     this.nbPublicationsMin, this.nbPublicationsMax,
                     bestThroughput, throughput);
         }
 
-        log.info(
+        LOG.info(
                 "Best throughput ({}) is when nbPublications is set to {}",
                 bestThroughput, bestPublicationNumber);
     }

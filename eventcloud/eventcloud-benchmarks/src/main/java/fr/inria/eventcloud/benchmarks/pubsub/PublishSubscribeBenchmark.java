@@ -107,7 +107,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxy;
  */
 public class PublishSubscribeBenchmark {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PublishSubscribeBenchmark.class);
 
     private static final String NB_QUADRUPLES_PER_PEER_CATEGORY =
@@ -353,35 +353,35 @@ public class PublishSubscribeBenchmark {
     }
 
     private void logParameterValues() {
-        log.info("Benchmark starting with the following parameters:");
-        log.info("  compoundEventSize -> {}", this.nbQuadruplesPerCompoundEvent);
-        log.info("  dryRuns -> {}", this.discardFirstRuns);
-        log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
-        log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
-        log.info("  listenerType -> {}", this.listenerType);
-        log.info("  measureStorageTime -> {}", this.measureStorageTime);
-        log.info(
+        LOG.info("Benchmark starting with the following parameters:");
+        LOG.info("  compoundEventSize -> {}", this.nbQuadruplesPerCompoundEvent);
+        LOG.info("  dryRuns -> {}", this.discardFirstRuns);
+        LOG.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
+        LOG.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
+        LOG.info("  listenerType -> {}", this.listenerType);
+        LOG.info("  measureStorageTime -> {}", this.measureStorageTime);
+        LOG.info(
                 "  nbEventGenerationRounds -> {}", this.nbEventGenerationRounds);
-        log.info("  nbPeers -> {}", this.nbPeers);
-        log.info("  nbPublications -> {}", nbPublications);
-        log.info("  nbPublishers -> {}", this.nbPublishers);
-        log.info("  nbRuns -> {}", this.nbRuns);
-        log.info("  nbSubscribers -> {}", this.nbSubscribers);
-        log.info(
+        LOG.info("  nbPeers -> {}", this.nbPeers);
+        LOG.info("  nbPublications -> {}", nbPublications);
+        LOG.info("  nbPublishers -> {}", this.nbPublishers);
+        LOG.info("  nbRuns -> {}", this.nbRuns);
+        LOG.info("  nbSubscribers -> {}", this.nbSubscribers);
+        LOG.info(
                 "  nbSubscriptionsPerSubscriber -> {}",
                 this.nbSubscriptionsPerSubscriber);
-        log.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
-        log.info("  rewritingLevel -> {}", this.rewritingLevel);
-        log.info("  objectTermSize -> {}", this.objectTermSize);
-        log.info("  rdfTermSize -> {}", this.rdfTermSize);
-        log.info(
+        LOG.info("  publishQuadruples -> {}", this.publishIndependentQuadruples);
+        LOG.info("  rewritingLevel -> {}", this.rewritingLevel);
+        LOG.info("  objectTermSize -> {}", this.objectTermSize);
+        LOG.info("  rdfTermSize -> {}", this.rdfTermSize);
+        LOG.info(
                 "  disableInterCompoundEventsShuffling -> {}",
                 this.disableInterCompoundEventsShuffling);
-        log.info(
+        LOG.info(
                 "  disableIntraCompoundEventsShuffling -> {}",
                 this.disableIntraCompoundEventsShuffling);
-        log.info("  subscriptionType -> {}", this.subscriptionType);
-        log.info(
+        LOG.info("  subscriptionType -> {}", this.subscriptionType);
+        LOG.info(
                 "  waitBetweenPublications -> {}", this.waitBetweenPublications);
     }
 
@@ -538,12 +538,12 @@ public class PublishSubscribeBenchmark {
                         }
 
                         if (this.synthethicSubscriptions.length > 0) {
-                            log.info("The subscriptions used by the subscriber(s) are the following:");
+                            LOG.info("The subscriptions used by the subscriber(s) are the following:");
                             for (SyntheticSubscription subscription : this.synthethicSubscriptions) {
-                                log.info("  {}", subscription.content);
+                                LOG.info("  {}", subscription.content);
                             }
                         } else {
-                            log.info("No subscription registered");
+                            LOG.info("No subscription registered");
                         }
                     }
 
@@ -717,10 +717,10 @@ public class PublishSubscribeBenchmark {
                                                     .getSubscriptionsEndTime()
                                                     - subscribeStartTime;
 
-                            log.info(
+                            LOG.info(
                                     "Time required to store publications: {}",
                                     publicationsStorageTime);
-                            log.info(
+                            LOG.info(
                                     "Time required to store subscriptions: {}",
                                     subscriptionsStorageTime);
 
@@ -936,12 +936,12 @@ public class PublishSubscribeBenchmark {
     private int logRunStatistics(EventCloudDeployer deployer) {
         int totalNumberOfQuadruples = 0;
 
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             List<Peer> peers = deployer.getRandomSemanticTracker().getPeers();
 
-            log.debug("Peers dump:");
+            LOG.debug("Peers dump:");
             for (Peer p : deployer.getRandomSemanticTracker().getPeers()) {
-                log.debug(p.dump());
+                LOG.debug(p.dump());
             }
 
             StringBuilder buf = new StringBuilder();
@@ -967,7 +967,7 @@ public class PublishSubscribeBenchmark {
                 }
             }
 
-            log.debug("Quadruples distribution on peers: " + buf.toString());
+            LOG.debug("Quadruples distribution on peers: " + buf.toString());
         }
 
         return totalNumberOfQuadruples;

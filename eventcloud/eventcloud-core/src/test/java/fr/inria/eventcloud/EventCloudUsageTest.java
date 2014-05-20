@@ -56,7 +56,7 @@ public class EventCloudUsageTest implements Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(EventCloudUsageTest.class);
 
     private static final List<Binding> bindingsReceived =
@@ -106,9 +106,9 @@ public class EventCloudUsageTest implements Serializable {
         // Hereafter, any quadruple which has any value as graph, subject,
         // predicate and object value is returned
         List<Quadruple> result = putGetProxy.find(QuadruplePattern.ANY);
-        log.info("Quadruples contained by the EventCloud {}", eventCloudId);
+        LOG.info("Quadruples contained by the EventCloud {}", eventCloudId);
         for (Quadruple quad : result) {
-            log.info(quad.toString());
+            LOG.info(quad.toString());
         }
 
         Assert.assertEquals(3, result.size());
@@ -123,8 +123,8 @@ public class EventCloudUsageTest implements Serializable {
 
         Node resultNode =
                 response.getResult().nextSolution().get("day").asNode();
-        log.info("Answer for SPARQL query {}:", sparqlQuery);
-        log.info(resultNode.toString());
+        LOG.info("Answer for SPARQL query {}:", sparqlQuery);
+        LOG.info(resultNode.toString());
 
         Assert.assertEquals(expectedNodeResult, resultNode);
 
@@ -152,10 +152,10 @@ public class EventCloudUsageTest implements Serializable {
                             bindingsReceived.add(solution);
                             bindingsReceived.notifyAll();
                         }
-                        log.info("Solution received:\n{}", solution);
+                        LOG.info("Solution received:\n{}", solution);
                     }
                 });
-        log.info(
+        LOG.info(
                 "Subscription with id {} has been registered",
                 subscription.getId());
 

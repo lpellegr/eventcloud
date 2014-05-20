@@ -78,7 +78,7 @@ import org.ow2.proactive.scheduler.common.exception.ConnectionException;
  */
 @PublicAPI
 public class SchedulerNodeProvider {
-    private static final Logger logger =
+    private static final Logger LOG =
             ProActiveLogger.getLogger(SchedulerNodeProvider.class);
 
     private static final String NODES_AQUISITION_TIMEOUT_PROPERTY =
@@ -423,8 +423,8 @@ public class SchedulerNodeProvider {
                                 + schedulerURL);
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Connected to Scheduler " + schedulerURL);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connected to Scheduler " + schedulerURL);
             }
 
             this.schedulers.put(schedulerURL, scheduler);
@@ -454,8 +454,8 @@ public class SchedulerNodeProvider {
             Scheduler scheduler =
                     sai.login(Credentials.getCredentials(credentialsPath));
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Connected to Scheduler " + schedulerURL);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connected to Scheduler " + schedulerURL);
             }
 
             this.schedulers.put(schedulerURL, scheduler);
@@ -494,8 +494,8 @@ public class SchedulerNodeProvider {
     private List<Node> getNodes(UniqueID nodeRequestID)
             throws NodeProviderException {
         if (this.nodeProviderJobs.containsKey(nodeRequestID)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Waiting for the acquisition of nodes for request #"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Waiting for the acquisition of nodes for request #"
                         + nodeRequestID);
             }
 
@@ -503,7 +503,7 @@ public class SchedulerNodeProvider {
             while (!this.registry.isDeploymentFinished(nodeRequestID)) {
                 try {
                     if (System.currentTimeMillis() > (startTime + this.nodesAquisitionTimeout)) {
-                        logger.error("Unsuccessful acquisition of nodes for node request #"
+                        LOG.error("Unsuccessful acquisition of nodes for node request #"
                                 + nodeRequestID
                                 + " after "
                                 + this.nodesAquisitionTimeout + " ms");
@@ -520,14 +520,14 @@ public class SchedulerNodeProvider {
                 }
             }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Acquisition of nodes for node request #"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Acquisition of nodes for node request #"
                         + nodeRequestID + " completed");
             }
 
             return this.registry.getNodes(nodeRequestID);
         } else {
-            logger.error("No such node request ID: #" + nodeRequestID);
+            LOG.error("No such node request ID: #" + nodeRequestID);
 
             return new ArrayList<Node>();
         }

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageDispatcher {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(MessageDispatcher.class);
 
     private final UniqueID proxyId;
@@ -159,7 +159,7 @@ public class MessageDispatcher {
         // waits for the final response
         this.wait(requestId);
 
-        log.debug("Final response received for request {}", requestId);
+        LOG.debug("Final response received for request {}", requestId);
 
         Serializable response =
                 this.entries.remove(requestId).response.getResult();
@@ -175,7 +175,7 @@ public class MessageDispatcher {
      *            indicates for which request we are waiting the final response.
      */
     private void wait(MessageId requestId) {
-        log.debug("Waiting final response for request with id {}", requestId);
+        LOG.debug("Waiting final response for request with id {}", requestId);
 
         Entry entry = this.entries.get(requestId);
 

@@ -40,7 +40,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(GcmDeploymentNodeProvider.class);
 
     private String gcmaPath;
@@ -101,7 +101,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
 
         this.init();
 
-        log.debug(
+        LOG.debug(
                 "Starting GCM deployment described in the GCM Application descriptor located at {}",
                 this.gcmaPath);
 
@@ -181,7 +181,7 @@ public class GcmDeploymentNodeProvider implements NodeProvider, Serializable {
                 this.isStarted(),
                 "Cannot terminate the GCM deployment because it has not yet been started");
 
-        log.debug(
+        LOG.debug(
                 "Terminating the GCM deployment described in the GCM Application descriptor located at {}",
                 this.gcmaPath);
 

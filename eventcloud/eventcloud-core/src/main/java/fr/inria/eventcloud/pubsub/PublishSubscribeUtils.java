@@ -101,7 +101,7 @@ import fr.inria.eventcloud.utils.SparqlResultSerializer;
  */
 public final class PublishSubscribeUtils {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PublishSubscribeUtils.class);
 
     private PublishSubscribeUtils() {
@@ -509,7 +509,7 @@ public final class PublishSubscribeUtils {
                                                          final Quadruple quadruple) {
         try {
             if (subscription.getSubSubscriptions().length == 1) {
-                log.debug(
+                LOG.debug(
                         "{} matches a subscription which cannot be rewritten, a notification will be delivered",
                         quadruple);
 
@@ -578,7 +578,7 @@ public final class PublishSubscribeUtils {
                                         // copy to get a serializable set
                                         Sets.newHashSet(hashCodes)));
                             } else {
-                                log.error(
+                                LOG.error(
                                         "Error while retrieving peer stub for URL: {}",
                                         peerURL);
                             }
@@ -613,7 +613,7 @@ public final class PublishSubscribeUtils {
                     break;
             }
 
-            log.debug(
+            LOG.debug(
                     "Notification sent for graph {} because subscription {} satisfied on peer {}",
                     quadruple.getGraph(), subscription.getId(),
                     semanticCanOverlay.getId());
@@ -694,7 +694,7 @@ public final class PublishSubscribeUtils {
                         semanticCanOverlay.getSubscriberConnectionFailures()
                                 .invalidate(subscription.getOriginalId());
 
-                        log.info(
+                        LOG.info(
                                 "Removed subscription {} due to subscriber which is not reachable at {}",
                                 subscription.getId(),
                                 subscription.getSubscriberUrl());
@@ -709,8 +709,8 @@ public final class PublishSubscribeUtils {
     private static void logSocialFilterAnswer(final Subscription subscription,
                                               final Quadruple quadruple,
                                               double relationshipStrength) {
-        if (log.isDebugEnabled()) {
-            log.debug(
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
                     "SocialFilterAnswer[source={}, destination={}, threshold={}, relationship_strengh={}, quadruple={}|{}|{}|{}]",
                     new Object[] {
                             quadruple.getPublicationSource(),
@@ -725,7 +725,7 @@ public final class PublishSubscribeUtils {
     public static void logSubscribeProxyNotReachable(String notificationId,
                                                      SubscriptionId subscriptionId,
                                                      String subscriberURL) {
-        log.warn(
+        LOG.warn(
                 "Notification for CE {} matching subscription {} cannot be sent to {}. Proxy not reachable.",
                 notificationId, subscriptionId, subscriberURL);
     }
@@ -817,7 +817,7 @@ public final class PublishSubscribeUtils {
         }
 
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-            log.info("Peer "
+            LOG.info("Peer "
                     + overlay
                     + " is about to dispatch a rewritten subscription, creation time = "
                     + rewrittenSubscription.getCreationTime()
@@ -892,8 +892,8 @@ public final class PublishSubscribeUtils {
                                     subscription, compoundEvent.get(j));
                 }
 
-                if (log.isTraceEnabled()) {
-                    log.trace(
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(
                             "CE with graph {} matching subscription {} with {} as the index of the first quadruple matching the subscription",
                             compoundEvent.getGraph(), subscription.getId(),
                             indexFirstQuadrupleMatching);

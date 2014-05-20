@@ -90,7 +90,7 @@ import fr.inria.eventcloud.utils.RDFReader;
  */
 public class LoadBalancingBenchmark {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(LoadBalancingBenchmark.class);
 
     private static final String BENCHMARK_STATS_COLLECTOR_NAME =
@@ -171,13 +171,13 @@ public class LoadBalancingBenchmark {
 
                     @Override
                     public void setup() throws Exception {
-                        log.info(
+                        LOG.info(
                                 "Loading events from {}",
                                 LoadBalancingBenchmark.this.inputFile);
                         this.events =
                                 LoadBalancingBenchmark.this.loadEvents(LoadBalancingBenchmark.this.inputFile);
 
-                        log.info(
+                        LOG.info(
                                 "{} compound events loaded", this.events.length);
 
                         this.collector =
@@ -261,10 +261,10 @@ public class LoadBalancingBenchmark {
                     @Override
                     public void run(StatsRecorder recorder)
                             throws TimeoutException {
-                        log.info("Assigning events");
+                        LOG.info("Assigning events");
                         this.publishProxies.assignEvents(this.events);
 
-                        log.info("Publishing events to trigger load balancing");
+                        LOG.info("Publishing events to trigger load balancing");
                         this.publishProxies.publish();
 
                         this.collector.waitCondition(3600000);
@@ -275,7 +275,7 @@ public class LoadBalancingBenchmark {
                             e.printStackTrace();
                         }
 
-                        log.info("Distribution on peers is:");
+                        LOG.info("Distribution on peers is:");
 
                         Map<OverlayId, Integer> results =
                                 new HashMap<OverlayId, Integer>();
@@ -303,12 +303,12 @@ public class LoadBalancingBenchmark {
 
                         int count = 0;
                         for (Entry<OverlayId, Integer> entry : results.entrySet()) {
-                            log.info("{}  {}", entry.getKey(), entry.getValue());
+                            LOG.info("{}  {}", entry.getKey(), entry.getValue());
                             count += entry.getValue();
                             stats.addValue(entry.getValue());
                         }
 
-                        log.info(
+                        LOG.info(
                                 "{} peers manage a total of {} quadruples, standard deviation is {}, variability (stddev/average * 100) is {}%",
                                 results.size(),
                                 count,
@@ -320,7 +320,7 @@ public class LoadBalancingBenchmark {
 
                     @Override
                     public void clear() throws Exception {
-                        log.info("Clearing previously recorded information before to start benchmark");
+                        LOG.info("Clearing previously recorded information before to start benchmark");
 
                         List<ResponseOperation> futures =
                                 new ArrayList<ResponseOperation>();
@@ -388,17 +388,17 @@ public class LoadBalancingBenchmark {
     }
 
     private void logParameterValues() {
-        log.info("Benchmark starting with the following parameters:");
-        log.info("  inputFile -> {}", this.inputFile);
-        log.info("  nbRuns -> {}", this.nbRuns);
-        log.info("  dryRuns -> {}", this.discardFirstRuns);
-        log.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
-        log.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
-        log.info("  nbPeers -> {}", this.nbPeers);
-        log.info("  strategy -> {}", this.strategy);
+        LOG.info("Benchmark starting with the following parameters:");
+        LOG.info("  inputFile -> {}", this.inputFile);
+        LOG.info("  nbRuns -> {}", this.nbRuns);
+        LOG.info("  dryRuns -> {}", this.discardFirstRuns);
+        LOG.info("  gcmaDescriptor -> {}", this.gcmaDescriptor);
+        LOG.info("  inMemoryDatastore -> {}", this.inMemoryDatastore);
+        LOG.info("  nbPeers -> {}", this.nbPeers);
+        LOG.info("  strategy -> {}", this.strategy);
 
         if (this.strategy == LoadBalancingStrategy.RELATIVE) {
-            log.info(
+            LOG.info(
                     "  gossip protocol -> {}",
                     EventCloudProperties.LOAD_BALANCING_GOSSIP_STRATEGY.getValue()
                             .getSimpleName());

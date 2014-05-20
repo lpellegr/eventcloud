@@ -38,7 +38,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class PublishCompoundEventRequest extends QuadrupleRequest {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PublishCompoundEventRequest.class);
 
     private static final long serialVersionUID = 160L;
@@ -84,11 +84,11 @@ public class PublishCompoundEventRequest extends QuadrupleRequest {
     }
 
     private void logNumberOfActiveAndWaitingMAOThreads() {
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             Thread[] threads =
                     ThreadUtils.getAllThreads("MAOs Executor Thread.*SemanticPeerImpl.*");
 
-            log.trace(
+            LOG.trace(
                     "Dump Threads SemanticPeerImpl {}, total={} active={} waiting={}",
                     System.identityHashCode(this), threads.length,
                     ThreadUtils.countActive(threads),

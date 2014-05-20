@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends Coordinate>
         extends Router<MulticastResponse<E>, Point<E>> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(BroadcastResponseRouter.class);
 
     /**
@@ -107,7 +107,7 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends C
                         if (localResponse.getReversePathStack().size() == 0) {
                             this.handle(overlay, localResponse);
                         } else {
-                            log.debug(
+                            LOG.debug(
                                     "All subreplies received on {} for request {}",
                                     overlay, response.getId());
 
@@ -191,7 +191,7 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends C
                         response.getKey(), dimension, direction);
 
         if (neighborChosen == null) {
-            log.warn(
+            LOG.warn(
                     "Trying to route a {} response but the key {} used "
                             + "is managed by no peer. You are probably using a key with "
                             + "values that are not between the minimum and the upper "
@@ -200,8 +200,8 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends C
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Request routed to a neighbor because the current peer "
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Request routed to a neighbor because the current peer "
                     + "managing " + overlay
                     + " does not contains the key to reach ("
                     + response.getKey()
@@ -212,7 +212,7 @@ public class BroadcastResponseRouter<T extends MulticastResponse<E>, E extends C
         try {
             ((PeerInternal) neighborChosen.getStub()).forward(response);
         } catch (ProActiveRuntimeException e) {
-            log.error("Error while forwarding a message to the neighbor managing "
+            LOG.error("Error while forwarding a message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }

@@ -40,7 +40,7 @@ import fr.inria.eventcloud.datastore.stats.StatsRecorder;
  */
 public class TransactionalTdbDatastore extends Datastore {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(TransactionalTdbDatastore.class);
 
     private final boolean autoRemove;
@@ -136,7 +136,7 @@ public class TransactionalTdbDatastore extends Datastore {
             try {
                 Files.deleteDirectory(this.location.getDirectoryPath());
             } catch (IOException e) {
-                log.error("The deletion of the repository "
+                LOG.error("The deletion of the repository "
                         + this.location.getDirectoryPath() + " has failed", e);
             }
         }

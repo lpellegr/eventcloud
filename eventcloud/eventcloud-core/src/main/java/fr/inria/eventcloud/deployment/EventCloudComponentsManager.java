@@ -83,7 +83,7 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(EventCloudComponentsManager.class);
 
     private boolean running;
@@ -213,7 +213,7 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
         this.fillUpPools();
         this.running = true;
 
-        log.info(
+        LOG.info(
                 "Component pool manager {} started",
                 PAActiveObject.getBodyOnThis().getID());
     }
@@ -244,7 +244,7 @@ public class EventCloudComponentsManager implements InitActive, RunActive,
 
             this.running = false;
 
-            log.info(
+            LOG.info(
                     "Component pool manager {} stopped",
                     PAActiveObject.getBodyOnThis().getID());
         }

@@ -37,7 +37,7 @@ public class WsCompoundEventNotificationListener extends
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(WsCompoundEventNotificationListener.class);
 
     private final String subscriberWsEndpointUrl;
@@ -69,11 +69,11 @@ public class WsCompoundEventNotificationListener extends
         try {
             this.subscriberWsClient.notifyCompoundEvent(id.toString(), event);
 
-            log.info(
+            LOG.info(
                     "Subscriber {} notified about:\n{}",
                     this.subscriberWsEndpointUrl, event);
         } catch (WebServiceException e) {
-            log.error("Failed to send notification to "
+            LOG.error("Failed to send notification to "
                     + this.subscriberWsEndpointUrl, e.getCause());
         }
     }
