@@ -19,7 +19,7 @@ package fr.inria.eventcloud.api;
 import java.util.List;
 
 /**
- * This class can be implemented by an another to indicate that its content can
+ * This interface can be implemented by a class to indicate that its content can
  * be serialized into a collection of {@link Quadruple}s.
  * 
  * @author lpellegr
