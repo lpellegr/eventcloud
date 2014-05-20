@@ -65,7 +65,7 @@ import fr.inria.eventcloud.proxies.SubscribeProxyImpl;
  */
 public class ProxyFactory extends AbstractFactory {
 
-    private static final Logger log;
+    private static final Logger LOG;
 
     protected static String publishProxyAdl;
 
@@ -74,7 +74,7 @@ public class ProxyFactory extends AbstractFactory {
     protected static String putgetProxyAdl;
 
     static {
-        log = LoggerFactory.getLogger(ProxyFactory.class);
+        LOG = LoggerFactory.getLogger(ProxyFactory.class);
 
         publishProxyAdl = PublishProxyImpl.PUBLISH_PROXY_ADL;
         subscribeProxyAdl = SubscribeProxyImpl.SUBSCRIBE_PROXY_ADL;
@@ -816,7 +816,7 @@ public class ProxyFactory extends AbstractFactory {
                     Fractive.registerByName(subComponent, "subscribe-proxy-"
                             + UUID.randomUUID().toString());
 
-            log.info("SubscribeProxy bound to {}", componentUri);
+            LOG.info("SubscribeProxy bound to {}", componentUri);
 
             SubscribeProxyAttributeController subscribeProxyAttributeController =
                     (SubscribeProxyAttributeController) GCM.getAttributeController(subComponent);

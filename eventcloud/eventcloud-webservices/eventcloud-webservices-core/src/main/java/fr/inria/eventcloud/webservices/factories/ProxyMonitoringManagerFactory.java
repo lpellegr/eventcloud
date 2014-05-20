@@ -38,7 +38,7 @@ import fr.inria.eventcloud.webservices.monitoring.ProxyMonitoringManagerImpl;
  */
 public class ProxyMonitoringManagerFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(ProxyMonitoringManagerFactory.class);
 
     private ProxyMonitoringManagerFactory() {
@@ -113,7 +113,7 @@ public class ProxyMonitoringManagerFactory extends AbstractFactory {
                         ProxyMonitoringManagerImpl.MONITORING_SERVICES_ITF,
                         ProxyMonitoringManager.class, true);
 
-        log.info("ProxyMonitoringManager created");
+        LOG.info("ProxyMonitoringManager created");
 
         return proxyMonitoringManager;
     }

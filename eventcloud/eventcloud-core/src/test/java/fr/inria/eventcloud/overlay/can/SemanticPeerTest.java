@@ -53,7 +53,7 @@ import fr.inria.eventcloud.overlay.SemanticPeer;
  */
 public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticPeerTest.class);
 
     public SemanticPeerTest() {
@@ -461,7 +461,7 @@ public class SemanticPeerTest extends JunitByClassEventCloudDeployer {
                 super.getPutGetProxy().executeSparqlAsk(
                         "ASK { GRAPH ?g { ?s ?p ?o } }");
 
-        log.debug(
+        LOG.debug(
                 "Measurements returned for a SPARQL ASK query with no data: {}",
                 response.getStats());
 

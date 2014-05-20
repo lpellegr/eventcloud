@@ -35,7 +35,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
  */
 public class Delayer<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(Delayer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Delayer.class);
 
     private final SemanticCanOverlay overlay;
 
@@ -84,12 +84,12 @@ public class Delayer<T> {
     protected void commitOrCreateCommitThread() {
         if (this.buffer.size() >= this.commitSize) {
             int nbObjectsFlushed = this.commit();
-            log.trace(
+            LOG.trace(
                     "{} {} committed because threshold exceeded on {}",
                     nbObjectsFlushed, this.elementsName, this.overlay);
         } else {
             if (this.commitThread == null) {
-                log.trace("Commit thread created on {}", this.overlay);
+                LOG.trace("Commit thread created on {}", this.overlay);
 
                 this.commitThread = new CommitThread();
                 this.commitThread.start();
@@ -98,7 +98,7 @@ public class Delayer<T> {
     }
 
     protected int commit() {
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
         long startTime = 0;
 
         synchronized (this.buffer) {
@@ -117,7 +117,7 @@ public class Delayer<T> {
             if (isTraceEnabled) {
                 boolean dueToTimeout = this.buffer.size() < this.commitSize;
 
-                log.trace(
+                LOG.trace(
                         "Buffer flushed in {} ms on {} {}",
                         System.currentTimeMillis() - startTime, this.overlay,
                         dueToTimeout
@@ -128,7 +128,7 @@ public class Delayer<T> {
             this.triggerAction();
 
             if (isTraceEnabled) {
-                log.trace(
+                LOG.trace(
                         "Fired {} action in {} ms on {}", this.elementsName,
                         System.currentTimeMillis() - startTime, this.overlay);
             }
@@ -188,7 +188,7 @@ public class Delayer<T> {
                 int nbObjectsFlushed = Delayer.this.commit();
 
                 if (nbObjectsFlushed == 0) {
-                    log.trace(
+                    LOG.trace(
                             "Commit thread terminated on {}",
                             Delayer.this.overlay);
                     // nothing was committed, we should
@@ -197,7 +197,7 @@ public class Delayer<T> {
 
                     return;
                 } else {
-                    log.trace(
+                    LOG.trace(
                             "{} {} committed because timeout exceeded on {}",
                             nbObjectsFlushed, Delayer.this.elementsName,
                             Delayer.this.overlay);

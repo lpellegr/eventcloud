@@ -71,7 +71,7 @@ import org.ow2.proactive.scripting.SimpleScript;
  * @author The ProActive Team
  */
 public class NodeProviderJob {
-    private static final Logger logger =
+    private static final Logger LOG =
             ProActiveLogger.getLogger(NodeProviderJob.class);
 
     private static final Map<String, FileSystemServerDeployer> fileSystemServers;
@@ -136,8 +136,8 @@ public class NodeProviderJob {
                             nbNodes, dataFolder, jvmArguments, registryURL,
                             nodeSourceNames));
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Job #" + this.jobID.getReadableName()
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Job #" + this.jobID.getReadableName()
                         + " for node request #" + this.nodeRequestID
                         + " has been submitted to the scheduler");
             }
@@ -212,8 +212,8 @@ public class NodeProviderJob {
             job.addTask(task);
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Job for node request #" + this.nodeRequestID
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Job for node request #" + this.nodeRequestID
                     + " has been created");
         }
 
@@ -286,8 +286,8 @@ public class NodeProviderJob {
             String url = fileSystemServer.getVFSRootURL();
             fileSystemServers.put(dataFolder, fileSystemServer);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("ProActive dataserver successfully started. VFS URL of this provider: "
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ProActive dataserver successfully started. VFS URL of this provider: "
                         + url);
             }
 
@@ -302,16 +302,15 @@ public class NodeProviderJob {
             try {
                 fileSystemServer.terminate();
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("ProActive dataserver at "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("ProActive dataserver at "
                             + fileSystemServer.getVFSRootURL()
                             + " has been terminated");
                 }
             } catch (ProActiveException pae) {
-                logger.error(
-                        "Cannot properly terminate ProActive dataserver at "
-                                + fileSystemServer.getVFSRootURL() + ": "
-                                + pae.getMessage(), pae);
+                LOG.error("Cannot properly terminate ProActive dataserver at "
+                        + fileSystemServer.getVFSRootURL() + ": "
+                        + pae.getMessage(), pae);
             }
         }
     }

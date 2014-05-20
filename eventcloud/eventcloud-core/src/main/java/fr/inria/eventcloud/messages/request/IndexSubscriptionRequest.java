@@ -45,7 +45,7 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(IndexSubscriptionRequest.class);
 
     protected SerializedValue<Subscription> subscription;
@@ -76,13 +76,13 @@ public class IndexSubscriptionRequest extends StatelessQuadruplePatternRequest {
         Subscription subscription = this.subscription.getValue();
 
         if (P2PStructuredProperties.ENABLE_BENCHMARKS_INFORMATION.getValue()) {
-            log.info("It took "
+            LOG.info("It took "
                     + (System.currentTimeMillis() - subscription.getCreationTime())
                     + "ms to receive subscription : "
                     + subscription.getSparqlQuery());
         }
 
-        log.debug("Indexing subscription {} on peer {}", subscription, overlay);
+        LOG.debug("Indexing subscription {} on peer {}", subscription, overlay);
 
         semanticOverlay.getPublishSubscribeOperationsDelayer().receive(
                 subscription);

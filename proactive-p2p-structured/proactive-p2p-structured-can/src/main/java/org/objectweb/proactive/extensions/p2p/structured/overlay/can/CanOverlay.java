@@ -84,7 +84,7 @@ import com.google.common.collect.Sets;
 public abstract class CanOverlay<E extends Coordinate> extends
         StructuredOverlay {
 
-    private static final Logger log = LoggerFactory.getLogger(CanOverlay.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CanOverlay.class);
 
     private ScheduledExecutorService maintenanceTask;
 
@@ -184,13 +184,13 @@ public abstract class CanOverlay<E extends Coordinate> extends
         NeighborEntry<E> entry =
                 neighbors.get(RandomUtils.nextInt(neighbors.size()));
 
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             if (!this.zone.neighbors(entry.getZone())) {
-                log.error("Neighbor chosen to route the message is "
+                LOG.error("Neighbor chosen to route the message is "
                         + entry.getZone()
                         + ". However it does not neighbor the current peer.");
             } else {
-                log.debug("Neighbor chosen to route the message is "
+                LOG.debug("Neighbor chosen to route the message is "
                         + entry.getZone());
             }
         }
@@ -874,7 +874,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                 }
             }
 
-            log.info(
+            LOG.info(
                     "Peer {} has left the network and the zone has been taken over by {}",
                     this, suitableNeighbor.getZone());
         }
@@ -886,7 +886,7 @@ public abstract class CanOverlay<E extends Coordinate> extends
                         - P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue())
                         + P2PStructuredProperties.CAN_LEAVE_RETRY_MIN.getValue();
 
-        log.info(
+        LOG.info(
                 "Peer {} cannot leave at this time, retry in {} ms", this,
                 timeout);
 
@@ -974,14 +974,14 @@ public abstract class CanOverlay<E extends Coordinate> extends
     }
 
     public void dumpNeighbors() {
-        log.debug("Peer managing {}", this.zone);
+        LOG.debug("Peer managing {}", this.zone);
         NeighborTable<E> neighborTable = this.getNeighborTable();
 
         for (byte dimension = 0; dimension < P2PStructuredProperties.CAN_NB_DIMENSIONS.getValue(); dimension++) {
             for (byte direction = 0; direction < 2; direction++) {
                 for (NeighborEntry<E> entry : neighborTable.get(
                         dimension, direction).values()) {
-                    log.debug(
+                    LOG.debug(
                             "  * {}, dimension={}, direction={}", new Object[] {
                                     entry.getZone(), dimension, direction});
                 }

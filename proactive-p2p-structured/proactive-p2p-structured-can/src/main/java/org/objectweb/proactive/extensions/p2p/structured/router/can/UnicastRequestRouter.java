@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class UnicastRequestRouter<T extends Request<Point<E>>, E extends Coordinate>
         extends Router<T, Point<E>> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(UnicastRequestRouter.class);
 
     public UnicastRequestRouter() {
@@ -120,7 +120,7 @@ public class UnicastRequestRouter<T extends Request<Point<E>>, E extends Coordin
                         request.getKey(), dimension, direction);
 
         if (neighborChosen == null) {
-            log.error(
+            LOG.error(
                     "Trying to route a {} request but the key {} used "
                             + "is managed by no peer. You are probably using a key with "
                             + "values that are not between the minimum and the upper "
@@ -129,8 +129,8 @@ public class UnicastRequestRouter<T extends Request<Point<E>>, E extends Coordin
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Request routed to a neigbour because the current peer "
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Request routed to a neigbour because the current peer "
                     + "managing " + overlay
                     + " does not contains the key to reach ("
                     + request.getKey()
@@ -141,7 +141,7 @@ public class UnicastRequestRouter<T extends Request<Point<E>>, E extends Coordin
         try {
             ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
-            log.error("Error while forwarding a request to the neighbor managing "
+            LOG.error("Error while forwarding a request to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }

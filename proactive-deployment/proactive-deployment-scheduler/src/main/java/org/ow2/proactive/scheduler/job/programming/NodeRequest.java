@@ -51,7 +51,7 @@ import org.ow2.proactive.scheduler.job.programming.NodeProviderTask.NodeProvider
  * @author The ProActive Team
  */
 public class NodeRequest {
-    private static final Logger logger =
+    private static final Logger LOG =
             ProActiveLogger.getLogger(NodeRequest.class);
 
     private UniqueID nodeRequestID;
@@ -79,15 +79,15 @@ public class NodeRequest {
         if (this.nbNodes > this.tasks.size()) {
             this.tasks.add(task);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Received registration of node provider task for node request #"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Received registration of node provider task for node request #"
                         + this.nodeRequestID);
             }
         } else {
             task.release();
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Received registration of node provider task for node request #"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Received registration of node provider task for node request #"
                         + this.nodeRequestID
                         + " but required number of nodes has already been reached");
             }
@@ -110,7 +110,7 @@ public class NodeRequest {
      */
     public List<Node> getNodes() {
         if (!this.isDeploymentFinished()) {
-            logger.warn("Deployment of node request #" + this.nodeRequestID
+            LOG.warn("Deployment of node request #" + this.nodeRequestID
                     + " is not finished, only " + this.tasks.size() + " of "
                     + this.nbNodes + " tasks are registered");
         }
@@ -132,8 +132,8 @@ public class NodeRequest {
             task.release();
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(this.tasks.size()
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.tasks.size()
                     + " node provider tasks for node request #"
                     + this.nodeRequestID + " have been released");
         }

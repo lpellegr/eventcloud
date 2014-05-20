@@ -59,7 +59,7 @@ import fr.inria.eventcloud.tracker.SemanticTrackerImpl;
  */
 public final class SemanticFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticFactory.class);
 
     private SemanticFactory() {
@@ -457,7 +457,7 @@ public final class SemanticFactory extends AbstractFactory {
 
             GCM.getGCMLifeCycleController(trackerComponent).startFc();
 
-            log.info(
+            LOG.info(
                     "SemanticTracker {} associated to network named '{}'",
                     tracker.getId(), networkName);
         } catch (NoSuchInterfaceException e) {
@@ -738,14 +738,14 @@ public final class SemanticFactory extends AbstractFactory {
                                 SemanticPeerImpl.SOCIAL_FILTER_SERVICES_ITF,
                                 socialFilter);
 
-                log.info(
+                LOG.info(
                         "SemanticPeer bound to social filter {}",
                         EventCloudProperties.SOCIAL_FILTER_URL.getValue());
             }
 
             GCM.getGCMLifeCycleController(peerComponent).startFc();
 
-            log.info("SemanticPeer {} initialized", peer.getId());
+            LOG.info("SemanticPeer {} initialized", peer.getId());
         } catch (NoSuchInterfaceException e) {
             throw new IllegalStateException(e);
         } catch (IOException e) {

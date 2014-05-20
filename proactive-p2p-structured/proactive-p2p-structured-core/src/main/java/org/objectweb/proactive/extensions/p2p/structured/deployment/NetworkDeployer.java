@@ -45,7 +45,7 @@ public abstract class NetworkDeployer extends
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(NetworkDeployer.class);
 
     protected final DeploymentDescriptor descriptor;
@@ -140,7 +140,7 @@ public abstract class NetworkDeployer extends
         // nbPeers);
         // this.injectPeersInParallel(nbPeers);
         // } else {
-        log.debug(
+        LOG.debug(
                 "Creates and use sequential injection for the {} peer(s) to insert on the network",
                 nbPeers);
 

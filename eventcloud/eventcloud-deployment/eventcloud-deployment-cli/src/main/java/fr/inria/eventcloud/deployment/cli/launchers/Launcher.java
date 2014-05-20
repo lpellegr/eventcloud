@@ -42,7 +42,7 @@ public abstract class Launcher {
     private static final String REDIRECT_STANDARD_OUTERR_JAVA_PROPERTY_NAME =
             "eventcloud.redirect.stdouterr";
 
-    private static final Logger log = LoggerFactory.getLogger("StdOutErr");
+    private static final Logger LOG = LoggerFactory.getLogger("StdOutErr");
 
     private File instanceFile;
 
@@ -58,14 +58,14 @@ public abstract class Launcher {
             System.setOut(new PrintStream(System.out) {
                 @Override
                 public void print(String s) {
-                    log.info(s);
+                    LOG.info(s);
                 }
             });
 
             System.setErr(new PrintStream(System.err) {
                 @Override
                 public void print(String s) {
-                    log.error(s);
+                    LOG.error(s);
                 }
             });
         }

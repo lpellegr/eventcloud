@@ -58,7 +58,7 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
 
     private final Map<SubscriptionId, String> subscribers;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SubscribeWsnServiceImpl.class);
 
     /**
@@ -149,10 +149,10 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
                 try {
                     String sparqlQuery = super.translator.translate(subscribe);
 
-                    log.info(
+                    LOG.info(
                             "Subscriber endpoint is {}",
                             subscriberWsEndpointUrl);
-                    log.info("Translation output:\n{}", sparqlQuery);
+                    LOG.info("Translation output:\n{}", sparqlQuery);
 
                     Subscription subscription =
                             new Subscription(
@@ -169,7 +169,7 @@ public class SubscribeWsnServiceImpl extends WsnService<SubscribeProxy>
                     return WsnHelper.createSubscribeResponse(
                             subscription.getId(), subscriberWsEndpointUrl);
                 } catch (TranslationException e) {
-                    log.error("Translation error:");
+                    LOG.error("Translation error:");
                     logAndThrowIllegalArgumentException(e.getMessage());
                 }
             } else {

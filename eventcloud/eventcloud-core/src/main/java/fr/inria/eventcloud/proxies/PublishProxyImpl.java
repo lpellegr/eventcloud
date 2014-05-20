@@ -47,7 +47,7 @@ import fr.inria.eventcloud.utils.RDFReader;
 public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
         PublishProxyAttributeController {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(PublishProxyImpl.class);
 
     /**
@@ -129,9 +129,9 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
     @Override
     @MemberOf("parallelSelfCompatible")
     public void publish(CompoundEvent event) {
-        if (log.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             // log information for integration test purposes
-            log.trace(
+            LOG.trace(
                     "EventCloud Entry {} {}", event.getGraph(),
                     super.eventCloudCache.getId().getStreamUrl());
         }
@@ -168,7 +168,7 @@ public class PublishProxyImpl extends EventCloudProxy implements PublishProxy,
 
             in.close();
         } catch (IOException ioe) {
-            log.error("An error occurred when reading from the given URL", ioe);
+            LOG.error("An error occurred when reading from the given URL", ioe);
         }
     }
 

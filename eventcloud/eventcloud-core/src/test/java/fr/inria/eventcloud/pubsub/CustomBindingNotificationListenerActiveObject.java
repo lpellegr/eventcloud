@@ -32,7 +32,7 @@ public class CustomBindingNotificationListenerActiveObject extends
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(CustomBindingNotificationListenerActiveObject.class);
 
     private List<Binding> bindings = new ArrayList<Binding>();
@@ -52,7 +52,7 @@ public class CustomBindingNotificationListenerActiveObject extends
         synchronized (this.bindings) {
             this.bindings.add(solution);
         }
-        log.info("New binding received:\n" + solution);
+        LOG.info("New binding received:\n" + solution);
     }
 
 }

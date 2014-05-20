@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Coordinate>
         extends Router<OptimalBroadcastRequest<E>, Point<E>> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(OptimalBroadcastRequestRouter.class);
 
     public OptimalBroadcastRequestRouter() {
@@ -98,7 +98,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                log.error("Cannot log broadcast algorithm : "
+                LOG.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
@@ -115,7 +115,7 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
 
         // the current peer has already received the request
         if (requestAlreadyReceived) {
-            log.debug(
+            LOG.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
@@ -143,8 +143,8 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
             // the current peer validates the constraints
             // log "1" message
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Request " + request.getId() + " is on peer "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
@@ -231,8 +231,8 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
             // operations and the current peer must await for the number
             // of responses sent.
             else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sending request " + request.getId() + " to "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -262,8 +262,8 @@ public class OptimalBroadcastRequestRouter<T extends MulticastRequest<E>, E exte
                             NeighborEntryWrapper<E> neighborEntry = it.next();
                             Peer p = neighborEntry.getNeighborEntry().getStub();
 
-                            if (log.isDebugEnabled()) {
-                                log.debug("Sending request " + request.getId()
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Sending request " + request.getId()
                                         + " from " + overlay.getId() + " to "
                                         + p);
                             }

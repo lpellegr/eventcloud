@@ -58,7 +58,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
 @RunWith(EachPublishSubscribeAlgorithm.class)
 public class PubSubTest extends WsTest {
 
-    private static final Logger log = LoggerFactory.getLogger(PubSubTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PubSubTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
 
@@ -193,7 +193,7 @@ public class PubSubTest extends WsTest {
             }
         }
 
-        log.info("Bindings received!");
+        LOG.info("Bindings received!");
 
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);
@@ -237,7 +237,7 @@ public class PubSubTest extends WsTest {
             }
         }
 
-        log.info("Compound event received!");
+        LOG.info("Compound event received!");
 
         // Unsubscribes
         this.subscribeWsClient.unsubscribe(subscriptionId);

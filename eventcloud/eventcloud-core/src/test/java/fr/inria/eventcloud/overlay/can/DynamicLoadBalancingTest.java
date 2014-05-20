@@ -49,7 +49,7 @@ import fr.inria.eventcloud.overlay.SemanticCanOverlay;
 public class DynamicLoadBalancingTest extends JunitByClassEventCloudDeployer {
 
     @SuppressWarnings("unused")
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticPeerTest.class);
 
     public DynamicLoadBalancingTest() {

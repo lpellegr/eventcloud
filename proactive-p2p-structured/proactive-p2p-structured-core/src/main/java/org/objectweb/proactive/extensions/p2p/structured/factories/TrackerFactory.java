@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TrackerFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(TrackerFactory.class);
 
     private TrackerFactory() {
@@ -349,7 +349,7 @@ public class TrackerFactory extends AbstractFactory {
             }
             trackerAttributeController.initAttributes(tracker, networkName);
 
-            log.info(
+            LOG.info(
                     "Tracker {} associated to network named '{}' created",
                     tracker.getId(), networkName);
 

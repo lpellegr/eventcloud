@@ -55,7 +55,7 @@ import org.ow2.proactive.scheduler.common.task.executable.JavaExecutable;
  * @author The ProActive Team
  */
 public class NodeProviderTask extends JavaExecutable {
-    private static final Logger logger =
+    private static final Logger LOG =
             ProActiveLogger.getLogger(NodeProviderTask.class);
 
     private String registryURL;
@@ -67,8 +67,8 @@ public class NodeProviderTask extends JavaExecutable {
      */
     @Override
     public Serializable execute(TaskResult... arg0) throws Throwable {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Node provider task for node request #"
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Node provider task for node request #"
                     + this.nodeRequestID + " has started");
         }
 
@@ -83,8 +83,8 @@ public class NodeProviderTask extends JavaExecutable {
             Thread.sleep(1000);
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Node provider task for node request #"
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Node provider task for node request #"
                     + this.nodeRequestID + " has terminated");
         }
 
@@ -169,8 +169,8 @@ public class NodeProviderTask extends JavaExecutable {
                             NodeProviderRegistry.class, this.registryURL);
             registry.registerNodeProviderTask((NodeProviderTaskHolder) PAActiveObject.getStubOnThis());
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Node provider task for node request #"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Node provider task for node request #"
                         + this.nodeRequestID + " has registered to registry");
             }
         }
@@ -184,7 +184,7 @@ public class NodeProviderTask extends JavaExecutable {
             try {
                 return PAActiveObject.getNode();
             } catch (NodeException ne) {
-                logger.error("Unable to get Node for node request #"
+                LOG.error("Unable to get Node for node request #"
                         + this.nodeRequestID + ": " + ne.getMessage(), ne);
 
                 return null;

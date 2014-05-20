@@ -43,7 +43,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SchedulerNodeProvider.class);
 
     private String schedulerUrl;
@@ -313,12 +313,12 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
         this.init();
 
-        log.debug(
+        LOG.debug(
                 "Submitting {} jobs to the ProActive Scheduler located at {}",
                 this.virtualNodeEntries.size(), this.schedulerUrl);
 
         for (GcmVirtualNodeEntry virtualNodeEntry : this.virtualNodeEntries) {
-            log.debug(
+            LOG.debug(
                     "Submitting a job to acquire {} nodes for the GCMVirtualNode {}",
                     virtualNodeEntry.getNbNodes(),
                     virtualNodeEntry.getVirtualNodeName());
@@ -439,7 +439,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
 
             if (nodeRequestId != null) {
                 try {
-                    log.debug("Getting the GCMVirtualNode {}", virtualNodeName);
+                    LOG.debug("Getting the GCMVirtualNode {}", virtualNodeName);
 
                     this.virtualNodes.put(
                             virtualNodeName,
@@ -467,7 +467,7 @@ public class SchedulerNodeProvider implements NodeProvider, Serializable {
                 this.isStarted(),
                 "Cannot terminate jobs because they have not yet been submitted");
 
-        log.debug(
+        LOG.debug(
                 "Terminating the {} jobs submitted to the ProActive Scheduler located at {}",
                 this.virtualNodeEntries.size(), this.schedulerUrl);
 

@@ -38,7 +38,7 @@ import fr.inria.eventcloud.api.listeners.NotificationListener;
  */
 public class NotificationListenerFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(NotificationListenerFactory.class);
 
     private NotificationListenerFactory() {
@@ -139,7 +139,7 @@ public class NotificationListenerFactory extends AbstractFactory {
                             notificationListenerClass, constructorParameters,
                             node);
 
-            log.info("Notification listener "
+            LOG.info("Notification listener "
                     + notificationListenerClass.getName() + " created");
 
             return notificationListener;

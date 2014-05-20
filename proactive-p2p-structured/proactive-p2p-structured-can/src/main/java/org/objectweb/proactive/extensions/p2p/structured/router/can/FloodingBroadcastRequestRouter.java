@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E extends Coordinate>
         extends Router<MulticastRequest<E>, Point<E>> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(FloodingBroadcastRequestRouter.class);
 
     public FloodingBroadcastRequestRouter() {
@@ -97,7 +97,7 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             try {
                 hostname = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
-                log.error("Cannot log broadcast algorithm : "
+                LOG.error("Cannot log broadcast algorithm : "
                         + "hostname couldn't be retrieved");
                 e.printStackTrace();
             }
@@ -105,7 +105,7 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
 
         // the current overlay has already received the request
         if (!messagingManager.receiveRequest(request.getId())) {
-            log.debug(
+            LOG.debug(
                     "Request {} reached peer {} which has already received it",
                     request.getId(), canOverlay.getZone().toString());
 
@@ -133,8 +133,8 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
         } else {
             // the current overlay validates the constraints
             if (request.validatesKeyConstraints(canOverlay)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Request " + request.getId() + " is on peer "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Request " + request.getId() + " is on peer "
                             + overlay + " which validates constraints "
                             + request.getKey());
                 }
@@ -210,8 +210,8 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             // operation and the current peer must await for the number
             // of responses sent.
             else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sending request " + request.getId() + " to "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sending request " + request.getId() + " to "
                             + neighborsToSendTo.size() + " neighbor(s) from "
                             + overlay);
                 }
@@ -242,8 +242,8 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
                         while (it.hasNext()) {
                             Peer p = it.next().getStub();
 
-                            if (log.isDebugEnabled()) {
-                                log.debug("Sending request " + request.getId()
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Sending request " + request.getId()
                                         + " from " + overlay + " to " + p);
                             }
 
@@ -337,7 +337,7 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
                         overlayCAN);
             }
 
-            log.warn(
+            LOG.warn(
                     "Trying to route a {} request but the key {} used "
                             + "is managed by no peer. You are probably using a key with "
                             + "values that are not between the minimum and the upper "
@@ -347,8 +347,8 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("The message is routed to a neigbour because the current peer "
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The message is routed to a neigbour because the current peer "
                     + "managing "
                     + overlay
                     + " does not contains the key to reach ("
@@ -372,7 +372,7 @@ public class FloodingBroadcastRequestRouter<T extends MulticastRequest<E>, E ext
 
             ((PeerInternal) neighborChosen.getStub()).forward(request);
         } catch (ProActiveRuntimeException e) {
-            log.error("Error while sending the message to the neighbor managing "
+            LOG.error("Error while sending the message to the neighbor managing "
                     + neighborChosen.getZone());
             e.printStackTrace();
         }

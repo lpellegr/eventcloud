@@ -59,7 +59,7 @@ import com.google.common.collect.Lists;
  */
 public class CanTest extends JunitByClassCanNetworkDeployer {
 
-    private static final Logger log = LoggerFactory.getLogger(CanTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CanTest.class);
 
     private static final int INITIAL_NUMBER_OF_PEERS = 10;
 
@@ -76,13 +76,13 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
                 Executors.newFixedThreadPool(SystemUtils.getOptimalNumberOfThreads());
         final Peer[] peers = new Peer[NB_PEERS_TO_INJECT];
 
-        log.info("Preallocating {} peers", peers.length);
+        LOG.info("Preallocating {} peers", peers.length);
 
         for (int i = 0; i < peers.length; i++) {
             peers[i] = createCustomPeer();
         }
 
-        log.info("Performing concurrent joins");
+        LOG.info("Performing concurrent joins");
 
         final List<Peer> handledPeers =
                 Collections.synchronizedList(Lists.<Peer> newArrayList());
@@ -167,13 +167,13 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
             NetworkAlreadyJoinedException {
         final Peer[] extraPeers = new Peer[70];
 
-        log.info("Inserting {} additional peers", extraPeers.length);
+        LOG.info("Inserting {} additional peers", extraPeers.length);
 
         for (int i = 0; i < extraPeers.length; i++) {
             super.getRandomTracker().inject(createCustomPeer());
         }
 
-        log.info("Performing concurrent leaves");
+        LOG.info("Performing concurrent leaves");
 
         // final ExecutorService threadPool = Executors.newFixedThreadPool(1);
         final ExecutorService threadPool =
@@ -259,22 +259,22 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
             }
         }
 
-        log.info("Inserting additional peers for leave requests");
+        LOG.info("Inserting additional peers for leave requests");
 
         for (int i = 0; i < nbLeaveRequests; i++) {
             super.getRandomTracker().inject(createCustomPeer());
         }
 
-        log.info(
+        LOG.info(
                 "At the beginning {} peers are maintained by the trackers",
                 this.getRandomTracker().getPeers().size());
 
-        log.info(
+        LOG.info(
                 "Scheduled {} join and {} leave requests",
                 preAllocatedPeers.size(), requests.length
                         - preAllocatedPeers.size());
 
-        log.info("Performing concurrent join or leave requests");
+        LOG.info("Performing concurrent join or leave requests");
 
         final ExecutorService threadPool = Executors.newFixedThreadPool(4);
         for (int i = 0; i < requests.length; i++) {
@@ -310,7 +310,7 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
             Assert.fail("Concurrent join and leave requests timeout");
         }
 
-        log.info(
+        LOG.info(
                 "At the end {} peers are still maintained by the trackers",
                 this.getRandomTracker().getPeers().size());
     }
@@ -422,13 +422,13 @@ public class CanTest extends JunitByClassCanNetworkDeployer {
             }
         }
 
-        log.info("Inserting additional peers for leave requests");
+        LOG.info("Inserting additional peers for leave requests");
 
         for (int i = 0; i < nbLeaveRequests; i++) {
             super.getRandomTracker().inject(createCustomPeer());
         }
 
-        log.info("Performing concurrent join, leave and routing requests");
+        LOG.info("Performing concurrent join, leave and routing requests");
 
         final ExecutorService threadPool = Executors.newFixedThreadPool(4);
         for (int i = 0; i < requests.length; i++) {

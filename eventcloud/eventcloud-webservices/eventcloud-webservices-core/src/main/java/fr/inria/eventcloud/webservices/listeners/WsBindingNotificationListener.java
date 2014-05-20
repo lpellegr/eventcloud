@@ -38,7 +38,7 @@ public class WsBindingNotificationListener extends BindingNotificationListener {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(WsBindingNotificationListener.class);
 
     private final String subscriberWsEndpointUrl;
@@ -71,11 +71,11 @@ public class WsBindingNotificationListener extends BindingNotificationListener {
             this.subscriberWsClient.notifyBinding(
                     id.toString(), new BindingWrapper(binding));
 
-            log.info(
+            LOG.info(
                     "Subscriber {} notified about:\n{}",
                     this.subscriberWsEndpointUrl, binding);
         } catch (WebServiceException e) {
-            log.error("Failed to send notification to "
+            LOG.error("Failed to send notification to "
                     + this.subscriberWsEndpointUrl, e.getCause());
         }
     }

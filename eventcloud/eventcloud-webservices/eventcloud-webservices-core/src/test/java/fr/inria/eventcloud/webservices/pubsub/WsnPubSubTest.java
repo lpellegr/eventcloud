@@ -78,7 +78,7 @@ import fr.inria.eventcloud.webservices.factories.WsClientFactory;
  */
 public class WsnPubSubTest extends WsTest {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(WsnPubSubTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
@@ -133,7 +133,7 @@ public class WsnPubSubTest extends WsTest {
         SubscriptionId subscriptionId =
                 WsnHelper.getSubcriptionId(subscribeResponse);
 
-        log.info("Subscription submitted, ID is " + subscriptionId);
+        LOG.info("Subscription submitted, ID is " + subscriptionId);
 
         SubscriptionTestUtils.waitSubscriptionIndexation();
 
@@ -153,7 +153,7 @@ public class WsnPubSubTest extends WsTest {
             }
         }
 
-        log.info("Compound event received!");
+        LOG.info("Compound event received!");
 
         // Unsubscribes
         this.subscribeWsnClient.unsubscribe(WsnHelper.createUnsubscribeRequest(subscriptionId));
@@ -233,7 +233,7 @@ public class WsnPubSubTest extends WsTest {
             }
         }
 
-        log.info("Compound event received!");
+        LOG.info("Compound event received!");
 
         // Creates the notify request emitted by source2
         notifyRequest =

@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationParser {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(ConfigurationParser.class);
 
     /**
@@ -111,11 +111,11 @@ public class ConfigurationParser {
                 } catch (SecurityException e) {
                     e.printStackTrace();
                 }
-                log.info(
+                LOG.info(
                         "Property '{}' has been loaded with value '{}'",
                         propertyName, props.getProperty(propertyName));
             } else {
-                log.warn("Skipped unknown property: " + propertyName);
+                LOG.warn("Skipped unknown property: " + propertyName);
             }
         }
     }

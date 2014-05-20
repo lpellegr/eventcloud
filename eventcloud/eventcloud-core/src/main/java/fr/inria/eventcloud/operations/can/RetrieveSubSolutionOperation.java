@@ -56,7 +56,7 @@ public class RetrieveSubSolutionOperation extends RunnableOperation {
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(RetrieveSubSolutionOperation.class);
 
     private final NotificationId notificationId;
@@ -140,7 +140,7 @@ public class RetrieveSubSolutionOperation extends RunnableOperation {
                                         PAActiveObject.getUrl(semanticOverlay.getStub()),
                                         bmap));
             } catch (ExecutionException e) {
-                log.error("No SubscribeProxy found under the given URL: "
+                LOG.error("No SubscribeProxy found under the given URL: "
                         + subscriberURL, e);
 
                 // TODO: this could be due to a subscriber which has left

@@ -31,7 +31,7 @@ public class CustomCompoundEventNotificationListenerActiveObject extends
 
     private static final long serialVersionUID = 160L;
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(CustomCompoundEventNotificationListenerActiveObject.class);
 
     private List<CompoundEvent> events = new ArrayList<CompoundEvent>();
@@ -51,7 +51,7 @@ public class CustomCompoundEventNotificationListenerActiveObject extends
         synchronized (this.events) {
             this.events.add(solution);
         }
-        log.info("New event received:\n" + solution);
+        LOG.info("New event received:\n" + solution);
     }
 
 }

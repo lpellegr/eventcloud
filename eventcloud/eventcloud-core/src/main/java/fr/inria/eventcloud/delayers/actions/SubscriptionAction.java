@@ -48,7 +48,7 @@ import fr.inria.eventcloud.pubsub.Subsubscription;
  */
 public final class SubscriptionAction extends Action<Subscription> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SubscriptionAction.class);
 
     public SubscriptionAction(SemanticCanOverlay overlay, int threadPoolSize) {
@@ -126,8 +126,8 @@ public final class SubscriptionAction extends Action<Subscription> {
             boolean mustIgnoreQuadrupleMatching =
                     quadrupleMatching.getPublicationTime() < s.getIndexationTime();
 
-            if (log.isDebugEnabled()) {
-                log.debug(
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
                         "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
                         new Object[] {
                                 s.getIndexationTime(),
@@ -142,8 +142,8 @@ public final class SubscriptionAction extends Action<Subscription> {
                 continue;
             }
 
-            if (log.isDebugEnabled() && s.getParentId() == null) {
-                log.debug(
+            if (LOG.isDebugEnabled() && s.getParentId() == null) {
+                LOG.debug(
                         "Ordering issue detected for eventId {} with subscription {} on {}",
                         quadrupleMatching.getGraph(), s.getId(),
                         super.overlay.getId());

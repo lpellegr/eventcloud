@@ -93,7 +93,7 @@ import fr.inria.eventcloud.reasoner.SparqlColander;
  */
 public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(SemanticCanOverlay.class);
 
     private RelationshipStrengthEngineManager socialFilter;
@@ -313,13 +313,13 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
             txnGraph.end();
         }
 
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             StringBuilder msg = new StringBuilder();
             msg.append("New ephemeral garbage collection performed, ");
             msg.append(solutions.size());
             msg.append(" quadruple(s) removed");
 
-            log.debug(msg.toString());
+            LOG.debug(msg.toString());
         }
     }
 
@@ -638,7 +638,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public void assignDataReceived(Serializable dataReceived) {
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
         long startTime = 0;
 
         if (isTraceEnabled) {
@@ -653,7 +653,7 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
                 semanticDataReceived.getSubscriptions());
 
         if (isTraceEnabled) {
-            log.trace(
+            LOG.trace(
                     "Assign data {} (misc={}, subscriptions={}) has required {} ms",
                     this.maintenanceId, semanticDataReceived.getMiscData()
                             .size(), semanticDataReceived.getSubscriptions()
@@ -721,9 +721,9 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     public void join(Peer landmarkPeer) {
         this.lastMaintenanceTimestamp = System.currentTimeMillis();
 
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
         if (isTraceEnabled) {
-            log.trace(
+            LOG.trace(
                     "Join {} T1 is {}", this.maintenanceId,
                     this.lastMaintenanceTimestamp);
         }
@@ -739,8 +739,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         if (isTraceEnabled) {
             long endTime = System.currentTimeMillis();
 
-            log.trace("Join {} T6 is {}", this.maintenanceId, endTime);
-            log.trace(
+            LOG.trace("Join {} T6 is {}", this.maintenanceId, endTime);
+            LOG.trace(
                     "Join {} has required {} ms (misc={}, subscriptions={})",
                     this.maintenanceId,
                     endTime - this.lastMaintenanceTimestamp,
@@ -757,12 +757,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
     public EmptyResponseOperation handleJoinIntroduceOperation(JoinIntroduceOperation<SemanticCoordinate> msg) {
         this.maintenanceId = msg.getMaintenanceId();
 
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
         long startTime = 0;
 
         if (isTraceEnabled) {
             startTime = System.currentTimeMillis();
-            log.trace("Join {} T2 is {}", this.maintenanceId, startTime);
+            LOG.trace("Join {} T2 is {}", this.maintenanceId, startTime);
         }
 
         this.getPublishSubscribeOperationsDelayer().sync();
@@ -782,8 +782,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         if (isTraceEnabled) {
             long endTime = System.currentTimeMillis();
 
-            log.trace("Join {} T3 is {}", this.maintenanceId, endTime);
-            log.trace(
+            LOG.trace("Join {} T3 is {}", this.maintenanceId, endTime);
+            LOG.trace(
                     "JoinIntroduce {} has required {} ms (misc={}, subscriptions={})",
                     this.maintenanceId, endTime - startTime,
                     this.miscDatastore.getStatsRecorder().getNbQuadruples(),
@@ -801,12 +801,12 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
      */
     @Override
     public EmptyResponseOperation handleJoinWelcomeOperation(JoinWelcomeOperation<SemanticCoordinate> op) {
-        boolean isTraceEnabled = log.isTraceEnabled();
+        boolean isTraceEnabled = LOG.isTraceEnabled();
         long startTime = 0;
 
         if (isTraceEnabled) {
             startTime = System.currentTimeMillis();
-            log.trace("Join {} T4 is {}", this.maintenanceId, startTime);
+            LOG.trace("Join {} T4 is {}", this.maintenanceId, startTime);
         }
 
         EmptyResponseOperation result = super.handleJoinWelcomeOperation(op);
@@ -814,8 +814,8 @@ public class SemanticCanOverlay extends CanOverlay<SemanticCoordinate> {
         if (isTraceEnabled) {
             long endTime = System.currentTimeMillis();
 
-            log.trace("Join {} T5 is {}", this.maintenanceId, endTime);
-            log.trace(
+            LOG.trace("Join {} T5 is {}", this.maintenanceId, endTime);
+            LOG.trace(
                     "JoinWelcome {} has required {} ms", this.maintenanceId,
                     endTime - startTime);
         }

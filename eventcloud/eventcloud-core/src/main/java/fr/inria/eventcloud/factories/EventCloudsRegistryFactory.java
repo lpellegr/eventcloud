@@ -45,7 +45,7 @@ import fr.inria.eventcloud.EventCloudsRegistryImpl;
  */
 public class EventCloudsRegistryFactory extends AbstractFactory {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(EventCloudsRegistryFactory.class);
 
     private EventCloudsRegistryFactory() {
@@ -192,7 +192,7 @@ public class EventCloudsRegistryFactory extends AbstractFactory {
                 ((CommonAttributeController) GCM.getAttributeController(((Interface) registry).getFcItfOwner())).setDeploymentConfiguration(deploymentConfiguration);
             }
 
-            log.info("EventCloudsRegistry created");
+            LOG.info("EventCloudsRegistry created");
 
             return registry;
         } catch (NoSuchInterfaceException e) {

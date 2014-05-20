@@ -65,7 +65,7 @@ import fr.inria.eventcloud.pubsub.SubscriptionTestUtils;
  */
 public class DataTransferTest {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(DataTransferTest.class);
 
     private JunitEventCloudInfrastructureDeployer deployer;
@@ -146,10 +146,10 @@ public class DataTransferTest {
                         .getLowerBound((byte) 3)
                         .getValue()));
 
-        log.debug(
+        LOG.debug(
                 "First generated quadruple is {}",
                 quadruple1.toString(StringRepresentation.CODE_POINTS));
-        log.debug(
+        LOG.debug(
                 "Second generated quadruple is {}",
                 quadruple2.toString(StringRepresentation.CODE_POINTS));
 
@@ -168,8 +168,8 @@ public class DataTransferTest {
 
         secondPeer.join(firstPeer);
 
-        log.debug("First peer manages {}", firstPeer);
-        log.debug("Second peer manages {}", secondPeer);
+        LOG.debug("First peer manages {}", firstPeer);
+        LOG.debug("Second peer manages {}", secondPeer);
 
         List<Quadruple> firstPeerResult =
                 Operations.findQuadruplesOperation(
@@ -242,8 +242,8 @@ public class DataTransferTest {
         Subscription s2 =
                 new Subscription(createSubscription(dimension, bound1));
 
-        log.debug("First subscription:\n{}", s1.getSparqlQuery());
-        log.debug("Second subscription:\n{}", s2.getSparqlQuery());
+        LOG.debug("First subscription:\n{}", s1.getSparqlQuery());
+        LOG.debug("Second subscription:\n{}", s2.getSparqlQuery());
 
         subscribeProxy.subscribe(s1, new CustomNotificationListener());
         subscribeProxy.subscribe(s2, new CustomNotificationListener());
@@ -267,7 +267,7 @@ public class DataTransferTest {
                         firstPeer, QuadruplePattern.ANY, true);
         int nbSubscriptionQuadsFirstPeerBeforeJoin = subscriptions.size();
 
-        log.debug(
+        LOG.debug(
                 "{} quadruples for first peer before join:\n{}",
                 nbSubscriptionQuadsFirstPeerBeforeJoin,
                 QuadruplesFormatter.toString(subscriptions));
@@ -279,7 +279,7 @@ public class DataTransferTest {
                         firstPeer, QuadruplePattern.ANY, true);
         int nbSubscriptionQuadsFirstPeerAfterJoin = subscriptions.size();
 
-        log.debug(
+        LOG.debug(
                 "{} quadruples for first peer after join:\n{}",
                 nbSubscriptionQuadsFirstPeerAfterJoin,
                 QuadruplesFormatter.toString(subscriptions));
@@ -288,7 +288,7 @@ public class DataTransferTest {
                 Operations.findQuadruplesOperation(
                         thirdPeer, QuadruplePattern.ANY, true);
 
-        log.debug(
+        LOG.debug(
                 "{} quadruples for third peer after join:\n{}",
                 subscriptions.size(),
                 QuadruplesFormatter.toString(subscriptions));

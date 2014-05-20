@@ -83,7 +83,7 @@ import fr.inria.eventcloud.reasoner.AtomicQuery;
  */
 public final class QuadrupleAction extends Action<Quadruple> {
 
-    private static final Logger log =
+    private static final Logger LOG =
             LoggerFactory.getLogger(QuadrupleAction.class);
 
     public QuadrupleAction(SemanticCanOverlay overlay, int threadPoolSize) {
@@ -136,15 +136,15 @@ public final class QuadrupleAction extends Action<Quadruple> {
                     Quadruple quadruple = matchingResult.quadruple;
                     Subscription subscription = matchingResult.subscription;
 
-                    log.debug(
+                    LOG.debug(
                             "Peer {} has a sub subscription that matches the quadruple {} ",
                             super.overlay, quadruple);
 
                     boolean mustIgnoreQuadrupleMatching =
                             quadruple.getPublicationTime() < subscription.getIndexationTime();
 
-                    if (log.isDebugEnabled()) {
-                        log.debug(
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(
                                 "Timestamp comparison, subscriptionTimestamp={}, quadrupleTimestamp={}, quadrupleId={}, quadruple must be ignored? {}",
                                 subscription.getIndexationTime(),
                                 quadruple.getPublicationTime(),
