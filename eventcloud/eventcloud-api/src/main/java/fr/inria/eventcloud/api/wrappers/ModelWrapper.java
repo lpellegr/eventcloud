@@ -57,7 +57,6 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.Command;
 import com.hp.hpl.jena.shared.Lock;
 import com.hp.hpl.jena.shared.PrefixMapping;
-import com.hp.hpl.jena.shared.ReificationStyle;
 
 import fr.inria.eventcloud.configuration.EventCloudProperties;
 import fr.inria.eventcloud.utils.SparqlResultSerializer;
@@ -771,14 +770,6 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
      * {@inheritDoc}
      */
     @Override
-    public Model add(Model m, boolean suppressReifications) {
-        return super.object.add(m, suppressReifications);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Statement createStatement(Resource s, Property p, String o) {
         return super.object.createStatement(s, p, o);
     }
@@ -1087,14 +1078,6 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
     @Override
     public Model write(OutputStream out, String lang, String base) {
         return super.object.write(out, lang, base);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Model remove(Model m, boolean suppressReifications) {
-        return super.object.remove(m, suppressReifications);
     }
 
     /**
@@ -1526,14 +1509,6 @@ public class ModelWrapper extends SparqlResultWrapper<Model> implements Model {
     @Override
     public RSIterator listReifiedStatements(Statement st) {
         return super.object.listReifiedStatements(st);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ReificationStyle getReificationStyle() {
-        return super.object.getReificationStyle();
     }
 
     /**
