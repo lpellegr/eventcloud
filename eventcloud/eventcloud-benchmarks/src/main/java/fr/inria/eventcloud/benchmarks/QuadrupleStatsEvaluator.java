@@ -20,12 +20,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.jena.atlas.lib.Tuple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.system.StreamRDF;
 
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Quad;
 
@@ -45,11 +43,7 @@ public class QuadrupleStatsEvaluator {
         final DescriptiveStatistics o = new DescriptiveStatistics();
 
         RDFDataMgr.parse(new StreamRDF() {
-
-            @Override
-            public void tuple(Tuple<Node> tuple) {
-            }
-
+            
             @Override
             public void triple(Triple triple) {
             }
