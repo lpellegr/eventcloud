@@ -50,10 +50,12 @@ import fr.inria.eventcloud.providers.SemanticOverlayProvider;
 public class DatastoreRestorationTest {
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         EventCloudProperties.REPOSITORIES_RESTORE.setValue(true);
         EventCloudProperties.REPOSITORIES_PATH.setValue(System.getProperty("java.io.tmpdir")
                 + File.separator + "eventcloud-restoration-test");
+        
+        Files.deleteDirectory(EventCloudProperties.REPOSITORIES_PATH.getValue());
     }
 
     @Test
@@ -92,9 +94,7 @@ public class DatastoreRestorationTest {
     }
 
     @After
-    public void tearDown() throws IOException {
-        Files.deleteDirectory(EventCloudProperties.REPOSITORIES_PATH.getValue());
-
+    public void tearDown() {
         EventCloudProperties.REPOSITORIES_RESTORE.setValue(false);
         EventCloudProperties.REPOSITORIES_PATH.setValue(EventCloudProperties.REPOSITORIES_PATH.getDefaultValue());
     }
