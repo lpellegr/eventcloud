@@ -1,3 +1,3 @@
-EventCloud aims to provide functionalities for enabling large-scale event storage, retrieval and dissemination capabilities by offering a publish/subscribe API on top of a peer-to-peer overlay network harnessing hosting nodes from possibly multiple - so heterogeneous - clouds at once.
+The purpose of the EventCloud middleware is to provide functionalities for enabling large-scale event storage, retrieval and dissemination capabilities by offering a publish/subscribe API on top of a peer-to-peer overlay network harnessing hosting nodes from possibly multiple - so heterogeneous - clouds at once.
 
-For more technical information, please [look at the wiki](https://bitbucket.org/eventcloud/eventcloud/wiki/Home).
+Please look at the [wiki](https://bitbucket.org/eventcloud/eventcloud/wiki/Home) for technical information.
